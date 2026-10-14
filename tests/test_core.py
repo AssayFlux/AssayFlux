@@ -8,7 +8,7 @@ from assayflux.interpreter import Interpreter
 class TestAssayFluxLexer(unittest.TestCase):
     def test_integer_token(self):
         tokens = Lexer("123").tokenize()
-        self.assertEqual(tokens[0].value, 123)
+        self.assertEqual(tokens[0].value, "123")
 
     def test_string_token(self):
         tokens = Lexer("`Hello`").tokenize()
