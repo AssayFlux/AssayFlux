@@ -1,0 +1,16 @@
+# AssayFlux variable example
+
+name = `AssayFlux`
+version = 1
+active = true
+temperature = 25.5
+
+show name
+show version
+show active
+show temperature
+
+version = version + 1
+
+show `Updated version:`
+show version
