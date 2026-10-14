@@ -1,0 +1,39 @@
+name: AssayFlux Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run AssayFlux Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Display Python version
+        run: python --version
+
+      - name: Check project structure
+        run: |
+          test -f pyproject.toml
+          test -f assayflux/__init__.py
+          test -f assayflux/lexer.py
+          test -f assayflux/ast_nodes.py
+          test -f assayflux/parser.py
+          test -f assayflux/interpreter.py
+          test -f tests/test_core.py
+
+      - name: Run automated tests
+        run: python -m unittest discover -s tests -v
