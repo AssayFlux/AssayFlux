@@ -1,0 +1,20 @@
+# AssayFlux function example
+
+f.add(a, b)
+    result = a + b
+    return result
+end
+
+f.multiply(a, b)
+    result = a * b
+    return result
+end
+
+sum = add(10, 20)
+product = multiply(5, 6)
+
+show `Addition result:`
+show sum
+
+show `Multiplication result:`
+show product
