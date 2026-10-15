@@ -1,0 +1,7 @@
+# AssayFlux input example
+
+show "What is your name?"
+name = input()
+
+show "Hello,"
+show name
