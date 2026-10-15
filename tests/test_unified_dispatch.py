@@ -3,6 +3,7 @@
 import unittest
 from unittest.mock import patch
 
+from assayflux.interop import dispatch
 from assayflux.interop.base import ExecutionResult
 from assayflux.interop.runtime import execute_code
 
@@ -11,10 +12,7 @@ class TestUnifiedDispatch(unittest.TestCase):
     """Verify the unified execution interface."""
 
     def test_python_dispatch_returns_execution_result(self):
-        result = execute_code(
-            "python",
-            "print(10 + 20)",
-        )
+        result = dispatch("python", "print(10 + 20)")
 
         self.assertIsInstance(result, ExecutionResult)
         self.assertEqual(result.language, "python")
@@ -24,23 +22,17 @@ class TestUnifiedDispatch(unittest.TestCase):
         self.assertTrue(result.success)
 
     def test_dispatch_accepts_case_insensitive_language_names(self):
-        result = execute_code(
-            "PYTHON",
-            "print('AssayFlux')",
-        )
+        result = dispatch("PYTHON", "print('AssayFlux')")
 
         self.assertEqual(result.stdout, "AssayFlux\n")
         self.assertTrue(result.success)
 
     def test_dispatch_rejects_unknown_language(self):
         with self.assertRaises(KeyError):
-            execute_code(
-                "unknown_assayflux_language",
-                "print(1)",
-            )
+            dispatch("unknown_assayflux_language", "print(1)")
 
     def test_dispatch_preserves_execution_errors(self):
-        result = execute_code(
+        result = dispatch(
             "python",
             "raise ValueError('dispatch test error')",
         )
@@ -64,10 +56,7 @@ class TestUnifiedDispatch(unittest.TestCase):
             mocked_adapter = mocked_get_adapter.return_value
             mocked_adapter.execute.return_value = fake_result
 
-            result = execute_code(
-                "python",
-                "print(42)",
-            )
+            result = dispatch("python", "print(42)")
 
         mocked_get_adapter.assert_called_once_with("python")
         mocked_adapter.execute.assert_called_once_with(
@@ -75,6 +64,12 @@ class TestUnifiedDispatch(unittest.TestCase):
             timeout=10.0,
         )
         self.assertEqual(result.stdout, "42\n")
+        self.assertTrue(result.success)
+
+    def test_execute_code_remains_compatible(self):
+        result = execute_code("python", "print('compatible')")
+
+        self.assertEqual(result.stdout, "compatible\n")
         self.assertTrue(result.success)
 
 
