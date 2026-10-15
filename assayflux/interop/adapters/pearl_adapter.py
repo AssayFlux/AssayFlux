@@ -122,4 +122,4 @@ class PerlAdapter(LanguageAdapter):
         except OSError as exc:
             raise RuntimeError(
                 f"Could not execute the Perl program: {exc}"
-            ) from exc 
+            ) from exc
