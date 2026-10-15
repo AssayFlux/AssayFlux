@@ -7,4 +7,4 @@ repeat 5
     count = count + 1
 end
 
-show `Loop completed!`
+show "Loop completed!"
