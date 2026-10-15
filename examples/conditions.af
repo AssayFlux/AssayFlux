@@ -3,9 +3,9 @@
 score = 85
 
 if score >= 90
-    show `Excellent!`
+    show "Excellent!"
 otherwise score >= 70
-    show `Good work!`
+    show "Good work!"
 else
-    show `Keep practicing!`
+    show "Keep practicing!"
 end
