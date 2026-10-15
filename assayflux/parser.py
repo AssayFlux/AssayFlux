@@ -737,16 +737,7 @@ class Parser:
             expression = BooleanLiteral(
                 line=token.line,
                 column=token.column,
-                value=True,
-            )
-
-        elif token.value == "false":
-            self.advance()
-
-            expression = BooleanLiteral(
-                line=token.line,
-                column=token.column,
-                value=False,
+                value =False,
             )
 
         elif token.type == "IDENTIFIER":
