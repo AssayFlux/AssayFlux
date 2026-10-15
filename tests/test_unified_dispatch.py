@@ -1,15 +1,18 @@
 """Tests for unified language dispatch in AssayFlux."""
 
+import io
 import unittest
+from contextlib import redirect_stdout
 from unittest.mock import patch
 
 from assayflux.interop import dispatch
 from assayflux.interop.base import ExecutionResult
 from assayflux.interop.runtime import execute_code
+from assayflux.interpreter import Interpreter
 
 
 class TestUnifiedDispatch(unittest.TestCase):
-    """Verify the unified execution interface."""
+    """Verify unified dispatch and interpreter integration."""
 
     def test_python_dispatch_returns_execution_result(self):
         result = dispatch("python", "print(10 + 20)")
@@ -29,7 +32,10 @@ class TestUnifiedDispatch(unittest.TestCase):
 
     def test_dispatch_rejects_unknown_language(self):
         with self.assertRaises(KeyError):
-            dispatch("unknown_assayflux_language", "print(1)")
+            dispatch(
+                "unknown_assayflux_language",
+                "print(1)",
+            )
 
     def test_dispatch_preserves_execution_errors(self):
         result = dispatch(
@@ -67,10 +73,29 @@ class TestUnifiedDispatch(unittest.TestCase):
         self.assertTrue(result.success)
 
     def test_execute_code_remains_compatible(self):
-        result = execute_code("python", "print('compatible')")
+        result = execute_code(
+            "python",
+            "print('compatible')",
+        )
 
         self.assertEqual(result.stdout, "compatible\n")
         self.assertTrue(result.success)
+
+    def test_assayflux_program_can_call_dispatch(self):
+        interpreter = Interpreter()
+
+        program = '''
+result = dispatch("python", "print(2 + 3)")
+show result.stdout
+'''
+
+        captured = io.StringIO()
+
+        with redirect_stdout(captured):
+            interpreter.run(program)
+
+        self.assertEqual(interpreter.output, ["5\n"])
+        self.assertEqual(captured.getvalue(), "5\n")
 
 
 if __name__ == "__main__":
