@@ -2,678 +2,734 @@
 
 **Language:** AssayFlux Scientific Systems  
 **Short name:** AssayFlux  
-**Source file extension:** `.af`  
-**Current project version:** 0.1.0  
-**Document type:** Language Dictionary and Reference  
-**Status:** Initial draft
+**Version:** 0.1.0  
+**File extension:** `.af`  
+**Document status:** Language reference for early development
 
 ---
 
-## 1. About This Dictionary
+## 1. Purpose
 
-The AssayFlux Language Dictionary explains the vocabulary, syntax,
-operators, data types, statements, and programming concepts of AssayFlux.
+This dictionary defines the terminology, keywords, operators, syntax conventions, and core concepts of AssayFlux.
 
-Its purpose is to help beginners, programmers, educators, and developers
-understand how to read and write AssayFlux programs.
+AssayFlux is a custom programming language designed for scientific computing, general-purpose programming, and interoperability with existing programming languages and libraries.
 
-This document will evolve alongside the language.
+Its initial implementation is based on Python, with the long-term goal of integrating selected capabilities from Python, C, C++, Java, JavaScript, and Rust.
 
-### Documentation Status
-
-Each feature must eventually be classified as one of the following:
-
-- **Implemented:** Available in the current interpreter and tested.
-- **Specified:** Its intended behavior has been documented.
-- **Planned:** Intended for a future implementation.
-- **Experimental:** Available but not yet considered stable.
-
-A documented example does not automatically mean that the current
-interpreter can execute it.
+**Important:** A documented feature is not necessarily implemented. Actual support must be verified against the interpreter and automated tests.
 
 ---
 
-## 2. Basic Language Information
+## 2. Basic Language Terms
 
-### 2.1 Language Name
-
-The full name is AssayFlux Scientific Systems.
-
-The short name is AssayFlux.
-
-### 2.2 Source File Extension
-
-AssayFlux source files use the `.af` extension.
-
-Example filename:
-
-`hello.af`
-
-### 2.3 Comments
-
-Comments explain code and are ignored during execution.
-
-The initial comment syntax uses `#`.
-
-Example:
-
-```text
-# This is an AssayFlux comment
-show `Hello`
-```
-
-**Status:** Implemented in the initial lexer; execution behavior should
-be verified with tests.
-
-### 2.4 Statements
-
-A statement is an instruction in an AssayFlux program.
-
-Examples include displaying a value, assigning a variable, declaring
-a function, and evaluating a conditional.
-
-Example:
-
-```text
-show `Hello, World!`
-```
-
-### 2.5 Blocks
-
-A block is a group of statements belonging to a construct such as a
-function, conditional, or repetition statement.
-
-The language uses `end` to close several block constructs.
-
-Example:
-
-```text
-if true
-    show `Condition passed`
-end
-```
-
-Indentation is intended to improve readability but is not mandatory.
+| Term | Meaning |
+|---|---|
+| AssayFlux | Short name of the programming language. |
+| AssayFlux Scientific Systems | Full language name. |
+| `.af` | File extension for AssayFlux source files. |
+| Source code | Instructions written in AssayFlux. |
+| Lexer | Converts source text into tokens. |
+| Token | A meaningful unit recognized by the lexer. |
+| Parser | Processes tokens according to the language grammar. |
+| Abstract Syntax Tree (AST) | Structured representation of a program. |
+| Interpreter | Executes a parsed AssayFlux program. |
+| Runtime | The environment in which a program executes. |
+| Expression | Code that produces a value. |
+| Statement | An instruction that performs an action. |
+| Identifier | A name used for a variable, constant, function, or module. |
+| Literal | A value written directly in source code. |
+| Scope | The region in which a name can be accessed. |
+| Module | A reusable unit of code or library. |
+| Interoperability | Communication between AssayFlux and another language or runtime. |
+| Adapter | A component that connects AssayFlux to an external runtime or implementation. |
 
 ---
 
-## 3. Variables and Values
+## 3. Variables
 
-### 3.1 Variable
+A variable is a named storage location whose value can be assigned or changed.
 
-A variable is a named storage location whose value can be assigned
-and, where permitted, changed.
+### Syntax
 
-Example:
+```assayflux
+name = expression
+```
 
-```text
+### Example
+
+```assayflux
+name = "AssayFlux"
+version = 0.1
 count = 10
-show count
-```
 
-**Status:** Specified; assignment and execution require automated tests.
-
-### 3.2 Assignment Operator
-
-The `=` operator assigns a value to a variable.
-
-Example:
-
-```text
-score = 85
-```
-
-The expression on the right is evaluated and its value is assigned
-to the variable on the left.
-
-### 3.3 Reassignment
-
-Reassignment changes the value of an existing variable.
-
-Example:
-
-```text
-count = 10
-count = count + 1
-show count
-```
-
-Expected result: `11`, provided the relevant interpreter behavior
-is implemented correctly.
-
-### 3.4 Integer
-
-An integer is a whole-number value.
-
-Examples:
-
-```text
-age = 18
-count = 100
-temperature = -5
-```
-
-**Status:** Integer literals are recognized by the initial lexer.
-
-### 3.5 Decimal Number
-
-A decimal number represents a value with a fractional part.
-
-Example:
-
-```text
-temperature = 25.5
-```
-
-**Status:** Decimal literals are recognized by the initial lexer.
-
-### 3.6 String
-
-A string is a sequence of characters.
-
-AssayFlux uses backticks to delimit strings.
-
-Example:
-
-```text
-name = `AssayFlux`
 show name
+show version
+show count
 ```
 
-**Status:** Backtick-delimited strings are recognized by the initial lexer.
+### Rules
 
-### 3.7 Boolean
+- Identifiers must follow the language's identifier rules.
+- Assignment uses `=`.
+- A variable can hold a value supported by the runtime.
+- Reassignment behavior must follow the language specification.
+- An undefined variable should produce a clear error when accessed.
 
-A Boolean represents a truth value.
+---
 
-AssayFlux uses:
+## 4. Constants
 
-- `true`
-- `false`
+A constant is a name intended to hold a value that cannot be reassigned after its definition.
 
-Example:
+### Syntax
 
-```text
-enabled = true
-show enabled
+```assayflux
+const NAME = expression
 ```
 
-**Status:** Boolean literals are recognized by the initial lexer.
-Runtime behavior requires verification.
+### Example
 
-### 3.8 Constants
-
-A constant is intended to represent a value that cannot be reassigned
-after declaration.
-
-The initial language design uses the `const` keyword.
-
-Intended example:
-
-```text
+```assayflux
 const PI = 3.14159
+const LANGUAGE = "AssayFlux"
+
 show PI
+show LANGUAGE
 ```
 
-**Status:** Syntax is being developed. Constant enforcement must be
-verified before this feature is considered complete.
+### Rules
+
+- The `const` keyword introduces a constant.
+- A constant requires an initial value.
+- Reassignment should produce an error.
+- Constant enforcement must be implemented by the interpreter; uppercase names alone do not make values constant.
 
 ---
 
-## 4. Output
+## 5. Data Types
 
-### 4.1 `show`
+AssayFlux is intended to support common programming and scientific data types.
 
-**Purpose:** Display a value.
-
-Syntax:
-
-`show expression`
-
-Example:
-
-```text
-show `Hello, World!`
-show 123
-```
-
-Variables and expressions may also be displayed.
-
-Example:
-
-```text
-result = 10 + 20
-show result
-```
-
-**Status:** Implemented in the initial interpreter; output behavior
-should be covered by automated tests.
-
----
-
-## 5. Operators
-
-### 5.1 Arithmetic Operators
-
-| Operator | Intended meaning | Example |
+| Type | Description | Example |
 |---|---|---|
-| `+` | Addition | `2 + 3` |
-| `-` | Subtraction | `8 - 3` |
-| `*` | Multiplication | `4 * 5` |
-| `/` | Division | `10 / 2` |
+| Integer | Whole number | `42` |
+| Floating-point number | Number with a fractional component | `3.14` |
+| String | Text enclosed in quotes | `"Hello"` |
+| Boolean | Logical true or false value | `true` |
+| Null-like value | Represents the absence of a value, if supported | Implementation-defined |
+| List | Ordered collection of values, if supported | Implementation-defined |
+| Tuple | Fixed ordered collection, if supported | Implementation-defined |
+| Dictionary | Key-value collection, if supported | Implementation-defined |
+| Function | Callable block of code | `add` |
+| Module | Imported library or module | `math` |
+
+This table describes intended or possible language concepts. It does not guarantee that every type is currently supported.
+
+---
+
+## 6. Strings
+
+Strings represent text.
+
+### Supported Quote Styles
+
+AssayFlux syntax uses single or double quotes.
+
+```assayflux
+first = "Hello, World!"
+second = 'Scientific Computing'
+
+show first
+show second
+```
+
+### Rules
+
+- Strings use matching single or double quotation marks.
+- Backticks are not string delimiters.
+- Escape-sequence support must be defined by the language specification and implemented by the lexer.
+- Unterminated strings should produce a clear syntax error.
+
+---
+
+## 7. Comments
+
+Comments explain code and are not executed as program instructions.
+
+### Syntax
+
+```assayflux
+# This is a comment
+```
+
+### Example
+
+```assayflux
+# Calculate a total
+price = 100
+quantity = 3
+
+total = price * quantity
+show total
+```
+
+The `#` character begins a comment outside a string.
+
+The current language specification defines single-line comments. Multiline comments are not assumed to be supported.
+
+---
+
+## 8. Output
+
+The `show` keyword displays the result of an expression.
+
+### Syntax
+
+```assayflux
+show expression
+```
+
+### Example
+
+```assayflux
+show "Welcome to AssayFlux"
+
+number = 25
+show number
+show number * 2
+```
+
+### Rules
+
+- `show` is the language's output statement.
+- The expression following `show` is evaluated before its result is displayed.
+- Output formatting depends on the runtime.
+- Input and output behavior must be tested in the actual interpreter.
+
+---
+
+## 9. Operators
+
+### 9.1 Arithmetic Operators
+
+| Operator | Meaning | Example |
+|---|---|---|
+| `+` | Addition | `10 + 5` |
+| `-` | Subtraction | `10 - 5` |
+| `*` | Multiplication | `10 * 5` |
+| `/` | Division | `10 / 5` |
 | `%` | Remainder | `10 % 3` |
+| `**` | Exponentiation, if supported | `2 ** 3` |
 
-Arithmetic behavior, including division results and division by zero,
-must be specified and tested.
+### 9.2 Comparison Operators
 
-### 5.2 Comparison Operators
-
-| Operator | Intended meaning | Example |
+| Operator | Meaning | Example |
 |---|---|---|
 | `==` | Equal to | `a == b` |
-| `nt=` | Not equal to | `a nt= b` |
+| `!=` | Not equal to | `a != b` |
 | `>` | Greater than | `a > b` |
 | `<` | Less than | `a < b` |
 | `>=` | Greater than or equal to | `a >= b` |
 | `<=` | Less than or equal to | `a <= b` |
 
-The initial lexer recognizes these operator spellings.
+**Important:** The not-equal operator is `!=`. The form `nt=` is invalid.
 
-Their behavior should be verified by interpreter tests.
+### 9.3 Assignment Operator
 
-### 5.3 Logical Operators
+| Operator | Meaning | Example |
+|---|---|---|
+| `=` | Assign a value | `count = 10` |
 
-| Keyword | Intended meaning |
+Assignment and equality comparison are different operations.
+
+### 9.4 Logical Operators
+
+| Operator | Meaning | Example |
+|---|---|---|
+| `and` | Logical conjunction | `age > 17 and active == true` |
+| `or` | Logical disjunction | `a == 0 or b == 0` |
+| `not` | Logical negation | `not active` |
+
+Logical operators combine or invert conditions.
+
+Their precedence and evaluation behavior must follow the formal language specification.
+
+---
+
+## 10. Boolean Values
+
+Boolean values represent logical truth.
+
+```assayflux
+active = true
+completed = false
+
+show active
+show completed
+```
+
+### Boolean Literals
+
+- `true`
+- `false`
+
+The language uses lowercase Boolean literals.
+
+Their runtime representation must be consistent across native operations and interoperability adapters.
+
+---
+
+## 11. Conditional Statements
+
+Conditional statements execute code according to a condition.
+
+### Keywords
+
+| Keyword | Purpose |
 |---|---|
-| `and` | Logical conjunction |
-| `or` | Logical disjunction |
-| `not` | Logical negation |
+| `if` | Begins a conditional branch. |
+| `otherwise` | Introduces an additional condition. |
+| `else` | Introduces the fallback branch. |
+| `end` | Closes the conditional block. |
 
-Examples of intended expressions:
+### Example
 
-```text
-age >= 18 and enabled == true
-```
+```assayflux
+temperature = 30
 
-```text
-age < 18 or enabled == false
-```
-
-**Status:** The initial lexer and parser recognize logical operators.
-Their exact evaluation rules require testing and formal specification.
-
----
-
-## 6. Conditional Statements
-
-### 6.1 `if`
-
-**Purpose:** Execute a block when a condition is true.
-
-Syntax:
-
-```text
-if condition
-    statements
-end
-```
-
-Example:
-
-```text
-if score >= 90
-    show `Excellent`
-end
-```
-
-### 6.2 `otherwise`
-
-**Purpose:** Check another condition when the preceding condition
-or branch has not been selected.
-
-Example:
-
-```text
-if score >= 90
-    show `Excellent`
-otherwise score >= 70
-    show `Good`
-end
-```
-
-### 6.3 `else`
-
-**Purpose:** Provide a fallback branch when no preceding condition
-matches.
-
-Example:
-
-```text
-if score >= 90
-    show `Excellent`
-otherwise score >= 70
-    show `Good`
+if temperature > 35
+    show "Very hot"
+otherwise temperature > 20
+    show "Moderate temperature"
 else
-    show `Keep practicing`
+    show "Cold"
 end
 ```
 
-**Status:** The initial parser includes support for `if`, `otherwise`,
-`else`, and `end`. These examples must be verified through execution tests.
+### Rules
+
+- A conditional begins with `if`.
+- Additional conditions use `otherwise`.
+- The optional fallback branch uses `else`.
+- The conditional ends with `end`.
+- Indentation is mandatory.
+- `otherwise` and `else` must align with their matching `if`.
+- Each block must use four spaces per indentation level.
+- Tabs are prohibited for indentation.
 
 ---
 
-## 7. Repetition and Loop Control
+## 12. Loops and Repetition
 
-### 7.1 `repeat`
+The `repeat` keyword introduces a repetition block.
 
-**Purpose:** Repeat a block of statements.
+### Example: Condition-Based Loop
 
-Example:
+```assayflux
+count = 0
 
-```text
-repeat 3
-    show `Hello`
+repeat count < 5
+    show count
+    count = count + 1
 end
 ```
 
-The intended behavior is to execute the block three times.
+### Loop Keywords
 
-The exact rules for repetition counts and invalid values must be
-defined and tested.
+| Keyword | Purpose |
+|---|---|
+| `repeat` | Begins a loop. |
+| `stop` | Exits the nearest enclosing loop. |
+| `skip` | Skips the current iteration of the nearest enclosing loop. |
+| `end` | Closes the loop block. |
 
-### 7.2 `stop`
+### Example: Stop
 
-**Purpose:** Exit the current repetition block early.
+```assayflux
+count = 0
 
-Intended example:
+repeat true
+    if count == 3
+        stop
+    end
 
-```text
-repeat 10
-    stop
+    show count
+    count = count + 1
 end
 ```
 
-### 7.3 `skip`
+### Example: Skip
 
-**Purpose:** Skip the remainder of the current iteration and proceed
-to the next iteration.
+```assayflux
+count = 0
 
-Intended example:
+repeat count < 5
+    count = count + 1
 
-```text
-repeat 5
-    skip
+    if count == 3
+        skip
+    end
+
+    show count
 end
 ```
 
-**Status:** The initial parser and interpreter contain loop-control
-support. Exact behavior requires tests.
+### Rules
+
+- Every loop block must end with `end`.
+- Loop bodies require four-space indentation.
+- `stop` exits the nearest enclosing loop.
+- `skip` advances to the next iteration of the nearest enclosing loop.
+- The interpreter must prevent infinite execution where appropriate, without changing valid program semantics unexpectedly.
 
 ---
 
-## 8. Functions
+## 13. Functions
 
-### 8.1 Function Definition
+Functions package reusable instructions.
 
-AssayFlux uses the `f.` prefix when declaring a function.
+AssayFlux uses the `f.` prefix for function declarations.
 
-General form:
+### Declaration Syntax
 
-```text
+```assayflux
 f.function_name(parameters)
-    statements
+    # Function body
 end
 ```
 
-Example:
+### Calling Syntax
 
-```text
+```assayflux
+function_name(arguments)
+```
+
+### Example
+
+```assayflux
 f.add(a, b)
-    result = a + b
-    return result
+    return a + b
 end
-```
 
-The function name in this example is `add`.
-
-### 8.2 Parameters
-
-Parameters are names that receive values supplied when a function
-is called.
-
-In the example:
-
-```text
-f.add(a, b)
-```
-
-`a` and `b` are parameters.
-
-### 8.3 Function Call
-
-A function call executes a previously defined function.
-
-Example:
-
-```text
 result = add(10, 20)
 show result
 ```
 
-The intended result is `30`.
+### Keywords and Concepts
 
-### 8.4 `return`
+| Term | Purpose |
+|---|---|
+| `f.` | Prefix used in function declarations. |
+| `return` | Returns a value from a function. |
+| Parameter | A name receiving a value during a function call. |
+| Argument | A value supplied when calling a function. |
+| Function call | Executes a function. |
 
-**Purpose:** Return a value from a function.
+### Rules
 
-Example:
+- Function declarations use `f.name(parameters)`.
+- Function calls use `name(arguments)`, without the `f.` prefix.
+- Function bodies require four-space indentation.
+- Each function declaration must end with `end`.
+- `return` exits the current function and provides its return value, subject to the implemented semantics.
+- Invalid argument counts and undefined functions should produce clear errors.
 
-```text
-f.square(number)
-    return number * number
+---
+
+## 14. Indentation and Block Formatting
+
+AssayFlux requires strict indentation.
+
+### Mandatory Rules
+
+1. Use exactly four spaces for each indentation level.
+2. Do not use tabs for indentation.
+3. Indent statements inside a block by one level.
+4. Increase indentation for nested blocks.
+5. Align `otherwise` and `else` with their matching `if`.
+6. Align `end` with the keyword that opened its block.
+7. Every block must have its required matching `end`.
+8. Incorrect indentation must be reported as an error.
+
+### Correct Example
+
+```assayflux
+if true
+    show "Outer block"
+
+    if true
+        show "Inner block"
+    end
 end
 ```
 
-Calling `square(5)` is intended to return `25`.
+### Incorrect Example
 
-**Status:** Function definitions, calls, and return statements have
-initial implementations. Scope rules, recursion, argument validation,
-and return behavior require testing.
-
----
-
-## 9. Input
-
-### 9.1 `input()`
-
-**Purpose:** Receive information from the user.
-
-Intended example:
-
-```text
-show `What is your name?`
-name = input()
-show name
+```assayflux
+if true
+  show "Incorrect indentation"
+end
 ```
 
-The exact return type, input handling, and behavior when input is
-unavailable must be specified.
+The second example uses two spaces instead of four and should be rejected under the strict indentation rules.
 
-**Status:** Planned. Do not assume that `input()` works in the current
-interpreter until it has been implemented and tested.
+Indentation and explicit block endings are both required. One does not replace the other.
 
 ---
 
-## 10. Modules and Imports
+## 15. Imports and Modules
 
-### 10.1 `import`
+Imports are intended to allow AssayFlux programs to reuse existing libraries.
 
-**Purpose:** Import functionality from another module or supported
-external language.
+### Intended Syntax
 
-Intended example:
-
-```text
-import mathematics
+```assayflux
+import math
 ```
 
-The actual import syntax, module search paths, security rules, and
-loading behavior remain to be defined.
+An alias may be expressed as:
 
-### 10.2 `as`
-
-**Purpose:** Introduce an alias for an imported module or symbol.
-
-Intended example:
-
-```text
-import mathematics as math
+```assayflux
+import numpy as np
 ```
 
-**Status:** Import-related syntax exists in the initial lexer and parser.
-A complete module system is planned and must be implemented.
+Module members may be accessed through member notation:
+
+```assayflux
+import math
+
+result = math.sqrt(25)
+show result
+```
+
+### Intended Capabilities
+
+- Import supported modules.
+- Assign module aliases.
+- Access supported functions and attributes.
+- Exchange compatible values with external libraries.
+- Report import and runtime errors clearly.
+
+### Important Limitations
+
+Import syntax is part of the language design, but full import execution must be implemented and tested.
+
+Python module interoperability does not automatically provide support for C, C++, Java, JavaScript, or Rust.
 
 ---
 
-## 11. Errors and Diagnostics
+## 16. Scientific Computing
 
-AssayFlux should provide useful error messages instead of unexplained
-tracebacks whenever possible.
+AssayFlux is designed to support scientific and numerical workloads by reusing existing libraries.
 
-The long-term diagnostic system should identify:
+### Intended Areas
 
-- The category of error.
-- The source filename.
-- The line and column.
-- The relevant source location.
-- A concise explanation.
-- A possible correction when one can be suggested.
+- Mathematics
+- Statistics
+- Numerical computation
+- Data analysis
+- Scientific visualization
+- Engineering calculations
+- Simulation
+- Scientific file processing
 
-Examples of error categories include:
+### Example: Basic Calculation
 
-- Invalid character.
-- Unterminated string.
-- Unexpected token.
-- Undefined variable.
-- Incorrect function argument count.
-- Division by zero.
-- Invalid operation.
-- Missing block terminator.
+```assayflux
+radius = 5
+area = 3.14159 * radius * radius
 
-**Status:** Error reporting is under development.
+show area
+```
 
----
-
-## 12. Multi-Language Integration
-
-AssayFlux is intended to provide a consistent programming interface
-to selected existing languages.
+### Intended Python Ecosystem Integration
 
 Potential integrations include:
 
-| Language | Possible integration approach | Status |
-|---|---|---|
-| Python | Interpreter and Python API interoperability | Planned |
-| C | Native library interfaces | Planned |
-| C++ | Native library interfaces | Planned |
-| Java | JVM interoperability | Planned |
-| JavaScript | JavaScript runtime interoperability | Planned |
-| Rust | Native library interfaces | Planned |
+- NumPy for numerical arrays.
+- SciPy for scientific algorithms.
+- SymPy for symbolic mathematics.
+- pandas for tabular data.
+- Matplotlib for plotting.
 
-Each integration must define:
+These are examples of potential library integrations, not a guarantee that the current interpreter can import or execute them.
+
+---
+
+## 17. Multi-Language Interoperability
+
+Interoperability allows AssayFlux to communicate with other programming languages and runtimes.
+
+### Planned Integration Targets
+
+| Language | Potential integration approach |
+|---|---|
+| Python | Python runtime, modules, and adapter interface |
+| C | Native libraries and foreign-function interfaces |
+| C++ | Native libraries and compatible interoperability layers |
+| Java | JVM-based integration |
+| JavaScript | Embedded or external JavaScript runtime |
+| Rust | Native libraries and compatible extension interfaces |
+
+### Design Requirements
+
+Every integration should define:
 
 - How functions are called.
-- How arguments and return values are converted.
-- How errors cross language boundaries.
-- How memory and resources are managed.
-- How dependencies are installed.
-- How untrusted code is handled.
+- How arguments are converted.
+- How return values are converted.
+- How errors are reported.
+- How dependencies are managed.
+- How resources are released.
+- Which platforms are supported.
+- What security boundaries apply.
 
-Listing a language here does not mean that integration is already available.
+External code must not be assumed safe merely because it is called through an adapter.
 
----
-
-## 13. Naming and Syntax Conventions
-
-The initial language design uses:
-
-- `.af` for source files.
-- Backticks for string literals.
-- `#` for comments.
-- `show` for output.
-- `=` for assignment.
-- `f.` for function declarations.
-- `return` for returning a value.
-- `end` for closing supported blocks.
-- `if`, `otherwise`, and `else` for conditional branches.
-- `repeat` for repetition.
-- `stop` and `skip` for loop control.
-- `and`, `or`, and `not` for logical operations.
-- `nt=` for inequality.
-
-These conventions must be maintained consistently or changed through an
-explicit language-specification update.
+A subprocess-based adapter is not automatically a security sandbox.
 
 ---
 
-## 14. Compatibility and Stability
+## 18. Errors and Diagnostics
 
-Before a feature is considered stable, it should have:
+AssayFlux should provide understandable errors during lexing, parsing, and execution.
 
-1. A documented definition.
-2. A clearly defined syntax.
-3. A defined runtime behavior.
-4. Automated tests.
-5. Examples that execute successfully.
-6. Documented error cases where applicable.
+### Error Categories
 
-Changes to established syntax or behavior should be recorded in the
-project's version history and release notes.
+| Category | Meaning |
+|---|---|
+| Lexical error | Invalid or malformed token. |
+| Syntax error | Source code violates the grammar. |
+| Indentation error | Block indentation violates formatting rules. |
+| Name error | An undefined name is accessed. |
+| Type error | An operation receives an incompatible value. |
+| Runtime error | An error occurs during execution. |
+| Import error | A module cannot be imported. |
+| Interoperability error | An external adapter or runtime operation fails. |
 
----
+### Diagnostic Goals
 
-## 15. How to Learn AssayFlux
+Errors should identify the problem and, where possible, provide:
 
-Beginners should learn in this order:
+- The source file.
+- The line number.
+- The relevant location.
+- The cause of the error.
+- A useful suggestion for correcting it.
 
-1. Comments and basic statements.
-2. Variables and values.
-3. Strings, integers, decimals, and Booleans.
-4. Output with `show`.
-5. Arithmetic and comparison operators.
-6. Conditional statements.
-7. Repetition and loop control.
-8. Functions and return values.
-9. Input and modules when implemented.
-10. Multi-language integration when available.
-
-Start with the example programs in the repository's `examples` directory.
+The exact error categories and messages depend on implementation progress.
 
 ---
 
-## 16. Contributing to This Dictionary
+## 19. Reserved Keywords
 
-When a new language feature is introduced:
+The following words have special meaning in the intended language syntax.
 
-1. Define its purpose.
-2. Document its syntax.
-3. Explain its behavior.
-4. Provide an example.
-5. Describe relevant errors and edge cases.
-6. Add tests for the implementation.
-7. Update this dictionary and the formal language specification.
+| Keyword | Meaning |
+|---|---|
+| `const` | Declares a constant. |
+| `show` | Displays a value. |
+| `if` | Begins a conditional. |
+| `otherwise` | Adds another conditional branch. |
+| `else` | Begins the fallback branch. |
+| `repeat` | Begins a loop. |
+| `stop` | Exits the nearest enclosing loop. |
+| `skip` | Skips the current loop iteration. |
+| `return` | Returns from a function. |
+| `end` | Closes a block. |
+| `true` | Boolean true value. |
+| `false` | Boolean false value. |
+| `and` | Logical conjunction. |
+| `or` | Logical disjunction. |
+| `not` | Logical negation. |
+| `import` | Imports a module. |
+| `as` | Specifies an import alias. |
 
-The dictionary should describe the actual language, not merely proposed
-features.
+Keyword reservation, case sensitivity, and name restrictions must be enforced consistently by the lexer and parser.
 
 ---
 
-## 17. Document History
+## 20. Naming Conventions
 
-### Version 0.1.0
+The following are recommended conventions, not necessarily mandatory syntax rules.
 
-- Established the initial AssayFlux dictionary.
-- Documented the initial syntax conventions.
-- Identified implemented, specified, and planned features.
-- Established a foundation for future language reference documentation.
+| Element | Recommended style | Example |
+|---|---|---|
+| Variables | `snake_case` | `sample_count` |
+| Constants | Uppercase with underscores | `MAX_VALUE` |
+| Functions | `snake_case` | `calculate_area` |
+| Modules | Short descriptive names | `math` |
+| Boolean variables | Descriptive logical names | `is_valid` |
+
+The language specification, not a naming convention, determines which identifiers are valid.
+
+---
+
+## 21. Source File and Project Conventions
+
+| Item | Convention |
+|---|---|
+| Language source file | `.af` |
+| Package name | `assayflux` |
+| Interoperability package | `assayflux.interop` |
+| Test directory | `tests/` |
+| Example directory | `examples/` |
+| Documentation directory | `docs/` |
+
+These conventions describe the current project organization and may evolve as the implementation grows.
+
+---
+
+## 22. Implementation Status
+
+AssayFlux is in early development.
+
+The dictionary describes the intended language and does not, by itself, establish that every feature works.
+
+Before marking a feature as implemented:
+
+1. Implement the behavior in the appropriate language component.
+2. Add automated tests.
+3. Run the test suite.
+4. Confirm that the tests pass.
+5. Update `docs/SPECIFICATION_STATUS.md`.
+6. Update examples and other documentation when necessary.
+
+Planned syntax must be clearly distinguished from tested functionality.
+
+---
+
+## 23. Related Documentation
+
+Refer to these files in the repository for more detailed information:
+
+- `README.md` — project overview.
+- `docs/LANGUAGE_SPECIFICATION.md` — language design and normative rules.
+- `docs/GRAMMAR.md` — grammar and syntax.
+- `docs/EXAMPLES.md` — example programs.
+- `docs/ARCHITECTURE.md` — implementation architecture.
+- `docs/ROADMAP.md` — development plan.
+- `docs/SPECIFICATION_STATUS.md` — feature status and implementation notes.
+
+When documents disagree, resolve the conflict explicitly and update the affected documentation. Do not silently treat an unimplemented feature as working.
+
+---
+
+## 24. Core Principles
+
+AssayFlux development follows these principles:
+
+1. **Consistency:** Syntax and runtime behavior should be predictable.
+2. **Strict formatting:** Four-space indentation and explicit `end` statements are mandatory.
+3. **Scientific usefulness:** Reuse established scientific libraries where appropriate.
+4. **Interoperability:** External integrations must have clear interfaces and conversion rules.
+5. **Transparency:** Documented plans must be distinguished from implemented features.
+6. **Testability:** Features should have automated tests.
+7. **Maintainability:** Keep the lexer, parser, AST, interpreter, and adapters modular.
+8. **Portability:** Platform limitations must be documented and tested.
+9. **Security:** External execution and imported code must be treated carefully.
+10. **Compatibility:** Changes to syntax and semantics must be documented.
+
+---
+
+**End of AssayFlux Language Dictionary**
