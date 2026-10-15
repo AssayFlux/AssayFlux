@@ -3,14 +3,14 @@
 **Project:** AssayFlux Scientific Systems  
 **Language:** AssayFlux  
 **Version:** 0.1.0  
-**Status:** Initial Draft
+**Status:** Examples for the proposed language specification
 
 ---
 
 ## 1. Hello World
 
 ```assayflux
-show `Hello, World!`
+show "Hello, World!"
 ```
 
 Expected output:
@@ -19,19 +19,15 @@ Expected output:
 Hello, World!
 ```
 
----
-
 ## 2. Variables
 
 ```assayflux
-name = `AssayFlux`
+name = "AssayFlux"
 version = 0.1
 
 show name
 show version
 ```
-
----
 
 ## 3. Numbers and Calculations
 
@@ -43,14 +39,14 @@ sum = a + b
 difference = a - b
 product = a * b
 quotient = a / b
+remainder = a % b
 
 show sum
 show difference
 show product
 show quotient
+show remainder
 ```
-
----
 
 ## 4. Boolean Values
 
@@ -62,119 +58,161 @@ show is_ready
 show has_error
 ```
 
----
+## 5. Constants
 
-## 5. Conditional Statements
+```assayflux
+const PI = 3.14159
+const MAX_ITERATIONS = 1000
+
+show PI
+show MAX_ITERATIONS
+```
+
+Constants cannot be reassigned after initialization.
+
+## 6. Conditional Statements
 
 ```assayflux
 temperature = 30
 
 if temperature > 35
-    show `It is very hot`
+    show "It is very hot"
 otherwise temperature > 20
-    show `The temperature is moderate`
+    show "The temperature is moderate"
 else
-    show `It is cold`
+    show "It is cold"
 end
 ```
 
-The `if` branch is checked first.
+Rules:
 
-Each `otherwise` branch provides another condition.
+- `if` introduces the first condition.
+- `otherwise` introduces an additional condition.
+- `else` provides an optional final alternative.
+- `end` closes the conditional statement.
+- `otherwise`, `else`, and `end` must align with the opening `if`.
+- Statements inside each branch must be indented by four spaces.
 
-The final `else` branch is the unconditional fallback.
-
-Only the first matching branch should execute.
-
----
-
-## 6. Comparison Operators
+## 7. Comparison Operators
 
 ```assayflux
 a = 10
 b = 20
 
 show a == b
-show a nt= b
+show a != b
 show a > b
 show a < b
 show a >= b
 show a <= b
 ```
 
-The `nt=` operator represents not equal.
+The `!=` operator means not equal.
 
----
+The former `nt=` operator is not valid AssayFlux syntax.
 
-## 7. Logical Operators
+## 8. Logical Operators
+
+### Logical AND
 
 ```assayflux
 age = 25
 has_permission = true
 
 if age >= 18 and has_permission
-    show `Access granted`
+    show "Access granted"
 else
-    show `Access denied`
+    show "Access denied"
 end
 ```
+
+### Logical OR
 
 ```assayflux
 is_scientist = false
 is_student = true
 
 if is_scientist or is_student
-    show `Scientific tools available`
+    show "Scientific tools available"
 else
-    show `General tools available`
+    show "General tools available"
 end
 ```
 
----
-
-## 8. Repetition
+### Logical NOT
 
 ```assayflux
-repeat 5
-    show `Hello from AssayFlux`
+is_ready = false
+
+if not is_ready
+    show "Not ready"
 end
 ```
 
-This illustrates the planned repetition syntax.
+## 9. Repetition
 
-The exact meaning of the number following `repeat` will be finalized in the language specification.
-
----
-
-## 9. Stop a Loop
+A conditional `repeat` loop continues while its condition is true.
 
 ```assayflux
-repeat
-    show `Loop running`
+count = 0
+
+repeat count < 5
+    show "Hello from AssayFlux"
+    count = count + 1
+end
+```
+
+The loop executes five times.
+
+The loop's `end` must align with `repeat`.
+
+## 10. Stop a Loop
+
+The `stop` statement exits the innermost active loop.
+
+```assayflux
+repeat true
+    show "Loop running"
     stop
 end
 ```
 
-The `stop` statement exits the nearest enclosing loop.
+Expected output:
 
----
+```text
+Loop running
+```
 
-## 10. Skip an Iteration
+## 11. Skip an Iteration
+
+The `skip` statement skips the remainder of the current iteration.
 
 ```assayflux
-repeat 5
-    skip
-    show `This statement is skipped`
+count = 0
+
+repeat count < 5
+    count = count + 1
+
+    if count == 3
+        skip
+    end
+
+    show count
 end
 ```
 
-The `skip` statement moves to the next iteration of the nearest enclosing loop.
+Expected output:
 
-This example illustrates the intended syntax. Execution details will be finalized with the loop specification.
+```text
+1
+2
+4
+5
+```
 
----
+## 12. Functions
 
-## 11. Functions
+Function declarations use the `f.` prefix.
 
 ```assayflux
 f.add(a, b)
@@ -186,30 +224,32 @@ result = add(10, 20)
 show result
 ```
 
-Functions use the `f.` prefix in their declarations.
+Expected output:
 
-`return` provides a function's result.
+```text
+30
+```
 
-`end` closes the function body.
+Function declarations use `f.name(...)`.
 
-The exact function declaration and call syntax will be finalized before interpreter implementation.
+Function calls use `name(...)`.
 
----
+The function's `end` must align with its declaration.
 
-## 12. Functions Without a Return Value
+## 13. Functions Without an Explicit Return
 
 ```assayflux
 f.greet(name)
-    show `Hello`
+    show "Hello"
     show name
 end
 
-greet(`AssayFlux`)
+greet("AssayFlux")
 ```
 
----
+A function without an explicit return value does not return a computed result.
 
-## 13. Scientific Calculations
+## 14. Scientific Calculations
 
 ```assayflux
 mass = 10
@@ -217,73 +257,124 @@ acceleration = 9.8
 
 force = mass * acceleration
 
-show `Force calculation`
+show "Force calculation"
 show force
 ```
 
-This example demonstrates arithmetic that could be used in a scientific program.
-
----
-
-## 14. Error Handling Goals
-
-AssayFlux should eventually provide readable error messages.
-
-For example, an invalid expression should produce an error containing:
-
-- The error type.
-- The source line number.
-- A clear explanation.
-- A suggested correction when possible.
-
-Example of a planned diagnostic:
+Expected output:
 
 ```text
-AssayFlux Error
-Line: 3
-Problem: Invalid expression.
-Suggestion: Check the expression and its operators.
+Force calculation
+98.0
 ```
 
-This is an illustration of the intended diagnostic format, not current interpreter output.
+## 15. Python Library Integration
 
----
+AssayFlux is designed to reuse existing Python libraries rather than recreate their functionality.
 
-## 15. Multi-Language Integration Goals
+For example, the intended syntax for using Python's `math` library is:
 
-AssayFlux is intended to support integration with other programming languages.
+```assayflux
+import math
 
-Potential integration targets include:
+result = math.sqrt(25)
+
+show result
+```
+
+Expected output:
+
+```text
+5.0
+```
+
+**Implementation status:** This example describes the intended behavior. It must not be considered a verified working program until the interpreter supports module imports, member access, and external function calls.
+
+## 16. Nested Blocks
+
+AssayFlux uses strict indentation and explicit `end` statements together.
+
+```assayflux
+count = 0
+
+repeat count < 5
+    if count != 3
+        show count
+    else
+        show "Skipping three"
+    end
+
+    count = count + 1
+end
+```
+
+Rules:
+
+1. Use four spaces per indentation level.
+2. Do not use tabs for indentation.
+3. Indent statements inside a block.
+4. Indent nested blocks further.
+5. Align `else` and `otherwise` with their matching `if`.
+6. Align `end` with the statement that opened the block.
+7. Reject inconsistent indentation.
+
+Indentation and `end` are both required.
+
+## 17. Error Reporting Goals
+
+AssayFlux should provide understandable diagnostics for invalid programs.
+
+For example:
+
+```text
+AssayFlux Syntax Error
+
+File: example.af
+Line: 5
+Problem: Missing 'end'.
+Suggestion: Add 'end' to close the current block.
+```
+
+This is an example of the intended diagnostic format, not a claim about the current interpreter's output.
+
+## 18. Multi-Language Integration Goals
+
+AssayFlux is intended to support integrations with:
 
 - Python
+- JavaScript
 - C
 - C++
 - Java
-- JavaScript
 - Rust
 
-The implementation strategy, supported versions, runtime requirements, and interoperability rules will be documented separately.
+Python is the initial integration target.
 
-These are project goals, not implemented features.
+Each integration must have defined rules for execution, values, errors, dependencies, and runtime requirements.
 
----
+These are project goals until implemented and tested.
 
-## 16. Current Implementation Status
+## 19. Implementation Status
 
-At version `0.1.0`, these examples describe the intended language design.
+These examples describe the intended AssayFlux syntax.
 
-They do not imply that an AssayFlux interpreter or compiler already exists.
+They do not guarantee that every example currently executes successfully.
 
-Before implementation, the grammar and behavior of each feature must be finalized.
+The lexer, parser, abstract syntax tree, interpreter, and tests must be updated to match the authoritative grammar.
 
-As the interpreter develops, examples should be tested and updated to match actual behavior.
+Each feature should be tracked separately as:
 
----
+1. Specified.
+2. Parsed.
+3. Implemented.
+4. Tested.
 
-## 17. Compatibility Policy
+## 20. Compatibility Policy
 
-The language specification is the authoritative source for AssayFlux syntax and semantics.
+The authoritative grammar is maintained in `GRAMMAR.md`.
 
-If an example conflicts with the finalized specification, the specification takes precedence.
+The language specification is maintained in `LANGUAGE_SPECIFICATION.md`.
 
-Breaking syntax changes must be documented in the project changelog.
+If an example conflicts with either authoritative document, the conflict must be resolved rather than silently changing the language.
+
+Breaking syntax changes must be documented and versioned.
