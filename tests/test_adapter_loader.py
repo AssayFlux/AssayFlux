@@ -10,6 +10,40 @@ from assayflux.interop.loader import (
 )
 
 
+EXPECTED_LANGUAGES = (
+    "c",
+    "cobol",
+    "cpp",
+    "crystal",
+    "csharp",
+    "d",
+    "dart",
+    "elixir",
+    "erlang",
+    "fsharp",
+    "fortran",
+    "go",
+    "haskell",
+    "java",
+    "javascript",
+    "julia",
+    "kotlin",
+    "lua",
+    "nim",
+    "ocaml",
+    "perl",
+    "php",
+    "python",
+    "r",
+    "ruby",
+    "rust",
+    "scala",
+    "swift",
+    "typescript",
+    "zig",
+)
+
+
 class TestAdapterLoader(unittest.TestCase):
     """Verify default adapter registration and discovery."""
 
@@ -23,6 +57,20 @@ class TestAdapterLoader(unittest.TestCase):
         second = get_default_registry()
 
         self.assertIs(first, second)
+
+    def test_all_30_languages_are_registered(self):
+        languages = available_languages()
+
+        self.assertEqual(len(languages), 30)
+        self.assertEqual(languages, EXPECTED_LANGUAGES)
+
+    def test_every_registered_adapter_implements_contract(self):
+        for language in EXPECTED_LANGUAGES:
+            with self.subTest(language=language):
+                adapter = get_adapter(language)
+
+                self.assertIsInstance(adapter, LanguageAdapter)
+                self.assertEqual(adapter.language, language)
 
     def test_python_adapter_is_registered(self):
         registry = get_default_registry()
@@ -40,19 +88,20 @@ class TestAdapterLoader(unittest.TestCase):
 
         self.assertEqual(adapter.language, "python")
 
-    def test_available_languages_returns_tuple(self):
+    def test_available_languages_returns_sorted_tuple(self):
         languages = available_languages()
 
         self.assertIsInstance(languages, tuple)
         self.assertEqual(languages, tuple(sorted(languages)))
 
-    def test_python_is_available_when_runtime_is_available(self):
+    def test_python_availability_matches_runtime(self):
         adapter = get_adapter("python")
+        languages = available_languages()
 
         if adapter.is_available():
-            self.assertIn("python", available_languages())
+            self.assertIn("python", languages)
         else:
-            self.assertNotIn("python", available_languages())
+            self.assertNotIn("python", languages)
 
     def test_javascript_adapter_is_registered(self):
         adapter = get_adapter("javascript")
