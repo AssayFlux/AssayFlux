@@ -20,8 +20,8 @@ EXPECTED_LANGUAGES = (
     "dart",
     "elixir",
     "erlang",
-    "fsharp",
     "fortran",
+    "fsharp",
     "go",
     "haskell",
     "java",
@@ -59,10 +59,12 @@ class TestAdapterLoader(unittest.TestCase):
         self.assertIs(first, second)
 
     def test_all_30_languages_are_registered(self):
-        languages = available_languages()
+        registry = get_default_registry()
 
-        self.assertEqual(len(languages), 30)
-        self.assertEqual(languages, EXPECTED_LANGUAGES)
+        registered = registry.registered_languages()
+
+        self.assertEqual(len(registered), 30)
+        self.assertEqual(registered, EXPECTED_LANGUAGES)
 
     def test_every_registered_adapter_implements_contract(self):
         for language in EXPECTED_LANGUAGES:
@@ -93,6 +95,13 @@ class TestAdapterLoader(unittest.TestCase):
 
         self.assertIsInstance(languages, tuple)
         self.assertEqual(languages, tuple(sorted(languages)))
+
+    def test_available_languages_are_registered(self):
+        registry = get_default_registry()
+
+        for language in available_languages():
+            with self.subTest(language=language):
+                self.assertTrue(registry.is_registered(language))
 
     def test_python_availability_matches_runtime(self):
         adapter = get_adapter("python")
