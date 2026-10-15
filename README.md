@@ -216,4 +216,4 @@ Significant changes should include appropriate tests and documentation.
 
 ## License
 
-A license has not yet been selected. Until a license is added, do not assume the repository is available for unrestricted copying, modification, or redistribution.
+A license has not yet been selected. Until a license is added, do not assume the repository is available for unrestricted copying, modification, or redistribution .
