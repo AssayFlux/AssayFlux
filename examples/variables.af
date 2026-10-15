@@ -1,6 +1,6 @@
-# AssayFlux variable example
+l# AssayFlux variable example
 
-name = `AssayFlux`
+name = "AssayFlux"
 version = 1
 active = true
 temperature = 25.5
@@ -12,5 +12,5 @@ show temperature
 
 version = version + 1
 
-show `Updated version:`
+show "Updated version:"
 show version
