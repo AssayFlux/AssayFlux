@@ -1,0 +1,3 @@
+app "Hello AssayFlux"
+constant GREETING = "Hello, AssayFlux!"
+show GREETING
