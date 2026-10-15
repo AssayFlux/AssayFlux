@@ -1,563 +1,539 @@
-# AssayFlux System Architecture
+# AssayFlux Scientific Systems — Architecture
 
-**Project:** AssayFlux Scientific Systems
-**Language:** AssayFlux
-**Version:** 0.1.0
-**Status:** Initial Architecture Proposal
-
----
-
-## 1. Project Vision
-
-AssayFlux is a programming language project designed to provide a unified environment for scientific computing and multi-language integration.
-
-The goal is to let developers write programs using AssayFlux syntax while accessing capabilities implemented in other programming languages.
-
-AssayFlux will initially be developed as a Python-based language implementation.
-
-The architecture should allow additional runtimes and language integrations to be introduced progressively.
+**Language:** AssayFlux Scientific Systems  
+**Short name:** AssayFlux  
+**Version:** 0.1.0  
+**Status:** Early development
 
 ---
 
-## 2. Core Architecture
+## 1. Overview
 
-The initial architecture consists of these components:
+AssayFlux is a custom programming language designed for scientific computing and multi-language interoperability.
 
-1. Source Code
-2. Lexer
-3. Parser
-4. Abstract Syntax Tree
-5. Semantic Analyzer
-6. Runtime and Interpreter
-7. Standard Library
-8. Foreign Language Integration
-9. Error Reporting
-10. Development Tools
+Its architecture separates language processing, execution, external language integration, testing, and developer tools into modular components.
 
-Each component has a separate responsibility.
+The initial implementation uses Python. The long-term goal is to enable AssayFlux programs to reuse capabilities from Python, C, C++, Java, JavaScript, and Rust.
 
----
+These integrations are development goals and must not be considered supported until implemented and tested.
 
-## 3. Source Code
+## 2. Architectural Goals
 
-Source code contains programs written in the AssayFlux language.
+The architecture should provide:
+
+- A clear separation between language components.
+- Predictable parsing and execution.
+- Strict indentation and explicit block endings.
+- Reusable scientific libraries.
+- A modular interoperability system.
+- Consistent error reporting.
+- Automated testing.
+- Portability across supported environments.
+- A foundation for a future Android IDE.
+
+## 3. High-Level Architecture
+
+The intended execution pipeline is:
+
+```text
+AssayFlux Source File (.af)
+          |
+          v
+       Source Reader
+          |
+          v
+         Lexer
+          |
+          v
+         Tokens
+          |
+          v
+         Parser
+          |
+          v
+ Abstract Syntax Tree (AST)
+          |
+          v
+      Interpreter
+          |
+          +--------------------+
+          |                    |
+          v                    v
+   Native Language       Interoperability
+     Operations              Runtime
+                               |
+                   +-----------+-----------+
+                   |           |           |
+                   v           v           v
+                Python     Native Code   Other Runtimes
+                            Integration   (Future)
+```
+
+This diagram describes the intended architecture. The exact implementation may evolve.
+
+## 4. Repository Structure
+
+The repository is organized into implementation, interoperability, testing, examples, and documentation.
+
+```text
+AssayFlux/
+|
+|-- assayflux/
+|   |-- __init__.py
+|   |-- lexer.py
+|   |-- ast_nodes.py
+|   |-- parser.py
+|   |-- interpreter.py
+|   |-- __main__.py
+|   |
+|   |-- interop/
+|       |-- __init__.py
+|       |-- base.py
+|       |-- registry.py
+|       |-- loader.py
+|       |-- runtime.py
+|       |
+|       |-- adapters/
+|           |-- python_adapter.py
+|
+|-- tests/
+|-- examples/
+|-- docs/
+|-- .github/
+|   |-- workflows/
+|       |-- tests.yml
+|
+|-- pyproject.toml
+|-- README.md
+|-- .gitignore
+```
+
+This is a conceptual overview of the project structure. Check the repository for the actual files currently present.
+
+## 5. Source Reader
+
+The source reader obtains AssayFlux source code from a file or another supported input source.
+
+### Responsibilities
+
+- Read `.af` source files.
+- Preserve source locations where possible.
+- Pass source text to the lexer.
+- Report file-reading errors.
+
+The source reader should not execute program instructions.
+
+## 6. Lexer
+
+The lexer converts source text into tokens.
+
+### Responsibilities
+
+- Recognize identifiers and keywords.
+- Recognize numbers and string literals.
+- Recognize operators and punctuation.
+- Recognize comments.
+- Detect invalid characters.
+- Track line and column positions.
+- Support strict indentation validation, either directly or through a dedicated layout-processing component.
+
+### Language Rules
+
+- Strings use single or double quotes.
+- Comments begin with `#`.
+- The not-equal operator is `!=`.
+- The invalid form `nt=` must not be accepted as a not-equal operator.
+- Indentation uses four spaces per level.
+- Tabs are prohibited for indentation.
+
+The lexer should provide useful error locations when tokenization fails.
+
+## 7. Parser
+
+The parser transforms tokens into an Abstract Syntax Tree.
+
+### Responsibilities
+
+- Recognize valid statements.
+- Parse expressions according to operator precedence.
+- Parse assignments and constants.
+- Parse conditional branches.
+- Parse loops.
+- Parse function declarations and calls.
+- Parse return statements.
+- Parse import statements when implemented.
+- Enforce block structure and matching `end` statements.
+- Reject invalid syntax.
+
+The parser should report syntax errors without silently accepting malformed programs.
+
+## 8. Abstract Syntax Tree
+
+The AST represents the structure of an AssayFlux program.
+
+Potential node categories include:
+
+| Node | Purpose |
+|---|---|
+| Program | Represents the complete program. |
+| Literal | Represents a literal value. |
+| Variable reference | Reads a named value. |
+| Assignment | Assigns a value to a variable. |
+| Constant declaration | Declares a constant. |
+| Binary expression | Represents an operation with two operands. |
+| Unary expression | Represents a single-operand operation. |
+| Output statement | Represents `show`. |
+| Conditional statement | Represents `if`, `otherwise`, and `else`. |
+| Loop statement | Represents `repeat`. |
+| Function declaration | Represents an `f.` function definition. |
+| Function call | Represents a call to a function. |
+| Return statement | Returns a value from a function. |
+| Import statement | Represents a module import. |
+
+These categories describe the intended design. Names and exact structures depend on the implementation.
+
+The AST should be independent of source formatting wherever possible, while the parser remains responsible for enforcing formatting requirements.
+
+## 9. Interpreter
+
+The interpreter evaluates the AST and executes program statements.
+
+### Responsibilities
+
+- Evaluate expressions.
+- Manage variables and constants.
+- Execute output statements.
+- Evaluate conditional branches.
+- Execute loops.
+- Handle loop control.
+- Define and invoke functions.
+- Implement return behavior.
+- Resolve supported imports.
+- Propagate runtime errors.
+- Invoke interoperability components when required.
+
+The interpreter should not contain unnecessary language-specific adapter logic. External execution should be handled by the interoperability layer.
+
+## 10. Environment and Scope
+
+The runtime environment stores names and their associated values.
+
+### Responsibilities
+
+- Store variable bindings.
+- Store constant bindings.
+- Resolve identifiers.
+- Manage function definitions.
+- Manage local and global scope.
+- Report undefined names.
+- Enforce constant reassignment rules.
+
+The exact scope rules must be defined by the language specification.
+
+Function-local variables should not accidentally overwrite global variables unless the language explicitly defines that behavior.
+
+## 11. Function Execution
+
+AssayFlux function declarations use the `f.` prefix.
 
 Example:
 
-    x = 10
-    y = 20
-    result = x + y
-    show result
+```assayflux
+f.add(a, b)
+    return a + b
+end
 
-The source code will eventually be stored in files using the `.afx` extension.
+result = add(10, 20)
+show result
+```
 
-Example filename:
+### Intended Execution Process
 
-    main.afx
+1. Parse the function declaration.
+2. Register the function in the appropriate environment.
+3. Evaluate the arguments when the function is called.
+4. Bind arguments to parameters.
+5. Execute the function body.
+6. Process the return statement.
+7. Return the resulting value to the caller.
 
-The `.afx` extension is the proposed default extension for AssayFlux programs.
+Recursive calls, argument validation, scope behavior, and return semantics must be covered by tests.
 
----
+## 12. Strict Block Formatting
 
-## 4. Lexer
+AssayFlux requires indentation and explicit block endings.
 
-The lexer converts source text into a sequence of tokens.
+### Rules
 
-It identifies elements such as:
+- Use four spaces per indentation level.
+- Do not use tabs for indentation.
+- Indent statements inside blocks.
+- Indent nested blocks further.
+- Align `otherwise` and `else` with their corresponding `if`.
+- Align `end` with the block-opening keyword.
+- Require a matching `end` for every block that needs one.
 
-- Keywords
-- Identifiers
-- Numbers
-- Strings
-- Operators
-- Parentheses
-- Commas
-- Newlines
+Example:
 
-Example source:
+```assayflux
+if true
+    show "Outer block"
 
-    show `Hello`
-
-Conceptual tokens:
-
-    KEYWORD_SHOW
-    STRING_LITERAL
-
-The lexer should report invalid characters and include source location information in its errors.
-
----
-
-## 5. Parser
-
-The parser receives tokens from the lexer and checks whether they follow the AssayFlux grammar.
-
-It constructs a structured representation of the program.
-
-The parser must support the finalized syntax for:
-
-- Variable assignments
-- Expressions
-- Conditional statements
-- Repetition statements
-- Functions
-- Return statements
-- Output statements
-- Import statements
-
-The parser must not silently accept invalid syntax.
-
----
-
-## 6. Abstract Syntax Tree
-
-The Abstract Syntax Tree, or AST, represents the structure of a parsed program.
-
-The initial implementation may include these node types:
-
-- ProgramNode
-- AssignmentNode
-- NumberNode
-- StringNode
-- BooleanNode
-- IdentifierNode
-- BinaryOperationNode
-- UnaryOperationNode
-- ShowNode
-- IfNode
-- RepeatNode
-- StopNode
-- SkipNode
-- FunctionDefinitionNode
-- FunctionCallNode
-- ReturnNode
-- ImportNode
-
-The exact node structure will be determined during implementation.
-
-The AST should remain independent of the source formatting wherever possible.
-
----
-
-## 7. Semantic Analyzer
-
-The semantic analyzer checks whether a syntactically valid program makes sense.
-
-Its responsibilities may include:
-
-- Detecting undefined variables
-- Detecting duplicate declarations where prohibited
-- Checking function calls
-- Checking function arguments
-- Checking return statements
-- Validating import declarations
-- Reporting invalid operations
-- Checking language interoperability declarations
-
-Some checks may occur at runtime rather than during semantic analysis.
-
-The implementation must document which checks happen at each stage.
-
----
-
-## 8. Runtime and Interpreter
-
-The initial AssayFlux implementation will use an interpreter written in Python.
-
-The interpreter will execute the AST.
-
-Its responsibilities include:
-
-- Managing variable environments
-- Evaluating expressions
-- Executing conditional statements
-- Executing repetition statements
-- Calling functions
-- Handling return values
-- Processing output statements
-- Managing runtime errors
-
-The interpreter is the first execution engine planned for AssayFlux.
-
-A separate compiler may be considered in a later development phase.
-
----
-
-## 9. Runtime Control Flow
-
-AssayFlux will provide structured control flow.
-
-### Conditional Statements
-
-Planned keywords:
-
-- if
-- otherwise
-- else
-- end
-
-The `if` branch is evaluated first.
-
-Each `otherwise` branch introduces an additional condition.
-
-The `else` branch provides an unconditional fallback.
-
-Only the first matching branch executes.
-
-### Repetition Statements
-
-Planned keywords:
-
-- repeat
-- stop
-- skip
-- end
-
-The exact repetition syntax and execution behavior must be finalized before implementation.
-
-`stop` is intended to exit the nearest enclosing loop.
-
-`skip` is intended to move to the next iteration of the nearest enclosing loop.
-
----
-
-## 10. Function System
-
-AssayFlux will use the `f.` prefix for function declarations.
-
-Proposed declaration:
-
-    f.add(a, b)
-        return a + b
+    if true
+        show "Inner block"
     end
+end
+```
 
-Functions should support:
+Formatting validation should produce clear errors rather than silently correcting invalid indentation.
 
-- Named parameters
-- Local variables
-- Function calls
-- Return values
-- Runtime argument validation
-- Clear error messages
+## 13. Interoperability Architecture
 
-The final grammar must explicitly define how function declarations differ from function calls.
+The interoperability layer separates AssayFlux language semantics from external execution mechanisms.
 
-The language specification must also determine how recursion and variable scope work.
+### Main Components
+
+#### Base Adapter
+
+Defines the common interface expected from interoperability adapters.
+
+#### Adapter Registry
+
+Associates supported language identifiers with adapter implementations.
+
+#### Adapter Loader
+
+Loads or retrieves supported adapters.
+
+#### Interoperability Runtime
+
+Provides the interface through which the interpreter can request external execution.
+
+#### Language Adapters
+
+Implement language-specific execution and value conversion.
+
+The existing Python adapter and interoperability infrastructure provide a foundation. They do not automatically mean that external code can be called from AssayFlux source programs.
+
+## 14. Python Integration
+
+Python is the first intended external integration target.
+
+### Goals
+
+- Import supported Python modules.
+- Call supported functions.
+- Pass compatible arguments.
+- Return results to AssayFlux.
+- Report Python exceptions.
+- Manage execution timeouts.
+- Document dependency requirements.
+
+Potential scientific libraries include NumPy, SciPy, SymPy, pandas, and Matplotlib.
+
+Their availability depends on the Python environment and the implementation of module integration.
+
+### Execution Safety
+
+If Python source is executed through a subprocess, that subprocess must not be treated as a security sandbox.
+
+Untrusted Python code may access files, processes, networks, and other resources available to the executing account.
+
+External execution must be treated as potentially unsafe.
+
+## 15. Future Language Integrations
+
+AssayFlux may eventually support selected capabilities from other languages.
+
+| Language | Potential approach | Status |
+|---|---|---|
+| Python | Python adapter and module integration | Initial integration target |
+| C | Native libraries and foreign-function interfaces | Planned |
+| C++ | Native libraries and compatible interoperability mechanisms | Planned |
+| Java | JVM-based integration | Planned |
+| JavaScript | Embedded or external runtime | Planned |
+| Rust | Native libraries and compatible interfaces | Planned |
+
+Each integration requires its own design, dependencies, error handling, value conversions, and tests.
+
+The architecture should avoid requiring a complete rewrite of the interpreter whenever a new adapter is introduced.
+
+## 16. Error Handling
+
+Errors may occur during source reading, lexing, parsing, interpretation, or external execution.
+
+### Error Categories
+
+- File-reading errors.
+- Lexical errors.
+- Syntax errors.
+- Indentation errors.
+- Undefined-name errors.
+- Type errors.
+- Function-call errors.
+- Import errors.
+- Runtime errors.
+- Interoperability errors.
+- External execution timeouts.
+
+### Diagnostic Requirements
+
+Where possible, errors should include:
+
+- A useful description.
+- The relevant source file.
+- The line and column.
+- The cause of the failure.
+- Guidance for correction.
+
+External errors should be translated into useful AssayFlux diagnostics without hiding important information.
+
+## 17. Testing Architecture
+
+Testing verifies that the language follows its specification.
+
+### Unit Tests
+
+Test individual components such as:
+
+- Lexer tokenization.
+- AST node behavior.
+- Parser rules.
+- Expression evaluation.
+- Variable and constant handling.
+- Function execution.
+- Loop behavior.
+- Indentation validation.
+
+### Interoperability Tests
+
+Test:
+
+- Adapter registration.
+- Adapter loading.
+- Argument and return-value handling.
+- External execution results.
+- Error propagation.
+- Timeout behavior.
+- Missing dependencies.
+
+### Integration Tests
+
+Test complete AssayFlux programs that pass through the source reader, lexer, parser, AST, interpreter, and any required adapter.
+
+### Continuous Integration
+
+The GitHub Actions workflow should run the automated test suite when applicable changes are pushed or submitted.
+
+A passing test suite verifies only the behavior covered by its tests. It does not prove that every planned feature is complete.
+
+## 18. Command-Line Interface
+
+The command-line interface is intended to provide a practical way to execute AssayFlux programs.
+
+Potential capabilities include:
+
+- Running a `.af` file.
+- Reporting syntax errors.
+- Displaying program output.
+- Returning appropriate process exit codes.
+- Providing help and usage information.
+
+The CLI must use the actual implemented entry point defined by the project configuration.
+
+## 19. Android IDE Architecture
+
+A future Android IDE may include:
+
+- A source editor.
+- `.af` syntax highlighting.
+- File management.
+- Program execution.
+- Console output.
+- Error navigation.
+- Project management.
+- Documentation access.
+
+The Android application should use a clearly defined interface to communicate with the AssayFlux execution engine.
+
+The execution engine and IDE should remain separate components so that language development does not depend on the user interface.
+
+## 20. Dependency Management
+
+Dependencies should be declared and managed explicitly.
+
+The project should distinguish between:
+
+- Required runtime dependencies.
+- Optional scientific libraries.
+- Development and testing dependencies.
+- Platform-specific dependencies.
+- Dependencies required only by an external adapter.
+
+Importing an optional library should produce a useful error when that library is unavailable.
+
+The project should avoid silently installing packages during normal program execution.
+
+## 21. Compatibility and Versioning
+
+AssayFlux must document changes that affect syntax or runtime behavior.
+
+Important compatibility areas include:
+
+- Keyword changes.
+- Operator changes.
+- Indentation rules.
+- Block termination.
+- Function declaration and call syntax.
+- Import semantics.
+- Value conversion.
+- Runtime error behavior.
+
+Changes to the language specification should be reflected in the implementation, tests, examples, and documentation.
+
+## 22. Development Priorities
+
+Recommended implementation order:
+
+1. Finalize the language grammar.
+2. Align lexer behavior with the grammar.
+3. Implement strict indentation validation.
+4. Align the parser and AST with the finalized syntax.
+5. Implement interpreter behavior for the supported language features.
+6. Add and run comprehensive automated tests.
+7. Connect Python imports to the interoperability runtime.
+8. Add integration tests for imported modules.
+9. Improve the command-line experience.
+10. Investigate additional language adapters.
+11. Develop the Android IDE.
+
+The order may change when testing identifies a blocking dependency, but language semantics should remain consistent.
+
+## 23. Architecture Principles
+
+AssayFlux follows these design principles:
+
+1. **Modularity:** Keep components focused on distinct responsibilities.
+2. **Separation of concerns:** Separate parsing, interpretation, and external execution.
+3. **Explicit behavior:** Define language semantics instead of relying on accidental implementation details.
+4. **Testability:** Design components for automated testing.
+5. **Extensibility:** Allow additional adapters without unnecessary changes to the core interpreter.
+6. **Transparency:** Distinguish implemented features from planned features.
+7. **Portability:** Document and test supported environments.
+8. **Security awareness:** Treat external code execution as potentially unsafe.
+9. **Maintainability:** Keep source code and documentation synchronized.
+10. **Compatibility:** Make language changes deliberate and documented.
+
+## 24. Current Status
+
+AssayFlux is in early development.
+
+The repository contains core language components and an interoperability foundation. The exact capabilities available to users depend on the current implementation and its tests.
+
+This document describes the intended architecture. It must not be interpreted as proof that every component, language integration, or IDE feature is already complete.
+
+For current implementation details, consult `docs/SPECIFICATION_STATUS.md`.
 
 ---
 
-## 11. Standard Library
-
-The AssayFlux standard library will provide reusable functionality.
-
-Proposed modules include:
-
-- assayflux.math
-- assayflux.strings
-- assayflux.collections
-- assayflux.files
-- assayflux.science
-- assayflux.statistics
-- assayflux.units
-- assayflux.errors
-
-The standard library should initially use Python where appropriate.
-
-Modules should have stable interfaces so that their internal implementations can change without unnecessarily breaking AssayFlux programs.
-
-These modules are planned components, not existing implementations.
-
----
-
-## 12. Multi-Language Integration Strategy
-
-Multi-language integration is a central design goal.
-
-AssayFlux should provide a common interface for accessing functions and capabilities implemented in other languages.
-
-Integration will be introduced in stages.
-
-### Stage 1: Python Integration
-
-Python will be the initial implementation language for the interpreter.
-
-The first integration milestone is to expose selected Python functionality through a controlled AssayFlux interface.
-
-### Stage 2: Native Libraries
-
-AssayFlux should eventually be able to call compatible native libraries through an appropriate interoperability layer.
-
-Possible technologies include Python's Foreign Function Interface facilities and native extension modules.
-
-The selected approach must account for platform compatibility, memory safety, and dependency management.
-
-### Stage 3: C and C++
-
-C and C++ integration may use native extension modules, compatible shared libraries, or foreign-function interfaces.
-
-The implementation must document calling conventions, data types, memory ownership, and error propagation.
-
-### Stage 4: Java
-
-Java integration may use a bridge or a separate runtime integration layer.
-
-The design must account for the Java Virtual Machine and the availability of compatible runtime components.
-
-### Stage 5: JavaScript
-
-JavaScript integration may use an embedded runtime or a separate execution process.
-
-The selected approach must define how values, function calls, errors, and asynchronous operations are exchanged.
-
-### Stage 6: Rust
-
-Rust integration may use native libraries or extension modules with clearly defined interfaces.
-
-The implementation must define how Rust values and errors cross the language boundary.
-
-These integrations are development goals. No integration should be described as implemented until it has been built and tested.
-
----
-
-## 13. Foreign Function Interface
-
-A future Foreign Function Interface, or FFI, should provide a consistent way to call supported external functions.
-
-Its responsibilities may include:
-
-- Loading approved external libraries
-- Resolving function names
-- Mapping data types
-- Passing arguments
-- Receiving return values
-- Propagating errors
-- Managing resource ownership
-- Reporting compatibility problems
-
-The interface should avoid exposing unnecessary implementation details to AssayFlux programs.
-
-The first version should support a small, explicitly documented set of types.
-
----
-
-## 14. Type Interoperability
-
-The interoperability layer will need rules for translating values between languages.
-
-Initial conceptual mappings include:
-
-- AssayFlux integer to a compatible integer type
-- AssayFlux floating-point value to a compatible floating-point type
-- AssayFlux boolean to a compatible boolean type
-- AssayFlux string to a compatible string representation
-- AssayFlux collection to a supported collection representation
-
-Actual mappings must be specified separately for each integration.
-
-The system must reject incompatible conversions or report them clearly.
-
-It must not assume that identically named types have identical representations in different languages.
-
----
-
-## 15. Import System
-
-AssayFlux will eventually support importing modules and external capabilities.
-
-The import system must define:
-
-- Module naming rules
-- Module search paths
-- Import resolution
-- Duplicate import behavior
-- Circular import handling
-- External library declarations
-- Import error reporting
-
-External libraries must not be loaded automatically without a defined and documented loading policy.
-
----
-
-## 16. Error Reporting
-
-Errors should be understandable and actionable.
-
-The error system should distinguish between:
-
-- Lexical errors
-- Syntax errors
-- Semantic errors
-- Runtime errors
-- Import errors
-- Foreign-function errors
-- Compatibility errors
-
-Where possible, an error should include:
-
-- Error category
-- Source filename
-- Line number
-- Column number
-- Explanation
-- Suggested correction
-
-Errors originating in another language should preserve useful diagnostic information from the original source whenever possible.
-
----
-
-## 17. Security and Reliability
-
-Language interoperability introduces risks.
-
-The architecture should consider:
-
-- Untrusted source code
-- External library loading
-- File system access
-- Process execution
-- Native memory errors
-- Dependency security
-- Resource exhaustion
-- Platform compatibility
-
-Calling native code can compromise process safety.
-
-The initial implementation should document which capabilities are available and which operations require additional controls.
-
-The interpreter must not be described as a secure sandbox unless appropriate isolation has been implemented and tested.
-
----
-
-## 18. Platform Strategy
-
-The initial language implementation will use Python.
-
-The repository should aim to keep the core language implementation separate from platform-specific user interfaces.
-
-This separation will make it easier to develop command-line tools first and consider an Android development environment later.
-
-Android support will require separate decisions about Python availability, packaging, native dependencies, and runtime compatibility.
-
-A future Android IDE must not be treated as a prerequisite for implementing the core language.
-
----
-
-## 19. Testing Architecture
-
-Each major component should have its own tests.
-
-Planned test groups include:
-
-- Lexer tests
-- Parser tests
-- AST tests
-- Semantic analysis tests
-- Interpreter tests
-- Function tests
-- Standard library tests
-- Import system tests
-- Interoperability tests
-- Error reporting tests
-
-Integration tests should verify that components work together.
-
-Tests for external language integrations must run only when their required runtimes and dependencies are available.
-
----
-
-## 20. Development Phases
-
-### Phase 1: Specification
-
-- Finalize lexical rules
-- Finalize grammar
-- Define expression precedence
-- Define variable behavior
-- Define function behavior
-- Define loop behavior
-- Define module behavior
-
-### Phase 2: Core Interpreter
-
-- Implement the lexer
-- Implement the parser
-- Build the AST
-- Implement the interpreter
-- Implement basic error reporting
-
-### Phase 3: Language Features
-
-- Implement variables
-- Implement expressions
-- Implement conditions
-- Implement repetition
-- Implement functions
-- Implement imports
-
-### Phase 4: Standard Library
-
-- Add mathematical functions
-- Add string utilities
-- Add collection utilities
-- Add scientific utilities
-
-### Phase 5: Multi-Language Integration
-
-- Establish the interoperability interface
-- Add controlled Python integration
-- Investigate native library integration
-- Evaluate additional language bridges
-- Add integration tests
-
-### Phase 6: Developer Tools
-
-- Add a command-line interface
-- Add source file execution
-- Improve diagnostic messages
-- Add debugging capabilities
-
-### Phase 7: Android Development Environment
-
-- Evaluate a suitable Android architecture
-- Integrate the interpreter
-- Build an editor interface
-- Add execution controls
-- Test on supported Android devices
-
----
-
-## 21. Architecture Principles
-
-AssayFlux development should follow these principles:
-
-1. Keep the language specification authoritative.
-2. Separate parsing from execution.
-3. Keep components modular.
-4. Test every major feature.
-5. Document language interoperability explicitly.
-6. Avoid claiming support for unimplemented features.
-7. Prefer clear errors over silent failures.
-8. Keep platform-specific code separate from the core language.
-9. Introduce integrations incrementally.
-10. Preserve compatibility where practical.
-
----
-
-## 22. Current Status
-
-Version 0.1.0 defines the initial architectural direction.
-
-This document describes planned components and development goals.
-
-It does not mean that the lexer, parser, interpreter, standard library, foreign-function interface, compiler, or Android IDE has already been implemented.
-
-Implementation status should be updated as each component is developed and tested.
-
----
-
-## 23. Future Architecture Changes
-
-Architecture decisions may change as the project develops.
-
-Significant changes should be documented with their reasons and consequences.
-
-The architecture must evolve alongside the language specification and the results of implementation testing.
+**End of AssayFlux Architecture**
