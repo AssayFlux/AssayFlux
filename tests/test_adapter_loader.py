@@ -54,9 +54,15 @@ class TestAdapterLoader(unittest.TestCase):
         else:
             self.assertNotIn("python", available_languages())
 
+    def test_javascript_adapter_is_registered(self):
+        adapter = get_adapter("javascript")
+
+        self.assertIsInstance(adapter, LanguageAdapter)
+        self.assertEqual(adapter.language, "javascript")
+
     def test_unregistered_language_raises_key_error(self):
         with self.assertRaises(KeyError):
-            get_adapter("javascript")
+            get_adapter("unknown_assayflux_language")
 
 
 if __name__ == "__main__":
