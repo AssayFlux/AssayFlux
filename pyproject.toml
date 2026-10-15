@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "assayflux"
+version = "0.2.0"
+description = "AssayFlux Scientific Systems programming language and interpreter"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "build>=1.2"]
+
+[project.scripts]
+assayflux = "assayflux.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["assayflux*"]
