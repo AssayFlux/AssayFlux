@@ -1,0 +1,6 @@
+# Condition-controlled repeat loop
+count = 0
+repeat count < 5
+    show count
+    count = count + 1
+end
