@@ -1,13 +1,13 @@
 """
 AssayFlux Scientific Systems
-Initial Parser Implementation
+Parser Implementation
 
 Converts lexer tokens into an Abstract Syntax Tree (AST).
 
 Version: 0.1.0
 """
 
-from typing import List, Optional
+from typing import List
 
 from assayflux.ast_nodes import (
     Assignment,
@@ -145,17 +145,51 @@ class Parser:
         self.skip_newlines()
 
         while self.current().type != "EOF":
+            if self.current().type in ("INDENT", "DEDENT"):
+                token = self.current()
+
+                raise ParserError(
+                    "Unexpected indentation outside a block.",
+                    token.line,
+                    token.column,
+                )
+
+            if self.check_value("end"):
+                token = self.current()
+
+                raise ParserError(
+                    "Unexpected 'end': no block is open.",
+                    token.line,
+                    token.column,
+                )
+
             statements.append(self.parse_statement())
+            self.finish_statement()
             self.skip_newlines()
 
         return Program(statements=statements)
+
+    def finish_statement(self):
+        """Require a statement to end at a line boundary."""
+
+        token = self.current()
+
+        if token.type in ("NEWLINE", "EOF", "DEDENT"):
+            return
+
+        raise ParserError(
+            f"Unexpected token {token.value!r} "
+            "after a statement.",
+            token.line,
+            token.column,
+        )
 
     def parse_statement(self):
         """Parse one statement."""
 
         token = self.current()
 
-        if token.type == "EOF":
+        if token.type in ("EOF", "INDENT", "DEDENT"):
             raise ParserError(
                 "Expected a statement.",
                 token.line,
@@ -211,11 +245,9 @@ class Parser:
         ):
             return self.parse_assignment()
 
-        token = self.current()
-
         raise ParserError(
             f"Unexpected token {token.value!r} at "
-            f"the beginning of a statement.",
+            "the beginning of a statement.",
             token.line,
             token.column,
         )
@@ -275,7 +307,11 @@ class Parser:
 
         token = self.expect_value("return")
 
-        if self.current().type in ("NEWLINE", "EOF"):
+        if self.current().type in (
+            "NEWLINE",
+            "EOF",
+            "DEDENT",
+        ):
             return ReturnStatement(
                 line=token.line,
                 column=token.column,
@@ -325,7 +361,9 @@ class Parser:
                     break
 
         self.expect_value(")")
-        self.require_newline("after a function declaration")
+        self.require_newline(
+            "after a function declaration"
+        )
 
         body = self.parse_block({"end"})
         self.expect_value("end")
@@ -353,7 +391,10 @@ class Parser:
         otherwise_branches = []
 
         while self.match_value("otherwise"):
-            branch_token = self.tokens[self.position - 1]
+            branch_token = self.tokens[
+                self.position - 1
+            ]
+
             branch_condition = self.parse_expression()
 
             self.require_newline(
@@ -391,11 +432,14 @@ class Parser:
         )
 
     def parse_repeat(self) -> RepeatStatement:
-        """Parse: repeat [count] ... end."""
+        """Parse: repeat [condition] ... end."""
 
         start = self.expect_value("repeat")
 
-        if self.current().type in ("NEWLINE", "EOF"):
+        if self.current().type in (
+            "NEWLINE",
+            "EOF",
+        ):
             count = None
         else:
             count = self.parse_expression()
@@ -448,24 +492,61 @@ class Parser:
         )
 
     def parse_block(self, terminators: set):
-        """Parse statements until a block terminator."""
+        """Parse an indented block until a terminator."""
 
         statements = []
         self.skip_newlines()
 
+        self.expect_type(
+            "INDENT",
+            "an indented block using four spaces",
+        )
+
+        self.skip_newlines()
+
         while self.current().type != "EOF":
-            if self.current().value in terminators:
+            token = self.current()
+
+            if token.type == "DEDENT":
+                self.advance()
                 break
 
+            if token.value in terminators:
+                raise ParserError(
+                    "A block terminator must appear "
+                    "after the block's indentation has closed.",
+                    token.line,
+                    token.column,
+                )
+
+            if token.type == "INDENT":
+                raise ParserError(
+                    "Unexpected nested indentation. "
+                    "A nested block must start with "
+                    "a valid block-opening statement.",
+                    token.line,
+                    token.column,
+                )
+
             statements.append(self.parse_statement())
+            self.finish_statement()
             self.skip_newlines()
 
-        if self.current().type == "EOF":
+        else:
             token = self.current()
 
             raise ParserError(
-                "Unexpected end of file. "
-                "A block may be missing its closing 'end'.",
+                "Unexpected end of file while parsing "
+                "an indented block.",
+                token.line,
+                token.column,
+            )
+
+        if not statements:
+            token = self.current()
+
+            raise ParserError(
+                "Empty blocks are not allowed.",
                 token.line,
                 token.column,
             )
@@ -473,7 +554,7 @@ class Parser:
         return statements
 
     def require_newline(self, context: str):
-        """Require a newline or EOF after a block header."""
+        """Require a newline after a block header."""
 
         if self.current().type == "NEWLINE":
             self.skip_newlines()
@@ -541,7 +622,7 @@ class Parser:
 
         comparison_operators = {
             "==",
-            "nt=",
+            "!=",
             ">",
             "<",
             ">=",
@@ -571,8 +652,8 @@ class Parser:
         expression = self.parse_multiplicative()
 
         while (
-            self.current().value in ("+", "-")
-            and self.current().type == "OPERATOR"
+            self.current().type == "OPERATOR"
+            and self.current().value in ("+", "-")
         ):
             operator = self.advance()
             right = self.parse_multiplicative()
@@ -593,8 +674,8 @@ class Parser:
         expression = self.parse_unary()
 
         while (
-            self.current().value in ("*", "/", "%")
-            and self.current().type == "OPERATOR"
+            self.current().type == "OPERATOR"
+            and self.current().value in ("*", "/", "%")
         ):
             operator = self.advance()
             right = self.parse_unary()
@@ -612,7 +693,13 @@ class Parser:
     def parse_unary(self):
         """Parse unary operators."""
 
-        if self.current().value in ("-", "+", "not"):
+        if (
+            self.current().value in ("-", "+", "not")
+            and self.current().type in (
+                "OPERATOR",
+                "KEYWORD",
+            )
+        ):
             operator = self.advance()
             operand = self.parse_unary()
 
@@ -737,7 +824,8 @@ class Parser:
             return expression
 
         raise ParserError(
-            f"Expected an expression, found {token.value!r}.",
+            f"Expected an expression, found "
+            f"{token.value!r}.",
             token.line,
             token.column,
         )
