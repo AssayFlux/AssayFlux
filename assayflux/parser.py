@@ -7,14 +7,14 @@ Converts lexer tokens into an Abstract Syntax Tree (AST).
 Version: 0.1.0
 """
 
-from typing import List
+from typing import List, Set
 
 from assayflux.ast_nodes import (
     Assignment,
     BinaryOperation,
     BooleanLiteral,
-    ConstantDeclaration,
     ConditionalBranch,
+    ConstantDeclaration,
     FunctionCall,
     FunctionDefinition,
     Identifier,
@@ -62,12 +62,10 @@ class Parser:
 
     def current(self) -> Token:
         """Return the current token."""
-
         return self.tokens[self.position]
 
     def peek(self, offset: int = 1) -> Token:
         """Look ahead without consuming a token."""
-
         index = min(
             self.position + offset,
             len(self.tokens) - 1,
@@ -76,7 +74,6 @@ class Parser:
 
     def advance(self) -> Token:
         """Consume and return the current token."""
-
         token = self.current()
 
         if token.type != "EOF":
@@ -86,12 +83,10 @@ class Parser:
 
     def check_value(self, value: str) -> bool:
         """Check the current token's value."""
-
         return self.current().value == value
 
     def match_value(self, value: str) -> bool:
         """Consume a token if its value matches."""
-
         if self.check_value(value):
             self.advance()
             return True
@@ -100,7 +95,6 @@ class Parser:
 
     def expect_value(self, value: str) -> Token:
         """Require a token with a specific value."""
-
         if not self.check_value(value):
             token = self.current()
 
@@ -119,7 +113,6 @@ class Parser:
         description: str,
     ) -> Token:
         """Require a token of a particular type."""
-
         token = self.current()
 
         if token.type != token_type:
@@ -134,29 +127,29 @@ class Parser:
 
     def skip_newlines(self):
         """Skip newline separators."""
-
         while self.current().type == "NEWLINE":
             self.advance()
 
+    # ---------------------------------------------------------
+    # Programs and statements
+    # ---------------------------------------------------------
+
     def parse(self) -> Program:
         """Parse an entire AssayFlux program."""
-
         statements = []
         self.skip_newlines()
 
         while self.current().type != "EOF":
-            if self.current().type in ("INDENT", "DEDENT"):
-                token = self.current()
+            token = self.current()
 
+            if token.type in ("INDENT", "DEDENT"):
                 raise ParserError(
                     "Unexpected indentation outside a block.",
                     token.line,
                     token.column,
                 )
 
-            if self.check_value("end"):
-                token = self.current()
-
+            if token.value == "end":
                 raise ParserError(
                     "Unexpected 'end': no block is open.",
                     token.line,
@@ -171,7 +164,6 @@ class Parser:
 
     def finish_statement(self):
         """Require a statement to end at a line boundary."""
-
         token = self.current()
 
         if token.type in ("NEWLINE", "EOF", "DEDENT"):
@@ -186,7 +178,6 @@ class Parser:
 
     def parse_statement(self):
         """Parse one statement."""
-
         token = self.current()
 
         if token.type in ("EOF", "INDENT", "DEDENT"):
@@ -254,7 +245,6 @@ class Parser:
 
     def parse_show(self) -> ShowStatement:
         """Parse: show expression."""
-
         token = self.expect_value("show")
         value = self.parse_expression()
 
@@ -266,7 +256,6 @@ class Parser:
 
     def parse_assignment(self) -> Assignment:
         """Parse: identifier = expression."""
-
         name_token = self.expect_type(
             "IDENTIFIER",
             "a variable name",
@@ -284,7 +273,6 @@ class Parser:
 
     def parse_constant(self) -> ConstantDeclaration:
         """Parse: const identifier = expression."""
-
         token = self.expect_value("const")
 
         name_token = self.expect_type(
@@ -304,21 +292,13 @@ class Parser:
 
     def parse_return(self) -> ReturnStatement:
         """Parse a return statement."""
-
         token = self.expect_value("return")
 
         if self.current().type in (
             "NEWLINE",
             "EOF",
             "DEDENT",
-        ):
-            return ReturnStatement(
-                line=token.line,
-                column=token.column,
-                value=None,
-            )
-
-        if self.check_value("end"):
+        ) or self.check_value("end"):
             return ReturnStatement(
                 line=token.line,
                 column=token.column,
@@ -333,13 +313,13 @@ class Parser:
 
     def parse_function_definition(self) -> FunctionDefinition:
         """Parse: f.name(parameters) ... end."""
-
         start = self.expect_type(
             "IDENTIFIER",
             "the function prefix 'f'",
         )
 
         self.expect_value(".")
+
         name_token = self.expect_type(
             "IDENTIFIER",
             "a function name",
@@ -361,9 +341,7 @@ class Parser:
                     break
 
         self.expect_value(")")
-        self.require_newline(
-            "after a function declaration"
-        )
+        self.require_newline("after a function declaration")
 
         body = self.parse_block({"end"})
         self.expect_value("end")
@@ -378,7 +356,6 @@ class Parser:
 
     def parse_if(self) -> IfStatement:
         """Parse if, otherwise, else, and end."""
-
         start = self.expect_value("if")
         condition = self.parse_expression()
 
@@ -391,10 +368,7 @@ class Parser:
         otherwise_branches = []
 
         while self.match_value("otherwise"):
-            branch_token = self.tokens[
-                self.position - 1
-            ]
-
+            branch_token = self.tokens[self.position - 1]
             branch_condition = self.parse_expression()
 
             self.require_newline(
@@ -432,14 +406,10 @@ class Parser:
         )
 
     def parse_repeat(self) -> RepeatStatement:
-        """Parse: repeat [condition] ... end."""
-
+        """Parse: repeat [count] ... end."""
         start = self.expect_value("repeat")
 
-        if self.current().type in (
-            "NEWLINE",
-            "EOF",
-        ):
+        if self.current().type in ("NEWLINE", "EOF"):
             count = None
         else:
             count = self.parse_expression()
@@ -458,7 +428,6 @@ class Parser:
 
     def parse_import(self) -> ImportStatement:
         """Parse: import module or import module as alias."""
-
         start = self.expect_value("import")
 
         module_token = self.expect_type(
@@ -491,9 +460,12 @@ class Parser:
             alias=alias,
         )
 
-    def parse_block(self, terminators: set):
-        """Parse an indented block until a terminator."""
+    # ---------------------------------------------------------
+    # Blocks and formatting
+    # ---------------------------------------------------------
 
+    def parse_block(self, terminators: Set[str]):
+        """Parse an indented block until a terminator."""
         statements = []
         self.skip_newlines()
 
@@ -534,7 +506,6 @@ class Parser:
 
         else:
             token = self.current()
-
             raise ParserError(
                 "Unexpected end of file while parsing "
                 "an indented block.",
@@ -544,7 +515,6 @@ class Parser:
 
         if not statements:
             token = self.current()
-
             raise ParserError(
                 "Empty blocks are not allowed.",
                 token.line,
@@ -555,7 +525,6 @@ class Parser:
 
     def require_newline(self, context: str):
         """Require a newline after a block header."""
-
         if self.current().type == "NEWLINE":
             self.skip_newlines()
             return
@@ -568,18 +537,16 @@ class Parser:
             token.column,
         )
 
-    # --------------------------------------------------------
+    # ---------------------------------------------------------
     # Expressions
-    # --------------------------------------------------------
+    # ---------------------------------------------------------
 
     def parse_expression(self):
         """Parse an expression."""
-
         return self.parse_or()
 
     def parse_or(self):
         """Parse logical OR expressions."""
-
         expression = self.parse_and()
 
         while self.match_value("or"):
@@ -598,7 +565,6 @@ class Parser:
 
     def parse_and(self):
         """Parse logical AND expressions."""
-
         expression = self.parse_comparison()
 
         while self.match_value("and"):
@@ -617,7 +583,6 @@ class Parser:
 
     def parse_comparison(self):
         """Parse comparison expressions."""
-
         expression = self.parse_additive()
 
         comparison_operators = {
@@ -648,7 +613,6 @@ class Parser:
 
     def parse_additive(self):
         """Parse addition and subtraction."""
-
         expression = self.parse_multiplicative()
 
         while (
@@ -670,7 +634,6 @@ class Parser:
 
     def parse_multiplicative(self):
         """Parse multiplication, division, and remainder."""
-
         expression = self.parse_unary()
 
         while (
@@ -692,7 +655,6 @@ class Parser:
 
     def parse_unary(self):
         """Parse unary operators."""
-
         if (
             self.current().value in ("-", "+", "not")
             and self.current().type in (
@@ -713,52 +675,61 @@ class Parser:
         return self.parse_primary()
 
     def parse_primary(self):
-        """Parse literals, identifiers, calls, and parentheses."""
+        """
+        Parse literals, identifiers, member access,
+        function calls, and parenthesized expressions.
 
+        Supports expressions such as:
+            add(2, 3)
+            math.sqrt(25)
+            mathematics.pow(2, 3)
+        """
         token = self.current()
 
         if token.type == "NUMBER":
             self.advance()
 
             if "." in token.value:
-                value = float(token.value)
+                expression = NumberLiteral(
+                    line=token.line,
+                    column=token.column,
+                    value=float(token.value),
+                )
             else:
-                value = int(token.value)
+                expression = NumberLiteral(
+                    line=token.line,
+                    column=token.column,
+                    value=int(token.value),
+                )
 
-            return NumberLiteral(
-                line=token.line,
-                column=token.column,
-                value=value,
-            )
-
-        if token.type == "STRING":
+        elif token.type == "STRING":
             self.advance()
 
-            return StringLiteral(
+            expression = StringLiteral(
                 line=token.line,
                 column=token.column,
                 value=token.value,
             )
 
-        if token.value == "true":
+        elif token.value == "true":
             self.advance()
 
-            return BooleanLiteral(
+            expression = BooleanLiteral(
                 line=token.line,
                 column=token.column,
                 value=True,
             )
 
-        if token.value == "false":
+        elif token.value == "false":
             self.advance()
 
-            return BooleanLiteral(
+            expression = BooleanLiteral(
                 line=token.line,
                 column=token.column,
                 value=False,
             )
 
-        if token.type == "IDENTIFIER":
+        elif token.type == "IDENTIFIER":
             self.advance()
 
             expression = Identifier(
@@ -767,73 +738,95 @@ class Parser:
                 name=token.value,
             )
 
-            while True:
-                if self.match_value("("):
-                    arguments = []
+        elif self.match_value("("):
+            expression = self.parse_expression()
+            self.expect_value(")")
 
-                    if not self.check_value(")"):
-                        while True:
-                            arguments.append(
-                                self.parse_expression()
-                            )
+        else:
+            raise ParserError(
+                f"Expected an expression, found "
+                f"{token.value!r}.",
+                token.line,
+                token.column,
+            )
 
-                            if not self.match_value(","):
-                                break
+        # Process postfix operations in order. This permits
+        # a member access to be followed by a function call.
+        while True:
+            if self.match_value("."):
+                member = self.expect_type(
+                    "IDENTIFIER",
+                    "a member name",
+                )
 
-                    self.expect_value(")")
+                expression = MemberAccess(
+                    line=token.line,
+                    column=token.column,
+                    object=expression,
+                    member=member.value,
+                )
 
-                    if not isinstance(expression, Identifier):
+                continue
+
+            if self.match_value("("):
+                arguments = []
+
+                if not self.check_value(")"):
+                    while True:
+                        arguments.append(
+                            self.parse_expression()
+                        )
+
+                        if not self.match_value(","):
+                            break
+
+                self.expect_value(")")
+
+                if isinstance(expression, Identifier):
+                    function_name = expression.name
+
+                elif isinstance(expression, MemberAccess):
+                    parts = []
+                    current = expression
+
+                    while isinstance(current, MemberAccess):
+                        parts.insert(0, current.member)
+                        current = current.object
+
+                    if not isinstance(current, Identifier):
                         raise ParserError(
-                            "Only named functions are "
-                            "supported in this initial parser.",
+                            "Unsupported function call target.",
                             token.line,
                             token.column,
                         )
 
-                    expression = FunctionCall(
-                        line=token.line,
-                        column=token.column,
-                        name=expression.name,
-                        arguments=arguments,
+                    parts.insert(0, current.name)
+                    function_name = ".".join(parts)
+
+                else:
+                    raise ParserError(
+                        "This expression cannot be called "
+                        "as a function.",
+                        token.line,
+                        token.column,
                     )
 
-                    continue
+                expression = FunctionCall(
+                    line=token.line,
+                    column=token.column,
+                    name=function_name,
+                    arguments=arguments,
+                )
 
-                if self.match_value("."):
-                    member = self.expect_type(
-                        "IDENTIFIER",
-                        "a member name",
-                    )
+                continue
 
-                    expression = MemberAccess(
-                        line=token.line,
-                        column=token.column,
-                        object=expression,
-                        member=member.value,
-                    )
+            break
 
-                    continue
-
-                break
-
-            return expression
-
-        if self.match_value("("):
-            expression = self.parse_expression()
-            self.expect_value(")")
-            return expression
-
-        raise ParserError(
-            f"Expected an expression, found "
-            f"{token.value!r}.",
-            token.line,
-            token.column,
-        )
+        return expression
 
 
 def parse(source: str) -> Program:
     """Tokenize and parse AssayFlux source code."""
-
     tokens = Lexer(source).tokenize()
     return Parser(tokens).parse()
 
