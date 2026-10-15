@@ -28,7 +28,7 @@ __all__ = [
     "__version__",
     "__author__",
     "__description__",
-]"""Command-line launcher for AssayFlux."""
+"""Lexer for the AssayFlux programming language."""
 
 import argparse
 import sys
