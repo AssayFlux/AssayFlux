@@ -1,12 +1,13 @@
 """
 AssayFlux Scientific Systems
-Initial Interpreter Implementation
+Interpreter Implementation
 
 Evaluates the Abstract Syntax Tree produced by parser.py.
 
 Version: 0.1.0
 """
 
+import importlib
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -19,6 +20,7 @@ from assayflux.ast_nodes import (
     FunctionDefinition,
     Identifier,
     IfStatement,
+    ImportStatement,
     MemberAccess,
     NumberLiteral,
     Program,
@@ -192,10 +194,8 @@ class Interpreter:
     def execute_program(self, program: Program) -> Any:
         """Execute all statements in a program."""
 
-        result = None
-
         try:
-            result = self.execute_statements(program.statements)
+            return self.execute_statements(program.statements)
 
         except (StopSignal, SkipSignal):
             raise AssayFluxRuntimeError(
@@ -206,8 +206,6 @@ class Interpreter:
             raise AssayFluxRuntimeError(
                 "'return' cannot be used outside a function."
             )
-
-        return result
 
     def execute_statements(self, statements: List[Any]) -> Any:
         """Execute statements sequentially."""
@@ -221,6 +219,9 @@ class Interpreter:
 
     def execute_statement(self, statement: Any) -> Any:
         """Execute one statement."""
+
+        if isinstance(statement, ImportStatement):
+            return self.execute_import(statement)
 
         if isinstance(statement, Assignment):
             value = self.evaluate(statement.value)
@@ -296,6 +297,32 @@ class Interpreter:
             getattr(statement, "column", 0),
         )
 
+    def execute_import(self, statement: ImportStatement) -> Any:
+        """Import an available Python module into the environment."""
+
+        module_name = statement.module_name
+
+        try:
+            module = importlib.import_module(module_name)
+
+        except ImportError as error:
+            raise AssayFluxRuntimeError(
+                f"Cannot import Python module '{module_name}': {error}",
+                statement.line,
+                statement.column,
+            ) from error
+
+        variable_name = statement.alias or module_name
+
+        self.environment.define(
+            variable_name,
+            module,
+            line=statement.line,
+            column=statement.column,
+        )
+
+        return module
+
     def execute_if(self, statement: IfStatement) -> Any:
         """Execute if, otherwise, and else branches."""
 
@@ -304,9 +331,7 @@ class Interpreter:
 
         for branch in statement.otherwise_branches:
             if self.is_truthy(self.evaluate(branch.condition)):
-                return self.execute_statements(
-                    branch.statements
-                )
+                return self.execute_statements(branch.statements)
 
         if statement.else_body is not None:
             return self.execute_statements(statement.else_body)
@@ -499,7 +524,7 @@ class Interpreter:
             if operator == "==":
                 return left == right
 
-            if operator == "nt=":
+            if operator == "!=":
                 return left != right
 
             if operator == ">":
@@ -535,7 +560,7 @@ class Interpreter:
         self,
         expression: MemberAccess,
     ) -> Any:
-        """Evaluate supported member access."""
+        """Evaluate member access on supported objects."""
 
         obj = self.evaluate(expression.object)
         member = expression.member
@@ -550,11 +575,16 @@ class Interpreter:
 
             return obj[member]
 
-        raise AssayFluxRuntimeError(
-            "Member access is not yet supported for this value.",
-            expression.line,
-            expression.column,
-        )
+        try:
+            return getattr(obj, member)
+
+        except AttributeError as error:
+            raise AssayFluxRuntimeError(
+                f"Object of type '{type(obj).__name__}' "
+                f"has no member '{member}'.",
+                expression.line,
+                expression.column,
+            ) from error
 
     def call_function(
         self,
@@ -563,7 +593,7 @@ class Interpreter:
         line: int = 0,
         column: int = 0,
     ) -> Any:
-        """Call a function defined in the current environment."""
+        """Call a function defined in AssayFlux."""
 
         function = self.environment.get(name)
 
@@ -663,6 +693,7 @@ def execute(source: str) -> Any:
 
 __all__ = [
     "Interpreter",
+    "Environment",
     "AssayFluxRuntimeError",
     "execute",
 ]
