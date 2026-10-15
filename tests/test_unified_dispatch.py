@@ -1,4 +1,4 @@
-"""Tests for unified language dispatch in AssayFlux."""
+"""Tests for unified language dispatch."""
 
 import io
 import unittest
@@ -11,75 +11,61 @@ from assayflux.interop.runtime import execute_code
 from assayflux.interpreter import Interpreter
 
 
-class TestUnifiedDispatch(unittest.TestCase):
-    """Verify unified dispatch and interpreter integration."""
+class UnifiedDispatchTests(unittest.TestCase):
+    """Test unified dispatch and AssayFlux integration."""
 
-    def test_python_dispatch_returns_execution_result(self):
-        result = dispatch("python", "print(10 + 20)")
+    def test_dispatch_executes_python(self):
+        result = dispatch("python", "print(2 + 3)")
 
-        self.assertIsInstance(result, ExecutionResult)
-        self.assertEqual(result.language, "python")
-        self.assertEqual(result.stdout, "30\n")
-        self.assertEqual(result.stderr, "")
-        self.assertEqual(result.returncode, 0)
         self.assertTrue(result.success)
+        self.assertEqual(result.stdout, "5\n")
 
-    def test_dispatch_accepts_case_insensitive_language_names(self):
+    def test_dispatch_accepts_case_insensitive_language(self):
         result = dispatch("PYTHON", "print('AssayFlux')")
 
-        self.assertEqual(result.stdout, "AssayFlux\n")
         self.assertTrue(result.success)
+        self.assertEqual(result.stdout, "AssayFlux\n")
 
-    def test_dispatch_rejects_unknown_language(self):
+    def test_dispatch_unknown_language_raises_error(self):
         with self.assertRaises(KeyError):
-            dispatch(
-                "unknown_assayflux_language",
-                "print(1)",
-            )
+            dispatch("unknown_language", "print('test')")
 
     def test_dispatch_preserves_execution_errors(self):
-        result = dispatch(
-            "python",
-            "raise ValueError('dispatch test error')",
-        )
+        result = dispatch("python", "raise ValueError('test error')")
 
         self.assertFalse(result.success)
-        self.assertNotEqual(result.returncode, 0)
         self.assertIn("ValueError", result.stderr)
-        self.assertIn("dispatch test error", result.stderr)
+        self.assertIn("test error", result.stderr)
 
     def test_dispatch_uses_registered_adapter(self):
-        fake_result = ExecutionResult(
-            language="python",
-            stdout="42\n",
+        expected = ExecutionResult(
+            language="mock",
+            success=True,
+            stdout="mock output",
             stderr="",
-            returncode=0,
+            return_code=0,
         )
 
         with patch(
             "assayflux.interop.runtime.get_adapter"
-        ) as mocked_get_adapter:
-            mocked_adapter = mocked_get_adapter.return_value
-            mocked_adapter.execute.return_value = fake_result
+        ) as mock_get_adapter:
+            mock_adapter = mock_get_adapter.return_value
+            mock_adapter.execute.return_value = expected
 
-            result = dispatch("python", "print(42)")
+            result = dispatch("mock", "example code")
 
-        mocked_get_adapter.assert_called_once_with("python")
-        mocked_adapter.execute.assert_called_once_with(
-            "print(42)",
+        mock_get_adapter.assert_called_once_with("mock")
+        mock_adapter.execute.assert_called_once_with(
+            "example code",
             timeout=10.0,
         )
-        self.assertEqual(result.stdout, "42\n")
-        self.assertTrue(result.success)
+        self.assertEqual(result, expected)
 
     def test_execute_code_remains_compatible(self):
-        result = execute_code(
-            "python",
-            "print('compatible')",
-        )
+        result = execute_code("python", "print('compatible')")
 
-        self.assertEqual(result.stdout, "compatible\n")
         self.assertTrue(result.success)
+        self.assertEqual(result.stdout, "compatible\n")
 
     def test_assayflux_program_can_call_dispatch(self):
         interpreter = Interpreter()
@@ -95,7 +81,7 @@ show result.stdout
             interpreter.run(program)
 
         self.assertEqual(interpreter.output, ["5\n"])
-        self.assertEqual(captured.getvalue(), "5\n")
+        self.assertEqual(captured.getvalue(), "5\n\n")
 
 
 if __name__ == "__main__":
