@@ -2,7 +2,7 @@
 AssayFlux Scientific Systems
 Interpreter Implementation
 
-Evaluates the Abstract Syntax Tree produced by parser.py.
+Executes AssayFlux programs and integrates with Python libraries.
 
 Version: 0.1.0
 """
@@ -37,7 +37,7 @@ from assayflux.parser import ParserError, parse
 
 
 class AssayFluxRuntimeError(Exception):
-    """An error raised while executing AssayFlux code."""
+    """Error raised during AssayFlux execution."""
 
     def __init__(
         self,
@@ -61,29 +61,29 @@ class AssayFluxRuntimeError(Exception):
 
 
 class ReturnSignal(Exception):
-    """Internal signal used to return from a function."""
+    """Internal signal for returning from a function."""
 
     def __init__(self, value: Any):
         self.value = value
 
 
 class StopSignal(Exception):
-    """Internal signal used to exit a repetition block."""
+    """Internal signal for stopping a repeat loop."""
 
 
 class SkipSignal(Exception):
-    """Internal signal used to skip a repetition iteration."""
+    """Internal signal for skipping a repeat iteration."""
 
 
 @dataclass
 class FunctionValue:
-    """A function defined in an AssayFlux program."""
+    """A function declared in AssayFlux."""
 
     definition: FunctionDefinition
 
 
 class Environment:
-    """Stores variables and constants for a scope."""
+    """Stores variables and constants."""
 
     def __init__(
         self,
@@ -92,9 +92,6 @@ class Environment:
         self.values: Dict[str, Any] = {}
         self.constants = set()
         self.parent = parent
-
-    def contains_local(self, name: str) -> bool:
-        return name in self.values
 
     def contains(self, name: str) -> bool:
         if name in self.values:
@@ -167,23 +164,27 @@ class Environment:
 
 
 class Interpreter:
-    """Executes AssayFlux abstract syntax trees."""
+    """Executes AssayFlux programs."""
 
     def __init__(self):
         self.global_environment = Environment()
         self.environment = self.global_environment
-        self.output = []
+        self.output: List[str] = []
         self.call_depth = 0
         self.max_call_depth = 200
 
     def run(self, source: str) -> Any:
-        """Parse and execute an AssayFlux source string."""
+        """Parse and execute AssayFlux source code."""
 
         try:
             program = parse(source)
             return self.execute_program(program)
 
-        except (LexerError, ParserError, AssayFluxRuntimeError):
+        except (
+            LexerError,
+            ParserError,
+            AssayFluxRuntimeError,
+        ):
             raise
 
         except (ZeroDivisionError, OverflowError) as error:
@@ -192,7 +193,7 @@ class Interpreter:
             ) from error
 
     def execute_program(self, program: Program) -> Any:
-        """Execute all statements in a program."""
+        """Execute a complete program."""
 
         try:
             return self.execute_statements(program.statements)
@@ -208,7 +209,7 @@ class Interpreter:
             )
 
     def execute_statements(self, statements: List[Any]) -> Any:
-        """Execute statements sequentially."""
+        """Execute statements in order."""
 
         result = None
 
@@ -298,7 +299,7 @@ class Interpreter:
         )
 
     def execute_import(self, statement: ImportStatement) -> Any:
-        """Import an available Python module into the environment."""
+        """Import an installed Python module."""
 
         module_name = statement.module_name
 
@@ -324,7 +325,7 @@ class Interpreter:
         return module
 
     def execute_if(self, statement: IfStatement) -> Any:
-        """Execute if, otherwise, and else branches."""
+        """Execute conditional branches."""
 
         if self.is_truthy(self.evaluate(statement.condition)):
             return self.execute_statements(statement.body)
@@ -382,7 +383,7 @@ class Interpreter:
         return result
 
     def evaluate(self, expression: Any) -> Any:
-        """Evaluate an expression and return its value."""
+        """Evaluate an expression."""
 
         if expression is None:
             return None
@@ -405,6 +406,9 @@ class Interpreter:
         if isinstance(expression, BinaryOperation):
             return self.evaluate_binary(expression)
 
+        if isinstance(expression, MemberAccess):
+            return self.evaluate_member_access(expression)
+
         if isinstance(expression, FunctionCall):
             arguments = [
                 self.evaluate(argument)
@@ -417,9 +421,6 @@ class Interpreter:
                 expression.line,
                 expression.column,
             )
-
-        if isinstance(expression, MemberAccess):
-            return self.evaluate_member_access(expression)
 
         raise AssayFluxRuntimeError(
             f"Unsupported expression type: "
@@ -457,7 +458,6 @@ class Interpreter:
         operator = expression.operator
         left = self.evaluate(expression.left)
 
-        # Short-circuit logical operators.
         if operator == "and":
             if not self.is_truthy(left):
                 return False
@@ -544,8 +544,7 @@ class Interpreter:
 
         except (TypeError, ValueError, OverflowError) as error:
             raise AssayFluxRuntimeError(
-                f"Cannot apply operator '{operator}' to "
-                f"these values: {error}.",
+                f"Cannot apply operator '{operator}': {error}",
                 expression.line,
                 expression.column,
             ) from error
@@ -560,7 +559,7 @@ class Interpreter:
         self,
         expression: MemberAccess,
     ) -> Any:
-        """Evaluate member access on supported objects."""
+        """Read an object's member or a dictionary entry."""
 
         obj = self.evaluate(expression.object)
         member = expression.member
@@ -593,8 +592,52 @@ class Interpreter:
         line: int = 0,
         column: int = 0,
     ) -> Any:
-        """Call a function defined in AssayFlux."""
+        """Call an AssayFlux function or an imported Python function."""
 
+        # Qualified calls, such as math.sqrt or numpy.array.
+        if "." in name:
+            parts = name.split(".")
+
+            if any(not part for part in parts):
+                raise AssayFluxRuntimeError(
+                    f"Invalid qualified function name '{name}'.",
+                    line,
+                    column,
+                )
+
+            value = self.environment.get(parts[0])
+
+            for member in parts[1:]:
+                try:
+                    value = getattr(value, member)
+
+                except AttributeError as error:
+                    raise AssayFluxRuntimeError(
+                        f"Function '{name}' could not be resolved: "
+                        f"missing member '{member}'.",
+                        line,
+                        column,
+                    ) from error
+
+            if not callable(value):
+                raise AssayFluxRuntimeError(
+                    f"'{name}' is not callable.",
+                    line,
+                    column,
+                )
+
+            try:
+                return value(*arguments)
+
+            except Exception as error:
+                raise AssayFluxRuntimeError(
+                    f"Python function '{name}' failed: "
+                    f"{type(error).__name__}: {error}",
+                    line,
+                    column,
+                ) from error
+
+        # Ordinary AssayFlux-defined functions.
         function = self.environment.get(name)
 
         if not isinstance(function, FunctionValue):
@@ -650,7 +693,7 @@ class Interpreter:
 
     @staticmethod
     def require_number(value: Any, expression: Any):
-        """Ensure a value is numeric but not a boolean."""
+        """Require an integer or floating-point value."""
 
         if isinstance(value, bool) or not isinstance(
             value, (int, float)
@@ -664,13 +707,13 @@ class Interpreter:
 
     @staticmethod
     def is_truthy(value: Any) -> bool:
-        """Determine whether a value is truthy."""
+        """Evaluate the truthiness of a value."""
 
         return bool(value)
 
     @staticmethod
     def format_value(value: Any) -> str:
-        """Convert a value into display text."""
+        """Format a value for the show statement."""
 
         if value is True:
             return "true"
@@ -685,10 +728,9 @@ class Interpreter:
 
 
 def execute(source: str) -> Any:
-    """Convenience function for running AssayFlux source."""
+    """Convenience function for executing AssayFlux code."""
 
-    interpreter = Interpreter()
-    return interpreter.run(source)
+    return Interpreter().run(source)
 
 
 __all__ = [
@@ -701,10 +743,8 @@ __all__ = [
 
 if __name__ == "__main__":
     example = (
-        "x = 10\n"
-        "y = 20\n"
-        "result = x + y\n"
-        "show result\n"
+        "import math\n"
+        "show math.sqrt(25)\n"
     )
 
     try:
