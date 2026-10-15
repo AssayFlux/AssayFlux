@@ -40,7 +40,6 @@ class UnifiedDispatchTests(unittest.TestCase):
     def test_dispatch_uses_registered_adapter(self):
         expected = ExecutionResult(
             language="mock",
-            success=True,
             stdout="mock output",
             stderr="",
             return_code=0,
