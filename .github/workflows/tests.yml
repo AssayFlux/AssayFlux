@@ -172,7 +172,7 @@ jobs:
 
       - name: Test AssayFlux Hello World
         run: |
-          printf 'print("Hello from AssayFlux")\n' > hello.af
+          printf 'show "Hello from AssayFlux"\n' > hello.af
           assayflux hello.af
 
       - name: Run automated tests
