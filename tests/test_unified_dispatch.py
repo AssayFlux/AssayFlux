@@ -3,10 +3,9 @@
 import io
 import unittest
 from contextlib import redirect_stdout
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from assayflux.interop import dispatch
-from assayflux.interop.base import ExecutionResult
 from assayflux.interop.runtime import execute_code
 from assayflux.interpreter import Interpreter
 
@@ -38,12 +37,11 @@ class UnifiedDispatchTests(unittest.TestCase):
         self.assertIn("test error", result.stderr)
 
     def test_dispatch_uses_registered_adapter(self):
-        expected = ExecutionResult(
-            language="mock",
-            stdout="mock output",
-            stderr="",
-            return_code=0,
-        )
+        expected = Mock()
+        expected.language = "mock"
+        expected.success = True
+        expected.stdout = "mock output"
+        expected.stderr = ""
 
         with patch(
             "assayflux.interop.runtime.get_adapter"
@@ -58,7 +56,7 @@ class UnifiedDispatchTests(unittest.TestCase):
             "example code",
             timeout=10.0,
         )
-        self.assertEqual(result, expected)
+        self.assertIs(result, expected)
 
     def test_execute_code_remains_compatible(self):
         result = execute_code("python", "print('compatible')")
