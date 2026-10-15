@@ -559,4 +559,4 @@ if __name__ == "__main__":
             print(token)
 
     except LexerError as error:
-        print(error) 
+        print(error)
