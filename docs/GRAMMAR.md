@@ -1,683 +1,388 @@
 # AssayFlux Grammar
+# AssayFlux Scientific Systems — Version 0.1.0
+# Status: Proposed authoritative grammar
+# Source extension: .af
+
+(* ============================================================
+   1. CORE LANGUAGE RULES
+   ============================================================ *)
+
+(* AssayFlux combines Python-inspired syntax with custom keywords.
+
+   Strict formatting rules:
+   - Every statement inside a block must be indented.
+   - Indentation must use spaces, not tabs.
+   - Four spaces represent one indentation level.
+   - Nested blocks require additional indentation.
+   - Every block must also be closed by the keyword "end".
+   - "end" must align with the statement that opened the block.
+   - "else" and "otherwise" must align with their matching "if".
+   - Blank lines do not affect indentation.
+   - Comments do not create blocks.
+*)
+
+program =
+    { newline | comment },
+    [ app_declaration, newline ],
+    { statement | newline | comment } ;
+
+app_declaration =
+    "app", string_literal ;
+
+(* ============================================================
+   2. LEXICAL RULES
+   ============================================================ *)
+
+identifier =
+    identifier_start, { identifier_continue } ;
+
+identifier_start =
+    letter | "_" ;
+
+identifier_continue =
+    letter | digit | "_" ;
+
+letter =
+    "A"…"Z" | "a"…"z" ;
+
+digit =
+    "0"…"9" ;
+
+integer_literal =
+    digit, { digit } ;
+
+float_literal =
+    digit, { digit }, ".", digit, { digit } ;
+
+boolean_literal =
+    "true" | "false" ;
+
+string_literal =
+      single_quoted_string
+    | double_quoted_string ;
+
+single_quoted_string =
+    "'", { single_string_character }, "'" ;
+
+double_quoted_string =
+    '"', { double_string_character }, '"' ;
+
+(* Supported escape sequences:
+   \\  backslash
+   \'  single quote
+   \"  double quote
+   \n  newline
+   \t  tab
+   \r  carriage return
+*)
+
+comment =
+    "#", { any_character_except_newline } ;
+
+newline =
+    line_ending ;
+
+(* The lexer must emit indentation information.
+   Tabs are rejected in indentation.
+   Each indentation level is four spaces.
+   Indentation changes must be consistent.
+*)
+
+(* ============================================================
+   3. RESERVED KEYWORDS
+   ============================================================ *)
+
+(* Reserved words:
+   app, const, return, end, if, otherwise, else, repeat,
+   stop, skip, show, true, false, and, or, not, import, as.
+*)
+
+(* The prefix "f." is reserved for function declarations.
+   The operator "nt=" is invalid.
+   The operator "!=" means not equal.
+*)
 
-**Full Project Name:** AssayFlux Scientific Systems  
-**Language:** AssayFlux  
-**Version:** 0.1.0  
-**Status:** Initial Draft
+(* ============================================================
+   4. STATEMENTS
+   ============================================================ *)
 
-## 1. Introduction
-
-AssayFlux is a general-purpose programming language designed for scientific computing and integration with other programming languages.
-
-This document defines the initial grammar and syntax rules of AssayFlux using Extended Backus–Naur Form (EBNF).
-
-## 2. Language Design Principles
-
-- Readable and consistent syntax.
-- Scientific computing capabilities.
-- Multi-language interoperability.
-- No mandatory indentation.
-- Explicit block termination using `end`.
-- Backtick-delimited strings.
-- Clear error messages with line numbers and useful suggestions.
-- Modular and extensible architecture.
-
-## 3. Lexical Structure
-
-### 3.1 Identifiers
-
-Identifiers name variables, functions, and other language elements.
-
-```ebnf
-identifier = letter, { letter | digit | "_" } ;
-letter = "A"…"Z" | "a"…"z" ;
-digit = "0"…"9" ;
-```
-
-Examples:
-
-```text
-temperature
-total_value
-calculate_sum
-```
-
-Identifiers must begin with a letter.
-
-### 3.2 Reserved Keywords
-
-The initial reserved keywords are:
-
-```text
-app
-let
-const
-return
-end
-if
-otherwise
-else
-repeat
-stop
-skip
-show
-true
-false
-and
-or
-not
-import
-```
-
-The `f.` prefix is reserved for function declarations.
-
-The `nt=` operator means not equal.
-
-Reserved keywords cannot be used as ordinary identifiers.
-
-### 3.3 Numeric Literals
-
-```ebnf
-integer = digit, { digit } ;
-float = digit, { digit }, ".", digit, { digit } ;
-```
-
-Examples:
-
-```text
-0
-10
-250
-3.14
-0.5
-```
-
-Scientific notation will be defined in a later revision.
-
-### 3.4 String Literals
-
-Strings use backticks as delimiters.
-
-```ebnf
-string_literal = "`", { string_character }, "`" ;
-```
-
-Examples:
-
-```text
-`Hello, AssayFlux!`
-`Scientific Computing`
-`Temperature is high`
-```
-
-Escape sequences will be defined in a later revision.
-
-### 3.5 Boolean Literals
-
-```ebnf
-boolean_literal = "true" | "false" ;
-```
-
-Examples:
-
-```text
-true
-false
-```
-
-### 3.6 Comments
-
-Single-line comments begin with `//`.
-
-Example:
-
-```text
-// This is an AssayFlux comment
-let temperature = 25
-```
-
-Comments are ignored during program execution.
-
-### 3.7 Whitespace and Indentation
-
-Spaces, tabs, and newlines separate tokens where necessary.
-
-Indentation is optional and does not determine block boundaries.
-
-Blocks are terminated using the keyword `end`.
-
-The parser must not require Python-style indentation.
-
-## 4. Program Structure
-
-An AssayFlux program consists of an optional application declaration followed by statements.
-
-```ebnf
-program = [ app_declaration ], { statement } ;
-app_declaration = "app", string_literal ;
-```
-
-Example:
-
-```text
-app `Scientific Calculator`
-```
-
-## 5. Variables and Constants
-
-### 5.1 Variable Declaration
-
-The keyword `let` declares a variable.
-
-```ebnf
-variable_declaration = "let", identifier, "=", expression ;
-```
-
-Examples:
-
-```text
-let temperature = 25
-let name = `AssayFlux`
-let enabled = true
-```
-
-Variables are intended to support type inference.
-
-### 5.2 Constant Declaration
-
-The keyword `const` declares a constant.
-
-```ebnf
-constant_declaration = "const", identifier, "=", expression ;
-```
-
-Example:
-
-```text
-const PI = 3.14159
-const MAX_ITERATIONS = 1000
-```
-
-Constants cannot be reassigned after initialization.
-
-### 5.3 Assignment
-
-```ebnf
-assignment = identifier, "=", expression ;
-```
-
-Example:
-
-```text
-let temperature = 25
-temperature = 30
-```
-
-Assignment to constants is prohibited.
-
-## 6. Operators and Expressions
-
-### 6.1 Arithmetic Operators
-
-| Operator | Meaning |
-|---|---|
-| `+` | Addition |
-| `-` | Subtraction |
-| `*` | Multiplication |
-| `/` | Division |
-| `%` | Remainder |
-
-Example:
-
-```text
-let sum = 10 + 5
-let difference = 10 - 5
-let product = 10 * 5
-let quotient = 10 / 5
-let remainder = 10 % 3
-```
-
-### 6.2 Comparison Operators
-
-| Operator | Meaning |
-|---|---|
-| `==` | Equal |
-| `nt=` | Not equal |
-| `<` | Less than |
-| `>` | Greater than |
-| `<=` | Less than or equal |
-| `>=` | Greater than or equal |
-
-Example:
-
-```text
-let result = 10 nt= 5
-show result
-```
-
-Expected output:
-
-```text
-true
-```
-
-### 6.3 Logical Operators
-
-| Operator | Meaning |
-|---|---|
-| `and` | Logical AND |
-| `or` | Logical OR |
-| `not` | Logical NOT |
-
-Examples:
-
-```text
-let first = true and false
-let second = true or false
-let third = not true
-```
-
-### 6.4 Expression Grammar
-
-```ebnf
-expression =
-      literal
-    | identifier
-    | unary_expression
-    | binary_expression
-    | function_call
-    | "(", expression, ")" ;
-
-literal =
-      integer
-    | float
-    | string_literal
-    | boolean_literal ;
-
-unary_expression =
-      "-", expression
-    | "not", expression ;
-
-binary_expression =
-    expression, binary_operator, expression ;
-
-binary_operator =
-      "+"
-    | "-"
-    | "*"
-    | "/"
-    | "%"
-    | "=="
-    | "nt="
-    | "<"
-    | ">"
-    | "<="
-    | ">="
-    | "and"
-    | "or" ;
-```
-
-Operator precedence and associativity must be defined explicitly before implementation.
-
-## 7. Display Output
-
-The keyword `show` displays a value.
-
-```ebnf
-show_statement = "show", expression ;
-```
-
-Examples:
-
-```text
-show `Hello, World!`
-show 100
-show temperature
-```
-
-The runtime should display the evaluated value.
-
-## 8. Conditional Statements
-
-AssayFlux uses `if`, `otherwise`, `else`, and `end` for conditional execution.
-
-### 8.1 If Statement
-
-```ebnf
-if_statement =
-    "if", expression, statement_block,
-    { otherwise_clause },
-    [ else_clause ],
-    "end" ;
-```
-
-### 8.2 Otherwise Clause
-
-```ebnf
-otherwise_clause =
-    "otherwise", expression, statement_block ;
-```
-
-The `otherwise` keyword introduces an additional condition.
-
-### 8.3 Else Clause
-
-```ebnf
-else_clause =
-    "else", statement_block ;
-```
-
-The `else` clause is the final alternative when no preceding condition is true.
-
-### 8.4 Example
-
-```text
-let temperature = 25
-
-if temperature > 30
-    show `Hot`
-otherwise temperature > 20
-    show `Warm`
-else
-    show `Cold`
-end
-```
-
-Expected output:
-
-```text
-Warm
-```
-
-Rules:
-
-- `if` introduces the first condition.
-- `otherwise` introduces another condition.
-- Multiple `otherwise` clauses are permitted.
-- `else` is optional and must be the final alternative.
-- `end` terminates the conditional statement.
-- Conditions must evaluate to Boolean values.
-- Indentation is optional.
-
-## 9. Repetition and Loops
-
-The `repeat` keyword introduces a repetition block.
-
-```ebnf
-repeat_statement =
-    "repeat", [ expression ], statement_block, "end" ;
-```
-
-Example:
-
-```text
-let count = 0
-
-repeat count < 5
-    show count
-    count = count + 1
-end
-```
-
-The intended behavior is to repeat while the condition evaluates to true.
-
-The behavior of `repeat` without a condition will be specified separately.
-
-### 9.1 Stop
-
-The `stop` statement terminates the innermost active loop.
-
-```ebnf
-stop_statement = "stop" ;
-```
-
-Example:
-
-```text
-repeat true
-    show `Running`
-    stop
-end
-```
-
-### 9.2 Skip
-
-The `skip` statement skips the remaining statements in the current iteration.
-
-```ebnf
-skip_statement = "skip" ;
-```
-
-Example:
-
-```text
-let count = 0
-
-repeat count < 5
-    count = count + 1
-
-    if count == 3
-        skip
-    end
-
-    show count
-end
-```
-
-`stop` and `skip` are valid only within an appropriate loop context.
-
-## 10. Functions
-
-### 10.1 Function Declaration
-
-AssayFlux uses the `f.` prefix for function declarations.
-
-```ebnf
-function_declaration =
-    "f.", identifier,
-    "(",
-    [ parameter_list ],
-    ")",
-    statement_block,
-    "end" ;
-
-parameter_list =
-    identifier, { ",", identifier } ;
-```
-
-Example:
-
-```text
-f.add(a, b)
-    return a + b
-end
-```
-
-### 10.2 Function Return
-
-The `return` keyword returns a value from a function.
-
-```ebnf
-return_statement = "return", [ expression ] ;
-```
-
-Example:
-
-```text
-f.square(number)
-    return number * number
-end
-```
-
-A function may return a value or return without an explicit value.
-
-### 10.3 Function Calls
-
-```ebnf
-function_call =
-    identifier,
-    "(",
-    [ argument_list ],
-    ")" ;
-
-argument_list =
-    expression, { ",", expression } ;
-```
-
-Example:
-
-```text
-f.add(a, b)
-    return a + b
-end
-
-let result = add(10, 20)
-show result
-```
-
-Expected output:
-
-```text
-30
-```
-
-Function declarations and function calls have different syntax.
-
-## 11. Modules and Imports
-
-The `import` keyword introduces a module import.
-
-```ebnf
-import_statement = "import", identifier ;
-```
-
-Example:
-
-```text
-import math
-```
-
-The module system will eventually support reusable AssayFlux modules and external libraries.
-
-Import paths, aliases, package resolution, and external-language bindings will be specified separately.
-
-## 12. Statement Blocks
-
-A statement block consists of zero or more statements.
-
-```ebnf
-statement_block = { statement } ;
-```
-
-Blocks are terminated by the `end` keyword associated with their enclosing construct.
-
-Block-opening constructs include:
-
-- `if`
-- `otherwise`
-- `else`
-- `repeat`
-- `f.` function declarations
-
-Nested blocks must be parsed according to their enclosing constructs.
-
-Indentation does not define block boundaries.
-
-## 13. Complete Statement Categories
-
-The initial statement categories are:
-
-```ebnf
 statement =
-      variable_declaration
+      assignment
     | constant_declaration
-    | assignment
     | show_statement
     | if_statement
     | repeat_statement
-    | stop_statement
-    | skip_statement
     | function_declaration
     | return_statement
+    | stop_statement
+    | skip_statement
     | import_statement
     | expression_statement ;
-```
 
-Expression statements permit standalone expressions where appropriate.
+assignment =
+    identifier, "=", expression ;
 
-The implementation must reject invalid statements and illegal control-flow operations.
+constant_declaration =
+    "const", identifier, "=", expression ;
 
-## 14. Multi-Language Integration
+show_statement =
+    "show", expression ;
 
-AssayFlux is designed to integrate with other programming languages.
+return_statement =
+    "return", [ expression ] ;
 
-Python is the initial integration target.
+stop_statement =
+    "stop" ;
 
-The planned architecture includes:
+skip_statement =
+    "skip" ;
 
-- Lexer.
-- Parser.
-- Abstract syntax tree.
-- Semantic analyzer.
-- Intermediate representation, if required.
-- Execution engine.
-- Foreign-function interface.
-- Language-specific adapters.
-- Standard library.
+expression_statement =
+    expression ;
 
-These are planned components, not implemented features.
+(* ============================================================
+   5. STRICT BLOCK FORMATTING
+   ============================================================ *)
 
-External-language calling syntax will be defined in a separate interoperability specification.
+(* Each block-opening statement establishes a required
+   indentation level for its body.
 
-## 15. Error Reporting
+   The block body must be indented exactly one level deeper
+   than its opening statement.
 
-AssayFlux should provide clear and useful error messages.
+   Nested blocks increase indentation by another level.
 
-Errors should include, where possible:
+   The closing "end" must align with its opening statement.
 
-- Error category.
-- File name.
-- Line number.
-- Column number.
-- Explanation of the problem.
-- Suggested correction.
+   Empty blocks are permitted only if explicitly supported
+   by the implementation. Otherwise, they are syntax errors.
+*)
 
-Example:
+statement_block =
+    indented_statement, { indented_statement } ;
 
-Syntax Error: Missing 'end'.
+indented_statement =
+    indentation, statement, newline ;
 
-File: example.af
-Line: 8, Column: 1
+(* "indentation" is a lexical property and must be validated
+   by the lexer/parser. It is not ordinary expression syntax.
+*)
 
-Suggestion: Add 'end' to close the conditional block.
+(* ============================================================
+   6. CONDITIONAL STATEMENTS
+   ============================================================ *)
 
-The implementation should distinguish lexical, syntax, semantic, runtime, and external integration errors.
+if_statement =
+    "if", expression, newline,
+    statement_block,
+    { otherwise_clause },
+    [ else_clause ],
+    indentation, "end" ;
 
-## 16. Grammar Development Status
+otherwise_clause =
+    indentation, "otherwise", expression, newline,
+    statement_block ;
 
-This document defines the initial syntax proposal for AssayFlux version 0.1.0.
+else_clause =
+    indentation, "else", newline,
+    statement_block ;
 
-The following areas require further formalization:
+(* Rules:
+   - "otherwise" introduces another condition.
+   - Multiple "otherwise" clauses are permitted.
+   - "else" is optional and must appear last.
+   - "otherwise" and "else" align with their matching "if".
+   - "end" aligns with the opening "if".
+*)
 
-- String escape sequences.
-- Numeric formats.
-- Operator precedence and associativity.
-- Type inference and type checking.
-- Variable scope and reassignment.
-- Conditional evaluation.
-- Repetition behavior.
-- Nested block parsing.
-- Function calls and return behavior.
-- Module resolution.
-- External-language interoperability.
-- Error recovery.
+(* ============================================================
+   7. LOOPS
+   ============================================================ *)
 
-The grammar must be refined and tested before implementation.
+repeat_statement =
+    "repeat", [ expression ], newline,
+    statement_block,
+    indentation, "end" ;
 
-## 17. Compatibility Policy
+(* A conditional repeat loop runs while its condition is true.
+   A repeat statement without a condition runs indefinitely.
+*)
 
-This specification is the authoritative reference for AssayFlux syntax.
+(* "stop" exits the innermost active loop.
+   "skip" begins the next iteration of the innermost loop.
+   Both are invalid outside a loop.
+*)
 
-Changes to keywords, operators, block structure, or function declaration syntax must be documented.
+(* ============================================================
+   8. FUNCTIONS
+   ============================================================ *)
 
-Breaking syntax changes should be recorded in the project changelog and versioned appropriately.
+function_declaration =
+    "f.", identifier,
+    "(", [ parameter_list ], ")",
+    newline,
+    statement_block,
+    indentation, "end" ;
+
+parameter_list =
+    identifier, { ",", identifier } ;
+
+function_call =
+    identifier, "(", [ argument_list ], ")" ;
+
+argument_list =
+    expression, { ",", expression } ;
+
+(* Function declarations require "f.".
+   Function calls do not use "f.".
+   "return" is valid only inside a function.
+*)
+
+(* ============================================================
+   9. IMPORTS
+   ============================================================ *)
+
+import_statement =
+    "import", module_path, [ "as", identifier ] ;
+
+module_path =
+    identifier, { ".", identifier } ;
+
+module_member_access =
+    identifier, { ".", identifier } ;
+
+(* Intended Python integration example:
+   import math
+   result = math.sqrt(25)
+   show result
+
+   Runtime integration must be implemented and tested separately.
+*)
+
+(* ============================================================
+   10. EXPRESSIONS
+   ============================================================ *)
+
+expression =
+    logical_or_expression ;
+
+logical_or_expression =
+    logical_and_expression,
+    { "or", logical_and_expression } ;
+
+logical_and_expression =
+    logical_not_expression,
+    { "and", logical_not_expression } ;
+
+logical_not_expression =
+      "not", logical_not_expression
+    | comparison_expression ;
+
+comparison_expression =
+    additive_expression,
+    [ comparison_operator, additive_expression ] ;
+
+comparison_operator =
+      "=="
+    | "!="
+    | "<"
+    | ">"
+    | "<="
+    | ">=" ;
+
+additive_expression =
+    multiplicative_expression,
+    { ("+" | "-"), multiplicative_expression } ;
+
+multiplicative_expression =
+    unary_expression,
+    { ("*" | "/" | "%"), unary_expression } ;
+
+unary_expression =
+      ("+" | "-"), unary_expression
+    | primary_expression ;
+
+primary_expression =
+      literal
+    | identifier
+    | function_call
+    | module_member_access
+    | "(", expression, ")" ;
+
+literal =
+      integer_literal
+    | float_literal
+    | string_literal
+    | boolean_literal ;
+
+(* Precedence, highest to lowest:
+   1. Parentheses and primary expressions
+   2. Unary + and -
+   3. *, /, %
+   4. +, -
+   5. Comparisons
+   6. not
+   7. and
+   8. or
+*)
+
+(* ============================================================
+   11. EXAMPLE PROGRAM
+   ============================================================ *)
+
+(* Valid AssayFlux example:
+
+   app "Example"
+
+   const LIMIT = 5
+   count = 0
+
+   f.add(a, b)
+       return a + b
+   end
+
+   repeat count < LIMIT
+       if count != 3
+           show add(count, 10)
+       otherwise count == 3
+           show "Skipping three"
+       else
+           show "Other value"
+       end
+
+       count = count + 1
+   end
+*)
+
+(* ============================================================
+   12. ERROR RULES
+   ============================================================ *)
+
+(* Syntax errors must be reported for:
+   - Missing "end".
+   - Unmatched "end".
+   - Incorrect indentation.
+   - Tabs used for indentation.
+   - Inconsistent indentation levels.
+   - "else" or "otherwise" at the wrong indentation.
+   - Invalid operators.
+   - Invalid identifiers.
+   - Unexpected end of file inside a block.
+
+   Errors should include a filename, line, column, and message
+   whenever that information is available.
+*)
+
+(* ============================================================
+   13. IMPLEMENTATION CONFORMANCE
+   ============================================================ *)
+
+(* This file defines the intended syntax.
+   It does not itself implement the lexer, parser, or interpreter.
+
+   The implementation must be updated to enforce these rules.
+   Automated tests must cover valid and invalid formatting.
+
+   The language must not claim strict indentation support
+   until the implementation and tests verify it.
+*)
