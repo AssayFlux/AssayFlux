@@ -33,7 +33,16 @@ jobs:
           test -f assayflux/ast_nodes.py
           test -f assayflux/parser.py
           test -f assayflux/interpreter.py
+          test -f assayflux/cli.py
+          test -f assayflux/__main__.py
           test -f tests/test_core.py
+          test -f tests/test_cli.py
+
+      - name: Install AssayFlux
+        run: python -m pip install .
+
+      - name: Verify AssayFlux command
+        run: assayflux --help
 
       - name: Run automated tests
         run: python -m unittest discover -s tests -v
