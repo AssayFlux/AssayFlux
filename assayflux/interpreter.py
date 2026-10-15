@@ -8,9 +8,10 @@ Version: 0.1.0
 """
 
 import importlib
-from assayflux.interop import dispatch as dispatch_language
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
+
+from assayflux.interop import dispatch as dispatch_language
 
 from assayflux.ast_nodes import (
     Assignment,
@@ -173,6 +174,12 @@ class Interpreter:
         self.output: List[str] = []
         self.call_depth = 0
         self.max_call_depth = 200
+
+        # Register unified language dispatch as a built-in.
+        self.global_environment.define(
+            "dispatch",
+            dispatch_language,
+        )
 
     def run(self, source: str) -> Any:
         """Parse and execute AssayFlux source code."""
@@ -641,6 +648,19 @@ class Interpreter:
         # Ordinary AssayFlux-defined functions.
         function = self.environment.get(name)
 
+        # Built-in Python callables, including dispatch.
+        if callable(function):
+            try:
+                return function(*arguments)
+
+            except Exception as error:
+                raise AssayFluxRuntimeError(
+                    f"Built-in function '{name}' failed: "
+                    f"{type(error).__name__}: {error}",
+                    line,
+                    column,
+                ) from error
+
         if not isinstance(function, FunctionValue):
             raise AssayFluxRuntimeError(
                 f"'{name}' is not a callable AssayFlux function.",
@@ -735,25 +755,9 @@ def execute(source: str) -> Any:
 
 
 __all__ = [
-    "Interpreter",
-    "Environment",
     "AssayFluxRuntimeError",
+    "Environment",
+    "FunctionValue",
+    "Interpreter",
     "execute",
 ]
-
-
-if __name__ == "__main__":
-    example = (
-        "import math\n"
-        "show math.sqrt(25)\n"
-    )
-
-    try:
-        execute(example)
-
-    except (
-        LexerError,
-        ParserError,
-        AssayFluxRuntimeError,
-    ) as error:
-        print(error)
