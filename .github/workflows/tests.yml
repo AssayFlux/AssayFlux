@@ -10,8 +10,9 @@ permissions:
 
 jobs:
   test:
-    name: Run AssayFlux Tests
+    name: Test AssayFlux and Language Runtimes
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
       - name: Check out repository
@@ -27,13 +28,93 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Display runtime versions
-        run: |
-          python --version
-          node --version
-          npm --version
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
 
-      - name: Check project structure
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Install system language runtimes
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            gfortran \
+            php-cli \
+            ruby \
+            lua5.4 \
+            perl \
+            r-base-core \
+            curl \
+            unzip \
+            gzip \
+            erlang-base \
+            erlang-dev \
+            elixir \
+            ghc \
+            ocaml-nox \
+            gnucobol3 \
+            nim \
+            ldc \
+            libgmp-dev \
+            libncurses-dev
+
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.1"
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install Kotlin compiler
+        run: |
+          KOTLIN_VERSION="2.2.20"
+          curl -fL \
+            "https://github.com/JetBrains/kotlin/releases/download/v${KOTLIN_VERSION}/kotlin-compiler-${KOTLIN_VERSION}.zip" \
+            -o /tmp/kotlin-compiler.zip
+          sudo unzip -q /tmp/kotlin-compiler.zip -d /opt
+          echo "/opt/kotlinc/bin" >> "$GITHUB_PATH"
+
+      - name: Install Scala CLI
+        run: |
+          curl -fL \
+            "https://github.com/VirtusLab/scala-cli/releases/latest/download/scala-cli-x86_64-pc-linux.gz" \
+            -o /tmp/scala-cli.gz
+          gzip -df /tmp/scala-cli.gz
+          chmod +x /tmp/scala-cli
+          sudo mv /tmp/scala-cli /usr/local/bin/scala
+
+      - name: Install TypeScript
+        run: npm install --global typescript
+
+      - name: Install Crystal
+        run: |
+          curl -fsSL https://crystal-lang.org/install.sh \
+            -o /tmp/install-crystal.sh
+          sudo bash /tmp/install-crystal.sh
+
+      - name: Verify project structure
         run: |
           test -f pyproject.toml
           test -f assayflux/__init__.py
@@ -46,6 +127,39 @@ jobs:
           test -f tests/test_core.py
           test -f tests/test_cli.py
           test -f tests/test_javascript_adapter.py
+
+      - name: Display installed runtime versions
+        run: |
+          python --version
+          node --version
+          npm --version
+          gcc --version
+          g++ --version
+          javac -version
+          rustc --version
+          go version
+          dotnet --version
+          php --version
+          ruby --version
+          lua -v
+          perl --version
+          gfortran --version
+          swift --version
+          dart --version
+          Rscript --version
+          julia --version
+          crystal --version
+          scala version
+          elixir --version
+          erlc -version
+          ghc --version
+          ocamlc --version
+          nim --version
+          cobc --version
+          tsc --version
+          kotlinc -version
+          zig version || true
+          dmd --version || ldc2 --version || gdc --version || true
 
       - name: Install AssayFlux
         run: python -m pip install .
