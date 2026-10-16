@@ -4,10 +4,11 @@ Interpreter Implementation
 
 Executes AssayFlux programs and integrates with Python libraries.
 
-Version: 0.2.0
+Version: 0.3.0
 """
 
 import importlib
+import math
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -40,15 +41,14 @@ from assayflux.lexer import LexerError
 from assayflux.parser import ParserError, parse
 
 
-class AssayFluxRuntimeError(Exception):
-    """Error raised during AssayFlux execution."""
+# ============================================================
+# Errors and internal control signals
+# ============================================================
 
-    def __init__(
-        self,
-        message: str,
-        line: int = 0,
-        column: int = 0,
-    ):
+class AssayFluxRuntimeError(Exception):
+    """Error raised when an AssayFlux program cannot execute."""
+
+    def __init__(self, message: str, line: int = 0, column: int = 0):
         self.message = message
         self.line = line
         self.column = column
@@ -72,27 +72,38 @@ class ReturnSignal(Exception):
 
 
 class StopSignal(Exception):
-    """Internal signal for stopping a repeat loop."""
+    """Internal signal for stopping the nearest repeat loop."""
 
 
 class SkipSignal(Exception):
-    """Internal signal for skipping a repeat iteration."""
+    """Internal signal for skipping the current repeat iteration."""
+
+
+class DestroySignal(BaseException):
+    """
+    Internal signal that terminates the current AssayFlux execution.
+
+    BaseException is used so ordinary `except Exception` handlers in
+    imported Python functions do not accidentally swallow this signal.
+    The interpreter catches it at the program boundary.
+    """
 
 
 @dataclass
 class FunctionValue:
-    """A function declared in AssayFlux."""
+    """A user-defined AssayFlux function."""
 
     definition: FunctionDefinition
 
 
-class Environment:
-    """Stores variables and constants."""
+# ============================================================
+# Environment and constants
+# ============================================================
 
-    def __init__(
-        self,
-        parent: Optional["Environment"] = None,
-    ):
+class Environment:
+    """Stores variables, constants, and parent-scope relationships."""
+
+    def __init__(self, parent: Optional["Environment"] = None):
         self.values: Dict[str, Any] = {}
         self.constants = set()
         self.parent = parent
@@ -124,7 +135,7 @@ class Environment:
         constant: bool = False,
         line: int = 0,
         column: int = 0,
-    ):
+    ) -> None:
         if name in self.values:
             raise AssayFluxRuntimeError(
                 f"'{name}' is already defined in this scope.",
@@ -143,7 +154,7 @@ class Environment:
         value: Any,
         line: int = 0,
         column: int = 0,
-    ):
+    ) -> None:
         if name in self.values:
             if name in self.constants:
                 raise AssayFluxRuntimeError(
@@ -156,48 +167,85 @@ class Environment:
             return
 
         if self.parent is not None and self.parent.contains(name):
-            self.parent.assign(
-                name,
-                value,
-                line,
-                column,
-            )
+            self.parent.assign(name, value, line, column)
             return
 
         self.values[name] = value
 
 
+# ============================================================
+# Interpreter
+# ============================================================
+
 class Interpreter:
-    """Executes AssayFlux programs."""
+    """
+    Executes AssayFlux programs.
+
+    Calling destroy() permanently disables this interpreter instance.
+    Create a new Interpreter instance to start a separate execution.
+    """
 
     def __init__(self):
         self.global_environment = Environment()
         self.environment = self.global_environment
+
         self.output: List[str] = []
         self.call_depth = 0
         self.max_call_depth = 200
+        self.max_loop_iterations = 1_000_000
+
+        self.application_name = None
+        self.destroyed = False
+
+        self.global_environment.define("dispatch", dispatch_language)
+        self.global_environment.define("input", input)
+        self.global_environment.define("destroy", self.destroy)
+
+    # --------------------------------------------------------
+    # Program lifecycle
+    # --------------------------------------------------------
+
+    def destroy(self) -> None:
+        """
+        Stop execution and clear this interpreter's in-memory state.
+
+        This affects only this Interpreter instance. It does not delete
+        files, modify the operating system, or erase repository contents.
+        """
+        if self.destroyed:
+            return
+
+        self.destroyed = True
+        self.output.clear()
+
+        # Clear stored variables and constants.
+        self.global_environment.values.clear()
+        self.global_environment.constants.clear()
+
+        # Drop references to the previous environment.
+        self.environment = self.global_environment
         self.application_name = None
 
-        # Register unified language dispatch as a built-in.
-        self.global_environment.define(
-            "dispatch",
-            dispatch_language,
-        )
-        # Python-like interactive input is available as a built-in.
-        self.global_environment.define("input", input)
+        # Raise a control signal to terminate active execution.
+        raise DestroySignal()
 
     def run(self, source: str) -> Any:
         """Parse and execute AssayFlux source code."""
+        if self.destroyed:
+            raise AssayFluxRuntimeError(
+                "This interpreter has been destroyed. "
+                "Create a new Interpreter instance to run another program."
+            )
 
         try:
             program = parse(source)
             return self.execute_program(program)
 
-        except (
-            LexerError,
-            ParserError,
-            AssayFluxRuntimeError,
-        ):
+        except DestroySignal:
+            # Destruction is an intentional termination, not a runtime error.
+            return None
+
+        except (LexerError, ParserError, AssayFluxRuntimeError):
             raise
 
         except (ZeroDivisionError, OverflowError) as error:
@@ -206,10 +254,15 @@ class Interpreter:
             ) from error
 
     def execute_program(self, program: Program) -> Any:
-        """Execute a complete program."""
+        """Execute a parsed program."""
+        if self.destroyed:
+            return None
 
         try:
             return self.execute_statements(program.statements)
+
+        except DestroySignal:
+            raise
 
         except (StopSignal, SkipSignal):
             raise AssayFluxRuntimeError(
@@ -221,22 +274,35 @@ class Interpreter:
                 "'return' cannot be used outside a function."
             )
 
-    def execute_statements(self, statements: List[Any]) -> Any:
-        """Execute statements in order."""
-
+    def execute_statements(self, statements) -> Any:
+        """Execute statements in sequence."""
         result = None
 
         for statement in statements:
+            if self.destroyed:
+                raise DestroySignal()
+
             result = self.execute_statement(statement)
 
         return result
 
-    def execute_statement(self, statement: Any) -> Any:
-        """Execute one statement."""
+    # --------------------------------------------------------
+    # Statements
+    # --------------------------------------------------------
+
+    def execute_statement(self, statement) -> Any:
+        """Execute a single AST statement."""
+        if self.destroyed:
+            raise DestroySignal()
 
         if isinstance(statement, AppDeclaration):
-            if self.application_name is not None and self.application_name != statement.name:
-                raise AssayFluxRuntimeError("Application metadata may only be declared once.", statement.line, statement.column)
+            if self.application_name is not None:
+                raise AssayFluxRuntimeError(
+                    "Application metadata has already been declared.",
+                    statement.line,
+                    statement.column,
+                )
+
             self.application_name = statement.name
             return statement.name
 
@@ -255,7 +321,6 @@ class Interpreter:
                 statement.line,
                 statement.column,
             )
-
             return value
 
         if isinstance(statement, ConstantDeclaration):
@@ -268,15 +333,14 @@ class Interpreter:
                 line=statement.line,
                 column=statement.column,
             )
-
             return value
 
         if isinstance(statement, ShowStatement):
-            value = self.evaluate(statement.value)
-            text = self.format_value(value)
+            value = self.evaluate(statement.expression)
+            formatted = self.format_value(value)
 
-            self.output.append(text)
-            print(text)
+            self.output.append(formatted)
+            print(formatted)
 
             return value
 
@@ -301,44 +365,44 @@ class Interpreter:
                 line=statement.line,
                 column=statement.column,
             )
-
             return function
 
         if isinstance(statement, ReturnStatement):
-            value = (
-                self.evaluate(statement.value)
-                if statement.value is not None
-                else None
-            )
+            value = None
+
+            if statement.value is not None:
+                value = self.evaluate(statement.value)
 
             raise ReturnSignal(value)
 
         raise AssayFluxRuntimeError(
-            f"Unsupported statement type: "
-            f"{type(statement).__name__}.",
-            getattr(statement, "line", 0),
-            getattr(statement, "column", 0),
+            f"Unsupported statement type: {type(statement).__name__}."
         )
 
-    def execute_import(self, statement: ImportStatement) -> Any:
-        """Import an installed Python module."""
+    # --------------------------------------------------------
+    # Imports
+    # --------------------------------------------------------
 
-        module_name = statement.module_name
+    def execute_import(self, statement: ImportStatement) -> Any:
+        """Import a Python module into the current environment."""
+        module_name = statement.module
 
         try:
             module = importlib.import_module(module_name)
-
-        except ImportError as error:
+        except DestroySignal:
+            raise
+        except Exception as error:
             raise AssayFluxRuntimeError(
-                f"Cannot import Python module '{module_name}': {error}",
+                f"Could not import '{module_name}': "
+                f"{type(error).__name__}: {error}",
                 statement.line,
                 statement.column,
             ) from error
 
-        variable_name = statement.alias or module_name
+        alias = statement.alias or module_name.split(".")[0]
 
         self.environment.define(
-            variable_name,
+            alias,
             module,
             line=statement.line,
             column=statement.column,
@@ -346,15 +410,18 @@ class Interpreter:
 
         return module
 
-    def execute_if(self, statement: IfStatement) -> Any:
-        """Execute conditional branches."""
+    # --------------------------------------------------------
+    # Conditions and loops
+    # --------------------------------------------------------
 
+    def execute_if(self, statement: IfStatement) -> Any:
+        """Execute a conditional statement."""
         if self.is_truthy(self.evaluate(statement.condition)):
             return self.execute_statements(statement.body)
 
         for branch in statement.otherwise_branches:
             if self.is_truthy(self.evaluate(branch.condition)):
-                return self.execute_statements(branch.statements)
+                return self.execute_statements(branch.body)
 
         if statement.else_body is not None:
             return self.execute_statements(statement.else_body)
@@ -362,39 +429,128 @@ class Interpreter:
         return None
 
     def execute_repeat(self, statement: RepeatStatement) -> Any:
-        """Execute a condition-controlled repeat loop.
+        """
+        Execute a repeat loop.
 
-        A missing condition means repeat forever until ``stop`` is used.
-        A configurable safety limit prevents accidental unbounded runs.
+        Supported AST modes:
+          - count: execute a fixed number of iterations
+          - forever: continue until stop() or destroy()
+          - condition: continue while the condition is true
+
+        A condition-less loop is treated as an infinite loop for compatibility
+        with AST nodes created before the mode field was introduced.
         """
         result = None
         iterations = 0
-        max_iterations = 1_000_000
 
-        while statement.condition is None or self.is_truthy(
-            self.evaluate(statement.condition)
-        ):
-            if iterations >= max_iterations:
+        mode = getattr(statement, "mode", "condition")
+        count_expression = getattr(statement, "count", None)
+        condition = getattr(statement, "condition", None)
+
+        if mode == "count":
+            if count_expression is not None:
+                raw_count = self.evaluate(count_expression)
+            elif condition is not None:
+                # Backwards compatibility with older AST representations.
+                raw_count = self.evaluate(condition)
+            else:
                 raise AssayFluxRuntimeError(
-                    f"repeat loop exceeded the safety limit of {max_iterations} iterations.",
+                    "A counted repeat loop requires a count.",
                     statement.line,
                     statement.column,
                 )
+
+            count = self.require_number(
+                raw_count,
+                "repeat count",
+                statement.line,
+                statement.column,
+            )
+
+            if isinstance(count, bool) or not float(count).is_integer():
+                raise AssayFluxRuntimeError(
+                    "repeat count must be a whole number.",
+                    statement.line,
+                    statement.column,
+                )
+
+            count = int(count)
+
+            if count < 0:
+                raise AssayFluxRuntimeError(
+                    "repeat count cannot be negative.",
+                    statement.line,
+                    statement.column,
+                )
+
+            if count > self.max_loop_iterations:
+                raise AssayFluxRuntimeError(
+                    f"repeat count exceeds the safety limit of "
+                    f"{self.max_loop_iterations}.",
+                    statement.line,
+                    statement.column,
+                )
+
+            for _ in range(count):
+                if self.destroyed:
+                    raise DestroySignal()
+
+                try:
+                    result = self.execute_statements(statement.body)
+                except SkipSignal:
+                    pass
+                except StopSignal:
+                    break
+
+                iterations += 1
+
+            return result
+
+        if mode not in ("condition", "forever"):
+            raise AssayFluxRuntimeError(
+                f"Unknown repeat mode '{mode}'.",
+                statement.line,
+                statement.column,
+            )
+
+        while True:
+            if self.destroyed:
+                raise DestroySignal()
+
+            if mode == "condition" and condition is not None:
+                if not self.is_truthy(self.evaluate(condition)):
+                    break
+            elif mode == "condition" and condition is None:
+                # Preserve older syntax: repeat with no condition means forever.
+                pass
+
+            if iterations >= self.max_loop_iterations:
+                raise AssayFluxRuntimeError(
+                    f"repeat loop exceeded the safety limit of "
+                    f"{self.max_loop_iterations} iterations.",
+                    statement.line,
+                    statement.column,
+                )
+
             try:
                 result = self.execute_statements(statement.body)
             except SkipSignal:
                 pass
             except StopSignal:
                 break
+
             iterations += 1
 
         return result
 
-    def evaluate(self, expression: Any) -> Any:
-        """Evaluate an expression."""
+    # --------------------------------------------------------
+    # Expressions
+    # --------------------------------------------------------
 
-        if expression is None:
-            return None
+    def evaluate(self, expression) -> Any:
+        """Evaluate an expression node."""
+        if self.destroyed:
+            raise DestroySignal()
 
         if isinstance(expression, NumberLiteral):
             return expression.value
@@ -409,7 +565,32 @@ class Interpreter:
             return self.environment.get(expression.name)
 
         if isinstance(expression, UnaryOperation):
-            return self.evaluate_unary(expression)
+            value = self.evaluate(expression.operand)
+
+            if expression.operator == "-":
+                return -self.require_number(
+                    value,
+                    "unary minus",
+                    expression.line,
+                    expression.column,
+                )
+
+            if expression.operator == "+":
+                return self.require_number(
+                    value,
+                    "unary plus",
+                    expression.line,
+                    expression.column,
+                )
+
+            if expression.operator in ("not", "!"):
+                return not self.is_truthy(value)
+
+            raise AssayFluxRuntimeError(
+                f"Unsupported unary operator '{expression.operator}'.",
+                expression.line,
+                expression.column,
+            )
 
         if isinstance(expression, BinaryOperation):
             return self.evaluate_binary(expression)
@@ -431,167 +612,120 @@ class Interpreter:
             )
 
         raise AssayFluxRuntimeError(
-            f"Unsupported expression type: "
-            f"{type(expression).__name__}.",
-            getattr(expression, "line", 0),
-            getattr(expression, "column", 0),
-        )
-
-    def evaluate_unary(self, expression: UnaryOperation) -> Any:
-        """Evaluate unary operators."""
-
-        value = self.evaluate(expression.operand)
-        operator = expression.operator
-
-        if operator == "-":
-            self.require_number(value, expression)
-            return -value
-
-        if operator == "+":
-            self.require_number(value, expression)
-            return +value
-
-        if operator == "not":
-            return not self.is_truthy(value)
-
-        raise AssayFluxRuntimeError(
-            f"Unsupported unary operator '{operator}'.",
-            expression.line,
-            expression.column,
+            f"Unsupported expression type: {type(expression).__name__}."
         )
 
     def evaluate_binary(self, expression: BinaryOperation) -> Any:
-        """Evaluate binary operators."""
-
+        """Evaluate a binary expression with short-circuit boolean operators."""
         operator = expression.operator
+
         left = self.evaluate(expression.left)
 
-        if operator == "and":
+        if operator in ("and", "&&"):
             if not self.is_truthy(left):
                 return False
 
-            return self.is_truthy(
-                self.evaluate(expression.right)
-            )
+            right = self.evaluate(expression.right)
+            return self.is_truthy(right)
 
-        if operator == "or":
+        if operator in ("or", "||"):
             if self.is_truthy(left):
                 return True
 
-            return self.is_truthy(
-                self.evaluate(expression.right)
-            )
+            right = self.evaluate(expression.right)
+            return self.is_truthy(right)
 
         right = self.evaluate(expression.right)
 
         try:
             if operator == "+":
-                if isinstance(left, str) and isinstance(right, str):
-                    return left + right
-
-                self.require_number(left, expression)
-                self.require_number(right, expression)
                 return left + right
 
             if operator == "-":
-                self.require_number(left, expression)
-                self.require_number(right, expression)
-                return left - right
+                return self.require_number(left, "subtraction") - self.require_number(
+                    right, "subtraction"
+                )
 
             if operator == "*":
-                self.require_number(left, expression)
-                self.require_number(right, expression)
-                return left * right
+                return self.require_number(left, "multiplication") * self.require_number(
+                    right, "multiplication"
+                )
 
             if operator == "/":
-                self.require_number(left, expression)
-                self.require_number(right, expression)
-
-                if right == 0:
-                    raise AssayFluxRuntimeError(
-                        "Division by zero is not allowed.",
-                        expression.line,
-                        expression.column,
-                    )
-
-                return left / right
+                return self.require_number(left, "division") / self.require_number(
+                    right, "division"
+                )
 
             if operator == "%":
-                self.require_number(left, expression)
-                self.require_number(right, expression)
+                return self.require_number(left, "remainder") % self.require_number(
+                    right, "remainder"
+                )
 
-                if right == 0:
+            if operator == "**":
+                exponent = self.require_number(right, "exponentiation")
+
+                if abs(exponent) > 10_000:
                     raise AssayFluxRuntimeError(
-                        "Remainder by zero is not allowed.",
-                        expression.line,
-                        expression.column,
+                        "Exponent exceeds the safety limit."
                     )
 
-                return left % right
+                return self.require_number(
+                    left, "exponentiation"
+                ) ** exponent
 
-            if operator == "==":
+            if operator in ("==", "="):
                 return left == right
 
             if operator == "!=":
                 return left != right
 
-            if operator == ">":
-                return left > right
-
             if operator == "<":
                 return left < right
-
-            if operator == ">=":
-                return left >= right
 
             if operator == "<=":
                 return left <= right
 
+            if operator == ">":
+                return left > right
+
+            if operator == ">=":
+                return left >= right
+
+        except DestroySignal:
+            raise
         except AssayFluxRuntimeError:
             raise
-
-        except (TypeError, ValueError, OverflowError) as error:
+        except Exception as error:
             raise AssayFluxRuntimeError(
-                f"Cannot apply operator '{operator}': {error}",
-                expression.line,
-                expression.column,
+                f"Operator '{operator}' failed: "
+                f"{type(error).__name__}: {error}",
+                getattr(expression, "line", 0),
+                getattr(expression, "column", 0),
             ) from error
 
         raise AssayFluxRuntimeError(
             f"Unsupported binary operator '{operator}'.",
-            expression.line,
-            expression.column,
+            getattr(expression, "line", 0),
+            getattr(expression, "column", 0),
         )
 
-    def evaluate_member_access(
-        self,
-        expression: MemberAccess,
-    ) -> Any:
-        """Read an object's member or a dictionary entry."""
-
-        obj = self.evaluate(expression.object)
-        member = expression.member
-
-        if isinstance(obj, dict):
-            if member not in obj:
-                raise AssayFluxRuntimeError(
-                    f"Dictionary has no key '{member}'.",
-                    expression.line,
-                    expression.column,
-                )
-
-            return obj[member]
+    def evaluate_member_access(self, expression: MemberAccess) -> Any:
+        """Evaluate access to a Python module or object's member."""
+        target = self.evaluate(expression.object)
 
         try:
-            return getattr(obj, member)
-
-        except AttributeError as error:
+            return getattr(target, expression.member)
+        except Exception as error:
             raise AssayFluxRuntimeError(
-                f"Object of type '{type(obj).__name__}' "
-                f"has no member '{member}'.",
+                f"Cannot access member '{expression.member}': "
+                f"{type(error).__name__}: {error}",
                 expression.line,
                 expression.column,
             ) from error
+
+    # --------------------------------------------------------
+    # Function calls
+    # --------------------------------------------------------
 
     def call_function(
         self,
@@ -600,29 +734,22 @@ class Interpreter:
         line: int = 0,
         column: int = 0,
     ) -> Any:
-        """Call an AssayFlux function or an imported Python function."""
+        """Call an AssayFlux function or an exposed Python callable."""
+        if self.destroyed:
+            raise DestroySignal()
 
-        # Qualified calls, such as math.sqrt or numpy.array.
+        # Qualified calls, such as math.sqrt(...).
         if "." in name:
             parts = name.split(".")
-
-            if any(not part for part in parts):
-                raise AssayFluxRuntimeError(
-                    f"Invalid qualified function name '{name}'.",
-                    line,
-                    column,
-                )
-
             value = self.environment.get(parts[0])
 
-            for member in parts[1:]:
+            for part in parts[1:]:
                 try:
-                    value = getattr(value, member)
-
-                except AttributeError as error:
+                    value = getattr(value, part)
+                except Exception as error:
                     raise AssayFluxRuntimeError(
-                        f"Function '{name}' could not be resolved: "
-                        f"missing member '{member}'.",
+                        f"Cannot resolve '{name}': "
+                        f"{type(error).__name__}: {error}",
                         line,
                         column,
                     ) from error
@@ -636,7 +763,8 @@ class Interpreter:
 
             try:
                 return value(*arguments)
-
+            except DestroySignal:
+                raise
             except Exception as error:
                 raise AssayFluxRuntimeError(
                     f"Python function '{name}' failed: "
@@ -645,14 +773,55 @@ class Interpreter:
                     column,
                 ) from error
 
-        # Ordinary AssayFlux-defined functions.
         function = self.environment.get(name)
 
-        # Built-in Python callables, including dispatch.
+        if isinstance(function, FunctionValue):
+            definition = function.definition
+
+            if len(arguments) != len(definition.parameters):
+                raise AssayFluxRuntimeError(
+                    f"Function '{name}' expects "
+                    f"{len(definition.parameters)} argument(s), "
+                    f"but received {len(arguments)}.",
+                    line,
+                    column,
+                )
+
+            if self.call_depth >= self.max_call_depth:
+                raise AssayFluxRuntimeError(
+                    f"Maximum function call depth of "
+                    f"{self.max_call_depth} exceeded.",
+                    line,
+                    column,
+                )
+
+            local_environment = Environment(self.global_environment)
+
+            for parameter, argument in zip(
+                definition.parameters,
+                arguments,
+            ):
+                local_environment.define(parameter, argument)
+
+            previous_environment = self.environment
+            self.environment = local_environment
+            self.call_depth += 1
+
+            try:
+                self.execute_statements(definition.body)
+            except ReturnSignal as signal:
+                return signal.value
+            finally:
+                self.environment = previous_environment
+                self.call_depth -= 1
+
+            return None
+
         if callable(function):
             try:
                 return function(*arguments)
-
+            except DestroySignal:
+                raise
             except Exception as error:
                 raise AssayFluxRuntimeError(
                     f"Built-in function '{name}' failed: "
@@ -661,81 +830,49 @@ class Interpreter:
                     column,
                 ) from error
 
-        if not isinstance(function, FunctionValue):
-            raise AssayFluxRuntimeError(
-                f"'{name}' is not a callable AssayFlux function.",
-                line,
-                column,
-            )
-
-        definition = function.definition
-
-        if len(arguments) != len(definition.parameters):
-            raise AssayFluxRuntimeError(
-                f"Function '{name}' expects "
-                f"{len(definition.parameters)} argument(s), "
-                f"but received {len(arguments)}.",
-                line,
-                column,
-            )
-
-        if self.call_depth >= self.max_call_depth:
-            raise AssayFluxRuntimeError(
-                "Maximum function call depth exceeded.",
-                line,
-                column,
-            )
-
-        local_environment = Environment(
-            parent=self.global_environment
+        raise AssayFluxRuntimeError(
+            f"'{name}' is not a function.",
+            line,
+            column,
         )
 
-        for parameter, value in zip(
-            definition.parameters,
-            arguments,
-        ):
-            local_environment.define(parameter, value)
-
-        previous_environment = self.environment
-        self.environment = local_environment
-        self.call_depth += 1
-
-        try:
-            self.execute_statements(definition.body)
-
-        except ReturnSignal as signal:
-            return signal.value
-
-        finally:
-            self.environment = previous_environment
-            self.call_depth -= 1
-
-        return None
-
-    @staticmethod
-    def require_number(value: Any, expression: Any):
-        """Require an integer or floating-point value."""
-
-        if isinstance(value, bool) or not isinstance(
-            value, (int, float)
-        ):
-            raise AssayFluxRuntimeError(
-                f"Expected a number, received "
-                f"{type(value).__name__}.",
-                getattr(expression, "line", 0),
-                getattr(expression, "column", 0),
-            )
+    # --------------------------------------------------------
+    # Helpers
+    # --------------------------------------------------------
 
     @staticmethod
     def is_truthy(value: Any) -> bool:
-        """Evaluate the truthiness of a value."""
-
+        """Convert a value to an AssayFlux truth value."""
         return bool(value)
 
     @staticmethod
-    def format_value(value: Any) -> str:
-        """Format a value for the show statement."""
+    def require_number(
+        value: Any,
+        operation: str,
+        line: int = 0,
+        column: int = 0,
+    ) -> Any:
+        """Validate numeric operands and reject booleans."""
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise AssayFluxRuntimeError(
+                f"{operation} requires a number, "
+                f"but received {type(value).__name__}.",
+                line,
+                column,
+            )
 
+        if isinstance(value, float) and not math.isfinite(value):
+            raise AssayFluxRuntimeError(
+                f"{operation} does not accept NaN or infinity.",
+                line,
+                column,
+            )
+
+        return value
+
+    @staticmethod
+    def format_value(value: Any) -> str:
+        """Format values for display."""
         if value is True:
             return "true"
 
@@ -746,18 +883,3 @@ class Interpreter:
             return "none"
 
         return str(value)
-
-
-def execute(source: str) -> Any:
-    """Convenience function for executing AssayFlux code."""
-
-    return Interpreter().run(source)
-
-
-__all__ = [
-    "AssayFluxRuntimeError",
-    "Environment",
-    "FunctionValue",
-    "Interpreter",
-    "execute",
-]
