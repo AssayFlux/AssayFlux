@@ -25,7 +25,7 @@ jobs:
   auto-run:
     name: Test AssayFlux
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -36,7 +36,67 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      # Install runtimes missing from the previous test run.
+      - name: Install system language runtimes
+        run: |
+          set -e
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            lua5.4 \
+            r-base \
+            elixir \
+            erlang-base \
+            ocaml-nox \
+            nim \
+            gdc \
+            gnucobol \
+            crystal \
+            curl \
+            gzip \
+            unzip
 
+      # Install the official Dart SDK.
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      # Install Zig compiler.
+      - name: Set up Zig
+        uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: 0.13.0
+
+      # Install Scala CLI, which provides the scala command.
+      - name: Set up Scala CLI
+        run: |
+          set -e
+          mkdir -p "$HOME/.local/bin"
+
+          curl -fL \
+            https://github.com/VirtusLab/scala-cli/releases/latest/download/scala-cli-x86_64-pc-linux.gz \
+            -o /tmp/scala-cli.gz
+
+          gzip -df /tmp/scala-cli.gz
+          install -m 755 /tmp/scala-cli "$HOME/.local/bin/scala"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Verify the required runtime commands exist.
+      - name: Verify required language runtimes
+        run: |
+          set -e
+
+          for command in \
+            lua Rscript elixir erl ocaml nim gdc cobc \
+            crystal dart zig scala
+          do
+            if ! command -v "$command" >/dev/null 2>&1; then
+              echo "ERROR: Missing runtime command: $command"
+              exit 1
+            fi
+
+            echo "PASS: $command is installed"
+          done
       - name: Install pytest
         run: python -m pip install --upgrade pip pytest
 
@@ -82,6 +142,10 @@ jobs:
           PY
 
       - name: Run Python tests
+        
+        env:
+
+          ASSAYFLUX_REQUIRE_ALL_RUNTIMES: "1"
         run: |
           if find . -type f \
             \( -name 'test_*.py' -o -name '*_test.py' \) \
