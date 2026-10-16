@@ -1,16 +1,14 @@
 """
-AssayFlux Project Builder
-=========================
+AssayFlux Project Builder.
 
-Creates complete website or Android project structures
-from a high-level specification.
+Builds a website project from the specifications supplied to
+the AssayFlux generators.
 """
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .base import GeneratedFile, GenerationResult
 from .html_generator import HtmlGenerator
@@ -21,12 +19,11 @@ from .sql_generator import SqlGenerator
 
 
 class ProjectBuilder:
-    """
-    Builds a complete project (website or android) from a specification.
-    """
+    """Generate and write a complete website project."""
 
-    def __init__(self, output_dir: str | Path = "output"):
+    def __init__(self, output_dir: str | Path = "output") -> None:
         self.output_dir = Path(output_dir)
+
         self.generators = {
             "html": HtmlGenerator(),
             "css": CssGenerator(),
@@ -35,86 +32,195 @@ class ProjectBuilder:
             "sql": SqlGenerator(),
         }
 
-    def build_website(self, spec: Dict[str, Any]) -> GenerationResult:
-        """
-        Build a complete website project.
+    def build_website(
+        self,
+        spec: dict[str, Any],
+    ) -> GenerationResult:
+        """Generate a website and write its files to disk."""
 
-        Expected spec example:
-        {
-            "title": "My Portfolio",
-            "theme": "light",
-            "primary_color": "#2563eb",
-            "pages": [
-                {"title": "Home", "content": "Welcome!", "filename": "index.html"},
-                {"title": "About", "content": "About me"}
-            ],
-            "backend": "flask",
-            "tables": [...]
-        }
-        """
-        all_files: List[GeneratedFile] = []
-        errors: List[str] = []
+        if not isinstance(spec, dict):
+            return GenerationResult(
+                success=False,
+                errors=["The project specification must be a dictionary."],
+            )
 
-        # HTML
-        html_result = self.generators["html"].generate(spec)
-        if html_result.success:
-            all_files.extend(html_result.files)
-        else:
-            errors.extend(html_result.errors)
+        title = spec.get("title", "AssayFlux Website")
 
-        # CSS
-        css_result = self.generators["css"].generate(spec)
-        if css_result.success:
-            all_files.extend(css_result.files)
-        else:
-            errors.extend(css_result.errors)
+        if not isinstance(title, str) or not title.strip():
+            return GenerationResult(
+                success=False,
+                errors=["The project title must be a non-empty string."],
+            )
 
-        # JavaScript
-        js_result = self.generators["js"].generate(spec)
-        if js_result.success:
-            all_files.extend(js_result.files)
-        else:
-            errors.extend(js_result.errors)
+        generated_files: list[GeneratedFile] = []
+        errors: list[str] = []
 
-        # Python backend
-        py_result = self.generators["python"].generate(spec)
-        if py_result.success:
-            all_files.extend(py_result.files)
-        else:
-            errors.extend(py_result.errors)
+        for generator_name, generator in self.generators.items():
+            try:
+                result = generator.generate(spec)
+            except Exception as exc:
+                errors.append(
+                    f"{generator_name} generator failed: {exc}"
+                )
+                continue
 
-        # SQL
-        sql_result = self.generators["sql"].generate(spec)
-        if sql_result.success:
-            all_files.extend(sql_result.files)
-        else:
-            errors.extend(sql_result.errors)
+            if not isinstance(result, GenerationResult):
+                errors.append(
+                    f"{generator_name} generator returned an invalid result."
+                )
+                continue
+
+            if result.success:
+                generated_files.extend(result.files)
+            else:
+                errors.extend(
+                    f"{generator_name}: {error}"
+                    for error in result.errors
+                )
 
         if errors:
-            return GenerationResult(success=False, files=all_files, errors=errors)
+            return GenerationResult(
+                success=False,
+                files=generated_files,
+                errors=errors,
+                message="Project generation failed.",
+            )
 
-        # Write files to disk
-        project_root = self.output_dir / "website"
-        self._write_files(project_root, all_files)
+        readme = self._create_readme(title)
 
-        # Create a simple README
-        readme = f"""# {spec.get('title', 'AssayFlux Website')}
+        generated_files.append(
+            GeneratedFile(
+                path="README.md",
+                content=readme,
+                language="markdown",
+            )
+        )
 
-Generated by **AssayFlux**.
+        try:
+            project_root = self.output_dir / "website"
+            self._write_files(project_root, generated_files)
+        except (OSError, ValueError) as exc:
+            return GenerationResult(
+                success=False,
+                files=generated_files,
+                errors=[f"Could not write the generated project: {exc}"],
+                message="Project generation failed.",
+            )
 
-## Structure
+        return GenerationResult(
+            success=True,
+            files=generated_files,
+            message=(
+                f"Website generated successfully at {project_root}."
+            ),
+        )
 
-- `index.html` and other pages
-- `css/style.css`
-- `js/main.js`
-- `backend/app.py`
-- `database/schema.sql`
+    @staticmethod
+    def _create_readme(title: str) -> str:
+        """Create basic instructions for the generated project."""
 
-## Run
+        return f"""# {title}
 
-```bash
-# Frontend: just open index.html
-# Backend (if Flask):
-cd backend
-pip install flask
-python app.py
+Generated by AssayFlux Scientific Systems.
+
+## Project structure
+
+- `index.html` — website entry page
+- `css/style.css` — website styles
+- `js/main.js` — browser-side JavaScript
+- `backend/app.py` — generated Python backend
+- `database/schema.sql` — generated SQL output
+
+Some files may be absent if their generators do not produce them.
+
+## Preview
+
+Open `index.html` in a web browser to preview the frontend.
+
+## Python backend
+
+If the generated backend uses Flask, install Flask in your Python
+environment and run the generated application using Python.
+
+Review generated code before running it in a production environment.
+"""
+
+    @staticmethod
+    def _validate_relative_path(file_path: str) -> Path:
+        """Reject absolute paths and directory traversal."""
+
+        if not isinstance(file_path, str) or not file_path.strip():
+            raise ValueError("Generated file paths must not be empty.")
+
+        relative_path = Path(file_path)
+
+        if relative_path.is_absolute():
+            raise ValueError(
+                f"Absolute output paths are not allowed: {file_path}"
+            )
+
+        if ".." in relative_path.parts:
+            raise ValueError(
+                f"Directory traversal is not allowed: {file_path}"
+            )
+
+        if relative_path == Path("."):
+            raise ValueError(
+                "A generated file path must identify a file."
+            )
+
+        return relative_path
+
+    @classmethod
+    def _write_files(
+        cls,
+        project_root: Path,
+        files: list[GeneratedFile],
+    ) -> None:
+        """Write generated files while preventing path traversal."""
+
+        seen_paths: set[Path] = set()
+
+        for generated_file in files:
+            if not isinstance(generated_file, GeneratedFile):
+                raise ValueError(
+                    "Every generated item must be a GeneratedFile."
+                )
+
+            relative_path = cls._validate_relative_path(
+                generated_file.path
+            )
+
+            if relative_path in seen_paths:
+                raise ValueError(
+                    f"Duplicate generated file path: {relative_path}"
+                )
+
+            seen_paths.add(relative_path)
+
+            if not isinstance(generated_file.content, str):
+                raise ValueError(
+                    f"File content must be text: {relative_path}"
+                )
+
+        project_root.mkdir(parents=True, exist_ok=True)
+        resolved_root = project_root.resolve()
+
+        for generated_file in files:
+            relative_path = cls._validate_relative_path(
+                generated_file.path
+            )
+            destination = project_root / relative_path
+            resolved_destination = destination.resolve()
+
+            if not resolved_destination.is_relative_to(resolved_root):
+                raise ValueError(
+                    f"Output path escapes the project directory: "
+                    f"{relative_path}"
+                )
+
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(
+                generated_file.content,
+                encoding="utf-8",
+            )
