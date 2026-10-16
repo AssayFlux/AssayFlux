@@ -505,14 +505,14 @@ class Lexer:
             )
 
         self.source_code = (
-    source_code
-    .replace("\r\n", "\n")
-    .replace("\r", "\n")
-)
-self.filename = filename
+            source_code
+            .replace("\r\n", "\n")
+            .replace("\r", "\n")
+        )
+        self.filename = filename
 
         self.position = 0
-        self.length = len(source_code)
+        self.length = len(self.source_code)
 
         self.line = 1
         self.column = 1
