@@ -2,11 +2,10 @@
 
   <br>
 
-  <img src="assayflux-logo.png" alt="AssayFlux" width="240">
+  <img src="assayflux-logo.png" alt="AssayFlux" width="480">
 
   <br><br>
 
-  <h1>ASSAYFLUX</h1>
 
   <p><strong>PROGRAMMING LANGUAGE & INTERPRETER</strong></p>
 
