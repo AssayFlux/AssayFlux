@@ -7,7 +7,6 @@
 #
 
 ### A Python-Interoperable Programming Language
-<br>
 **Readable syntax. Structured execution. Python interoperability.**
 
 <br>
