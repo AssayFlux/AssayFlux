@@ -304,24 +304,3 @@ redistribution or reuse is permitted.
 
 ---
 
-<div align="center">
-
-  <br>
-
-  <img src="assayflux-logo.png" alt="AssayFlux" width="112">
-
-  <br><br>
-
-  <h3>ASSAYFLUX</h3>
-
-  <p>Programming Language · Interpreter Development</p>
-
-  <br>
-
-  <hr>
-
-  <sub>Built around the development of a dedicated programming language.</sub>
-
-  <br><br>
-
-</div>
