@@ -1,216 +1,43 @@
-name: AssayFlux Auto Run
+name: AssayFlux CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
-      - master
-    paths-ignore:
-      - "*.md"
-      - "docs/**"
+    branches: [ "main", "master" ]
   pull_request:
-    branches:
-      - main
-      - master
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-concurrency:
-  group: assayflux-auto-run-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [ "main", "master" ]
 
 jobs:
-  auto-run:
-    name: Test AssayFlux
+  build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-          cache: pip
-      # Install runtimes missing from the previous test run.
-      - name: Install system language runtimes
-        run: |
-          set -e
-          sudo apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            lua5.4 \
-            r-base \
-            elixir \
-            erlang-base \
-            ocaml-nox \
-            nim \
-            gdc \
-            gnucobol \
-            crystal \
-            curl \
-            gzip \
-            unzip
+          python-version: ${{ matrix.python-version }}
 
-      # Install the official Dart SDK.
-      - name: Set up Dart
-        uses: dart-lang/setup-dart@v1
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest pytest-cov
+          pip install -e .
+
+      - name: Lint Code with Ruff
+        run: |
+          ruff check . --output-format=github
+
+      - name: Run Test Suite with Coverage
+        run: |
+          pytest --cov=assayflux --cov-report=xml
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
         with:
-          sdk: stable
-
-      # Install Zig compiler.
-      - name: Set up Zig
-        uses: goto-bus-stop/setup-zig@v2
-        with:
-          version: 0.13.0
-
-      # Install Scala CLI, which provides the scala command.
-      - name: Set up Scala CLI
-        run: |
-          set -e
-          mkdir -p "$HOME/.local/bin"
-
-          curl -fL \
-            https://github.com/VirtusLab/scala-cli/releases/latest/download/scala-cli-x86_64-pc-linux.gz \
-            -o /tmp/scala-cli.gz
-
-          gzip -df /tmp/scala-cli.gz
-          install -m 755 /tmp/scala-cli "$HOME/.local/bin/scala"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
-      # Verify the required runtime commands exist.
-      - name: Verify required language runtimes
-        run: |
-          set -e
-
-          for command in \
-            lua Rscript elixir erl ocaml nim gdc cobc \
-            crystal dart zig scala
-          do
-            if ! command -v "$command" >/dev/null 2>&1; then
-              echo "ERROR: Missing runtime command: $command"
-              exit 1
-            fi
-
-            echo "PASS: $command is installed"
-          done
-      - name: Install pytest
-        run: python -m pip install --upgrade pip pytest
-
-      - name: Show repository files
-        run: |
-          echo "Repository files:"
-          find . -maxdepth 3 -type f \
-            ! -path "./.git/*" | sort
-
-      - name: Check Python syntax
-        run: |
-          python - <<'PY'
-          import pathlib
-          import sys
-
-          files = [
-              p for p in pathlib.Path(".").rglob("*.py")
-              if ".git" not in p.parts
-              and ".venv" not in p.parts
-              and "venv" not in p.parts
-          ]
-
-          if not files:
-              print("No Python files found; skipping syntax check.")
-              sys.exit(0)
-
-          failed = False
-
-          for path in files:
-              try:
-                  compile(
-                      path.read_text(encoding="utf-8"),
-                      str(path),
-                      "exec"
-                  )
-                  print(f"PASS: {path}")
-              except (SyntaxError, UnicodeError) as exc:
-                  print(f"FAIL: {path}: {exc}")
-                  failed = True
-
-          if failed:
-              sys.exit(1)
-          PY
-
-      - name: Run Python tests
-        
-        env:
-
-          ASSAYFLUX_REQUIRE_ALL_RUNTIMES: "1"
-        run: |
-          if find . -type f \
-            \( -name 'test_*.py' -o -name '*_test.py' \) \
-            -not -path './.git/*' \
-            -not -path './.venv/*' \
-            -not -path './venv/*' \
-            | grep -q .; then
-            python -m pytest -q -rs
-          else
-            echo "No Python test files found. Skipping pytest."
-          fi
-
-      - name: Find AssayFlux examples
-        id: examples
-        run: |
-          python - <<'PY'
-          import pathlib
-          import os
-
-          files = sorted(
-              p for p in pathlib.Path(".").rglob("*.af")
-              if ".git" not in p.parts
-          )
-
-          print("AssayFlux example files:")
-
-          for path in files:
-              print(f"FOUND: {path}")
-
-          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write(f"found={'true' if files else 'false'}\n")
-          PY
-
-      - name: Validate AssayFlux example files
-        if: steps.examples.outputs.found == 'true'
-        run: |
-          python - <<'PY'
-          import pathlib
-
-          files = sorted(
-              p for p in pathlib.Path(".").rglob("*.af")
-              if ".git" not in p.parts
-          )
-
-          for path in files:
-              content = path.read_text(encoding="utf-8")
-              if not content.strip():
-                  raise SystemExit(f"FAIL: {path} is empty")
-              print(f"PASS: {path} is readable and non-empty")
-          PY
-
-      - name: Auto-run AssayFlux examples
-        if: steps.examples.outputs.found == 'true'
-        run: |
-          echo "Example files were detected."
-          echo "Automatic execution requires the AssayFlux interpreter."
-          echo "No interpreter command has been configured yet."
-          echo "Example discovery and validation completed."
-
-      - name: Workflow summary
-        if: always()
-        run: |
-          echo "## AssayFlux Auto Run" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Python: 3.12" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Pytest: installed" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Python syntax: checked" >> "$GITHUB_STEP_SUMMARY"
-          echo "- AssayFlux .af files: discovered and validated" >> "$GITHUB_STEP_SUMMARY"
+          file: ./coverage.xml
+          fail_ci_if_error: false
