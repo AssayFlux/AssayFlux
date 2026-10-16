@@ -24,3 +24,9 @@ assayflux = "assayflux.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["assayflux", "assayflux.*"]
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "mypy>=1.8",
+    "pyright>=1.1.350",
+]
