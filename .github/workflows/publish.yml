@@ -1,30 +1,168 @@
-name: Publish to PyPI
+name: Publish AssayFlux to PyPI
 
 on:
   release:
-    types: [created]
+    types:
+      - published
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assayflux-pypi-publish
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
+    name: Build and Validate Package
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # Required for PyPI trusted publishing
+    timeout-minutes: 15
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout AssayFlux
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
-      - name: Install Build Dependencies
+      - name: Upgrade packaging tools
         run: |
-          python -m pip install --upgrade pip
-          pip install build
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install build twine
 
-      - name: Build Distribution Packages
-        run: python -m build
+      - name: Verify project configuration
+        run: |
+          python - <<'PY'
+          import tomllib
+          from pathlib import Path
+          import sys
 
-      - name: Publish Package to PyPI
+          project_file = Path("pyproject.toml")
+
+          if not project_file.is_file():
+              sys.exit("ERROR: pyproject.toml is missing.")
+
+          with project_file.open("rb") as file:
+              config = tomllib.load(file)
+
+          project = config.get("project", {})
+          name = project.get("name")
+          version = project.get("version")
+          readme = project.get("readme")
+
+          print(f"Package name: {name}")
+          print(f"Package version: {version}")
+          print(f"Python requirement: {project.get('requires-python')}")
+
+          if name != "assayflux":
+              sys.exit(
+                  "ERROR: Expected project name 'assayflux'."
+              )
+
+          if not version:
+              sys.exit("ERROR: Project version is missing.")
+
+          if readme and isinstance(readme, str):
+              if not Path(readme).is_file():
+                  sys.exit(
+                      f"ERROR: Configured README file is missing: {readme}"
+                  )
+
+          if not Path("assayflux/__init__.py").is_file():
+              sys.exit(
+                  "ERROR: assayflux/__init__.py is missing."
+              )
+
+          print("Project configuration verified.")
+          PY
+
+      - name: Compile-check Python source
+        run: |
+          python -m compileall -q assayflux
+
+      - name: Build source and wheel distributions
+        run: |
+          python -m build
+
+      - name: Validate distribution metadata
+        run: |
+          python -m twine check dist/*
+
+      - name: Verify distribution files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+
+          dist = Path("dist")
+
+          if not dist.is_dir():
+              sys.exit("ERROR: dist directory was not created.")
+
+          files = sorted(
+              path for path in dist.iterdir()
+              if path.is_file()
+          )
+
+          if not files:
+              sys.exit("ERROR: No distribution files were built.")
+
+          wheels = [
+              path for path in files
+              if path.name.endswith(".whl")
+          ]
+
+          source_archives = [
+              path for path in files
+              if path.name.endswith(".tar.gz")
+          ]
+
+          for path in files:
+              print(f"{path.name}: {path.stat().st_size} bytes")
+
+          if not wheels:
+              sys.exit("ERROR: Wheel distribution is missing.")
+
+          if not source_archives:
+              sys.exit(
+                  "ERROR: Source distribution (.tar.gz) is missing."
+              )
+
+          print("Wheel and source distributions verified.")
+          PY
+
+      - name: Upload validated distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: assayflux-release-dists
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    timeout-minutes: 10
+
+    permissions:
+      id-token: write
+
+    environment:
+      name: pypi
+      url: https://pypi.org/project/assayflux/
+
+    steps:
+      - name: Download validated distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: assayflux-release-dists
+          path: dist/
+
+      - name: Publish distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
