@@ -2,11 +2,11 @@
 
 <br>
 
-<img src="assayflux-logo.png" alt="AssayFlux" width="260">
+<img src="assayflux-logo.png" alt="AssayFlux" width="450">
 
 <br><br>
 
-# AssayFlux
+#
 
 ### Programming Language & Interpreter
 
@@ -177,17 +177,3 @@ If no license has been established, clarify the licensing status before
 claiming that unrestricted reuse or redistribution is permitted.
 
 ---
-
-<div align="center">
-
-<img src="assayflux-logo.png" alt="AssayFlux" width="88">
-
-<br><br>
-
-**AssayFlux**
-
-Programming Language & Interpreter Development
-
-<br>
-
-</div>
