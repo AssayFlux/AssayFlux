@@ -1,135 +1,59 @@
 <div align="center">
 
-  <br>
+<br>
 
-  <img src="assayflux-logo.png" alt="AssayFlux" width="480">
+<img src="assayflux-logo.png" alt="AssayFlux" width="260">
 
-  <br><br>
+<br><br>
 
+# AssayFlux
 
-  <p><strong>PROGRAMMING LANGUAGE & INTERPRETER</strong></p>
+### Programming Language & Interpreter
 
-  <p>
-    A dedicated programming-language project focused on syntax,
-    interpretation, and execution.
-  </p>
-
-  <br>
-<div align="center">
-
-<strong>PROJECT</strong>&nbsp;&nbsp;&nbsp;&nbsp;
-<strong>SOURCE FORMAT</strong>&nbsp;&nbsp;&nbsp;&nbsp;
-<strong>IMPLEMENTATION</strong>
+A dedicated programming-language project built around the development
+of AssayFlux syntax, interpretation, and execution.
 
 <br>
 
-AssayFlux&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-.af&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-Python
-
-
 </div>
-  <br>
 
-  <hr>
-
-</div>
+---
 
 ## Overview
 
-AssayFlux is a programming-language project built around the development
-of a dedicated language and its interpreter.
+AssayFlux is a programming-language project with its own `.af` source
+files and an evolving interpreter implementation.
 
-The repository contains AssayFlux source examples, including programs
-covering variables, conditions, loops, functions, and input.
+The repository includes example programs covering fundamental programming
+concepts, including variables, conditions, loops, functions, and input.
 
-The objective is to develop a coherent programming environment in which
-language syntax, interpreter behavior, and testing evolve together.
+The project focuses on developing a consistent language experience,
+maintaining a testable implementation, and documenting supported behavior
+as the interpreter evolves.
 
-The implementation and its documented capabilities remain the source
-of truth for determining which features are currently supported.
+## Language Examples
 
----
+The following source files demonstrate the principal example categories
+currently associated with the project.
 
-## Language Design
-
-<table>
-  <tr>
-    <td width="50%" valign="top">
-
-**01 / VARIABLES**
-
-Working with values and variable assignments.
-
-    </td>
-    <td width="50%" valign="top">
-
-**02 / CONDITIONS**
-
-Representing conditional program logic.
-
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-
-**03 / LOOPS**
-
-Exploring repetitive program execution.
-
-    </td>
-    <td width="50%" valign="top">
-
-**04 / FUNCTIONS**
-
-Organizing programs around reusable operations.
-
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-
-**05 / INPUT**
-
-Exploring input handling in example programs.
-
-    </td>
-    <td width="50%" valign="top">
-
-**06 / INTERPRETER**
-
-Developing the machinery required to process AssayFlux programs.
-
-    </td>
-  </tr>
-</table>
-
----
-
-## Source Examples
-
-The following `.af` files demonstrate the project's example categories.
-
-| Source file | Subject |
-|:---|:---|
+| Source file | Description |
+|:--|:--|
 | `hello.af` | Introductory program |
-| `variables.af` | Variables |
+| `variables.af` | Variables and values |
 | `conditions.af` | Conditional logic |
-| `loops.af` | Loops |
+| `loops.af` | Loops and repetition |
 | `functions.af` | Functions |
-| `input.af` | Input |
+| `input.af` | Input handling |
 
-These filenames describe the examples; the actual syntax and behavior
-are defined by their source code and the interpreter implementation.
+The examples are intended to illustrate the language. Their precise
+syntax and behavior are determined by the actual source files and the
+interpreter implementation.
 
----
+## Getting Started
 
-## Working With AssayFlux
+### Explore the Source
 
-AssayFlux programs use the `.af` file extension.
-
-To explore the language, begin with the existing example files and
-examine how each program is written.
+Begin with the existing `.af` examples.
 
 ```text
 hello.af
@@ -140,162 +64,130 @@ functions.af
 input.af
 ```
 
-The correct command for executing a program depends on the interpreter's
-actual entry point and command-line interface.
+Read the examples to understand the syntax currently supported by
+AssayFlux.
 
-Consult the implementation before assuming a particular execution
-command or installation procedure.
+### Running Programs
 
----
+The execution command depends on the interpreter's actual entry point
+and command-line interface.
+
+Consult the repository's implementation and existing instructions
+before running a program. No unverified execution command is specified
+here.
 
 ## Interpreter Development
 
-An interpreter is responsible for processing source code and producing
-the corresponding program behavior.
+The interpreter is the central component responsible for processing
+AssayFlux programs and producing their runtime behavior.
 
-The development of AssayFlux can be evaluated across several areas.
+Development and verification can cover several areas:
 
-<table>
-  <tr>
-    <td width="33%" valign="top">
+- Source-code processing.
+- Language syntax and expression handling.
+- Variables and conditional execution.
+- Loop and function behavior.
+- Input and output.
+- Runtime errors and diagnostics.
+- Regression testing.
 
-**SOURCE PROCESSING**
+These areas describe the scope of interpreter development; they do not
+imply that every capability is already implemented.
 
-Reading and processing language source files.
+## Testing
 
-    </td>
-    <td width="33%" valign="top">
+Automated testing helps verify language behavior and detect regressions
+when the interpreter changes.
 
-**LANGUAGE SEMANTICS**
+The test suite should reflect the features supported by the current
+implementation.
 
-Defining the meaning and behavior of supported constructs.
+Testing priorities include:
 
-    </td>
-    <td width="34%" valign="top">
-
-**EXECUTION**
-
-Evaluating programs and handling runtime behavior.
-
-    </td>
-  </tr>
-</table>
-
-This section describes the general responsibilities of an interpreter.
-It does not assert that a particular parser architecture, execution
-engine, or runtime feature has already been implemented.
-
----
-
-## Testing and Reliability
-
-Testing helps ensure that changes to the interpreter do not unexpectedly
-alter existing language behavior.
-
-Relevant areas for verification include:
-
-- Valid and invalid source syntax.
-- Variable assignment and expression evaluation.
-- Conditional execution.
+- Valid and invalid source programs.
+- Variable assignment and expressions.
+- Conditional branches.
 - Loop behavior and termination.
-- Function-related behavior.
-- Input and output handling.
-- Runtime errors and regression testing.
+- Functions and input handling.
+- Runtime error handling.
+- Regression coverage for existing examples.
 
-Use the test framework and commands configured in the actual repository.
-No particular testing command is assumed here.
-
----
+Use the testing framework and commands configured in the repository.
 
 ## Development Principles
 
 AssayFlux development should prioritize:
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
+**Consistency**
 
-**CONSISTENCY**
+Keep syntax and runtime behavior predictable.
 
-Maintain predictable syntax and language behavior.
+**Reliability**
 
-    </td>
-    <td width="50%" valign="top">
+Verify changes against examples and automated tests.
 
-**RELIABILITY**
+**Maintainability**
 
-Verify interpreter changes against existing examples and tests.
+Keep the implementation understandable and straightforward to extend.
 
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
+**Documentation**
 
-**MAINTAINABILITY**
-
-Keep implementation changes understandable and testable.
-
-    </td>
-    <td width="50%" valign="top">
-
-**DOCUMENTATION**
-
-Describe supported features accurately and distinguish completed
-functionality from planned improvements.
-
-    </td>
-  </tr>
-</table>
-
----
+Document supported behavior accurately and distinguish implemented
+features from planned improvements.
 
 ## Project Status
 
-AssayFlux is presented here as a programming-language and interpreter
-project.
+AssayFlux is an evolving programming-language project.
 
-The availability of individual language features, installation methods,
-runtime capabilities, and development tools must be established from
-the current repository.
+The available language features, interpreter capabilities, installation
+requirements, and execution methods should be established from the
+current repository.
 
-This README intentionally avoids claiming that unverified features
-are complete.
-
----
+Documentation should reflect the implementation rather than promise
+unverified functionality.
 
 ## Contributing
 
-When working on the project:
+Contributions that improve the interpreter, examples, tests, and
+documentation can help advance the project.
 
-1. Review the existing implementation before modifying behavior.
-2. Preserve working language features where possible.
-3. Keep examples consistent with the actual interpreter.
-4. Test changes using the project's configured test suite.
-5. Update documentation when supported behavior changes.
-6. Clearly identify experimental or incomplete functionality.
+Before submitting changes:
 
----
+1. Review the existing implementation.
+2. Preserve existing behavior where possible.
+3. Add tests for new or modified functionality.
+4. Run the configured test suite.
+5. Update documentation when behavior changes.
 
 ## Security
 
-Interpreter development requires careful handling of source programs,
-runtime errors, and interactions with the host environment.
+Do not commit passwords, access tokens, private credentials, or other
+sensitive information.
 
-Do not assume that arbitrary programs are safe to execute. Security
-controls should reflect the actual capabilities and execution model
-of the implementation.
-
-Never commit private credentials, access tokens, or passwords.
-
----
+Programs executed by an interpreter should be treated according to
+the capabilities and security properties of the actual implementation.
+Do not assume that arbitrary source code is safe to execute.
 
 ## License
 
-Refer to the license file in the repository, if one is present, for the
-applicable licensing terms.
+Refer to the repository's license file, if present, for the applicable
+licensing terms.
 
-If no license has been established, do not assume that unrestricted
-redistribution or reuse is permitted.
+If no license has been established, clarify the licensing status before
+claiming that unrestricted reuse or redistribution is permitted.
 
 ---
 
+<div align="center">
+
+<img src="assayflux-logo.png" alt="AssayFlux" width="88">
+
+<br><br>
+
+**AssayFlux**
+
+Programming Language & Interpreter Development
+
+<br>
+
+</div>
