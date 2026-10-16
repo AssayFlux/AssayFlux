@@ -21,8 +21,7 @@
 <tr>
 <td align="center">
 
-<table>
-<tr>
+
 <td align="center" valign="middle">
 <sub>PROJECT</sub><br>
 <strong>AssayFlux</strong>
@@ -35,8 +34,7 @@
 <sub>IMPLEMENTATION</sub><br>
 <strong>Python</strong>
 </td>
-</tr>
-</table>
+
 
 </td>
 </tr>
