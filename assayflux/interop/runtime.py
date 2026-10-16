@@ -1,39 +1,25 @@
-"""Unified execution interface for AssayFlux language adapters."""
+class InteropRuntimeRegistry:
+    """Manages secure cross-language execution and runtime adapters with type checking."""
+    def __init__(self):
+        self._registry = {}
 
-from assayflux.interop.base import ExecutionResult
-from assayflux.interop.loader import get_adapter
+    def register(self, language: str, handler: callable):
+        """Registers a foreign language handler with callable verification."""
+        if not callable(handler):
+            raise TypeError(f"Handler for '{language}' must be a callable function.")
+        self._registry[language.lower()] = handler
 
-
-def execute_code(
-    language: str,
-    source: str,
-    *,
-    timeout: float = 10.0,
-) -> ExecutionResult:
-    """Execute source code using the Universal Adapter."""
-    if not isinstance(language, str) or not language.strip():
-        raise ValueError("Language must be a non-empty string.")
-
-    if not isinstance(source, str):
-        raise ValueError("Source code must be a string.")
-
-    if not source.strip():
-        raise ValueError("Source code must not be empty.")
-
-    adapter = get_adapter(language)
-
-    # UniversalAdapter needs the language name
-    return adapter.execute(source, language=language, timeout=timeout)
-
-
-def dispatch(
-    language: str,
-    source: str,
-    *,
-    timeout: float = 10.0,
-) -> ExecutionResult:
-    """Dispatch source code to the selected language via Universal Adapter."""
-    return execute_code(language, source, timeout=timeout)
-
-
-__all__ = ["execute_code", "dispatch", "ExecutionResult"]
+    def execute(self, language: str, payload: dict):
+        """Executes foreign code payload with strict type validation."""
+        lang = language.lower()
+        if lang not in self._registry:
+            raise KeyError(f"Unsupported interoperability language target: '{language}'")
+        
+        if not isinstance(payload, dict):
+            raise TypeError("Interop execution payload must be formatted as a dictionary.")
+            
+        handler = self._registry[lang]
+        try:
+            return handler(payload)
+        except Exception as e:
+            raise RuntimeError(f"Error executing interop for '{language}': {e}")
