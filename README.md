@@ -15,10 +15,10 @@
   </p>
 
   <br>
+<div align="center">
 
-  <table>
+  <table align="center">
     <tr>
-     <div align="center">
       <td align="center">
         <sub>PROJECT</sub><br>
         <strong>AssayFlux</strong>
@@ -31,10 +31,10 @@
         <sub>IMPLEMENTATION</sub><br>
         <strong>Python</strong>
       </td>
-    <div align="center">
     </tr>
   </table>
 
+</div>
   <br>
 
   <hr>
