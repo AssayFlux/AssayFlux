@@ -1,12 +1,12 @@
 """
 Language adapter registry for AssayFlux.
 
-The registry provides a central location for registering and
-retrieving language adapters without coupling the interpreter
-to individual language implementations.
+Central place to register and retrieve language adapters.
+Currently designed to work with the single Universal Adapter.
 """
 
 from threading import RLock
+from typing import Tuple
 
 from assayflux.interop.base import LanguageAdapter
 
@@ -43,9 +43,7 @@ class AdapterRegistry:
         Duplicate registrations are rejected unless replace=True.
         """
         if not isinstance(adapter, LanguageAdapter):
-            raise TypeError(
-                "Adapter must be an instance of LanguageAdapter."
-            )
+            raise TypeError("Adapter must be an instance of LanguageAdapter.")
 
         if not isinstance(replace, bool):
             raise ValueError("replace must be a boolean.")
@@ -57,7 +55,6 @@ class AdapterRegistry:
                 raise ValueError(
                     f"An adapter for '{language}' is already registered."
                 )
-
             self._adapters[language] = adapter
 
     def get(self, language: str) -> LanguageAdapter:
@@ -68,9 +65,7 @@ class AdapterRegistry:
             adapter = self._adapters.get(normalized)
 
         if adapter is None:
-            raise KeyError(
-                f"No adapter registered for language '{normalized}'."
-            )
+            raise KeyError(f"No adapter registered for language '{normalized}'.")
 
         return adapter
 
@@ -81,7 +76,7 @@ class AdapterRegistry:
         with self._lock:
             return normalized in self._adapters
 
-    def available_languages(self) -> tuple[str, ...]:
+    def available_languages(self) -> Tuple[str, ...]:
         """
         Return the sorted identifiers of registered adapters
         whose required runtimes are currently available.
@@ -90,19 +85,16 @@ class AdapterRegistry:
             adapters = tuple(self._adapters.items())
 
         available = []
-
         for language, adapter in adapters:
             try:
                 if adapter.is_available():
                     available.append(language)
             except Exception:
-                # An adapter that cannot verify availability should
-                # not be advertised as currently available.
                 continue
 
         return tuple(sorted(available))
 
-    def registered_languages(self) -> tuple[str, ...]:
+    def registered_languages(self) -> Tuple[str, ...]:
         """Return every registered language identifier."""
         with self._lock:
             return tuple(sorted(self._adapters))
