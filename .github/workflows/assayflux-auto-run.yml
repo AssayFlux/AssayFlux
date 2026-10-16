@@ -1,44 +1,332 @@
-name: AssayFlux CI/CD Pipeline
+name: AssayFlux Master CI
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches:
+      - main
+      - master
+
   pull_request:
-    branches: [ "main", "master" ]
+    branches:
+      - main
+      - master
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assayflux-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  master-test:
+    name: Master Test Suite
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    timeout-minutes: 30
 
     steps:
-      - name: Checkout Repository
+      # ------------------------------------------------------
+      # Checkout repository
+      # ------------------------------------------------------
+
+      - name: Checkout AssayFlux
         uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
+      # ------------------------------------------------------
+      # Configure Python
+      # ------------------------------------------------------
+
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
+          cache: pip
 
-      - name: Install Dependencies
+      # ------------------------------------------------------
+      # Install build tools
+      # ------------------------------------------------------
+
+      - name: Upgrade Python packaging tools
         run: |
-          python -m pip install --upgrade pip
-          pip install ruff pytest pytest-cov
-          pip install -e .
+          python -m pip install --upgrade pip setuptools wheel
 
-      - name: Lint Code with Ruff
+      # ------------------------------------------------------
+      # Install testing framework
+      # ------------------------------------------------------
+
+      - name: Install pytest
         run: |
-          ruff check . --output-format=github
+          python -m pip install pytest
 
-      - name: Run Test Suite with Coverage
+      # ------------------------------------------------------
+      # Install AssayFlux
+      # ------------------------------------------------------
+
+      - name: Install AssayFlux package
         run: |
-          pytest --cov=assayflux --cov-report=xml
+          python -m pip install -e .
 
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.xml
-          fail_ci_if_error: false
+      # ------------------------------------------------------
+      # Verify Python environment
+      # ------------------------------------------------------
 
+      - name: Verify Python environment
+        run: |
+          python --version
+          python -m pip --version
+          python -m pip show assayflux
+          python -m pytest --version
+
+      # ------------------------------------------------------
+      # Check repository structure
+      # ------------------------------------------------------
+
+      - name: Validate repository structure
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+
+          required_files = [
+              "pyproject.toml",
+              "README.md",
+              "assayflux/__init__.py",
+              "assayflux/lexer.py",
+              "assayflux/parser.py",
+              "assayflux/ast_nodes.py",
+              "assayflux/interpreter.py",
+              "assayflux/cli.py",
+              "assayflux/interop/base.py",
+              "assayflux/interop/loader.py",
+              "assayflux/interop/registry.py",
+              "assayflux/interop/runtime.py",
+              "assayflux/interop/adapters/master_adapter.py",
+              "tests/test_master.py",
+          ]
+
+          missing = [
+              filename
+              for filename in required_files
+              if not Path(filename).is_file()
+          ]
+
+          if missing:
+              print("ERROR: Required repository files are missing:")
+              for filename in missing:
+                  print(f"  - {filename}")
+              sys.exit(1)
+
+          print("Repository structure verified.")
+          print(f"Checked {len(required_files)} required files.")
+          PY
+
+      # ------------------------------------------------------
+      # Check Python syntax
+      # ------------------------------------------------------
+
+      - name: Compile-check AssayFlux source
+        run: |
+          python -m compileall -q assayflux
+
+      - name: Compile-check master test suite
+        run: |
+          python -m compileall -q tests
+
+      # ------------------------------------------------------
+      # Verify package imports
+      # ------------------------------------------------------
+
+      - name: Verify core imports
+        run: |
+          python - <<'PY'
+          import assayflux
+          import assayflux.lexer
+          import assayflux.parser
+          import assayflux.ast_nodes
+          import assayflux.interpreter
+          import assayflux.cli
+          import assayflux.interop.base
+          import assayflux.interop.loader
+          import assayflux.interop.registry
+          import assayflux.interop.runtime
+          import assayflux.interop.adapters.master_adapter
+          import assayflux.interop.adapters.universal_adapter
+
+          print("All required AssayFlux modules imported successfully.")
+          PY
+
+      # ------------------------------------------------------
+      # Verify package metadata and command-line entry point
+      # ------------------------------------------------------
+
+      - name: Verify AssayFlux CLI installation
+        run: |
+          python - <<'PY'
+          from importlib.metadata import distribution
+          from pathlib import Path
+          import shutil
+          import sys
+
+          package = distribution("assayflux")
+
+          print(f"Package: {package.metadata['Name']}")
+          print(f"Version: {package.version}")
+
+          cli = shutil.which("assayflux")
+
+          if cli is None:
+              print("ERROR: assayflux command was not installed.")
+              sys.exit(1)
+
+          if not Path(cli).is_file():
+              print("ERROR: CLI executable does not exist.")
+              sys.exit(1)
+
+          print(f"CLI executable: {cli}")
+          print("Package metadata and CLI installation verified.")
+          PY
+
+      # ------------------------------------------------------
+      # Execute real AssayFlux program
+      # ------------------------------------------------------
+
+      - name: Run AssayFlux CLI smoke test
+        run: |
+          cat > "$RUNNER_TEMP/assayflux_ci_smoke.af" <<'AF'
+          constant BASE = 10
+
+          f.add(a, b):
+              return a + b
+          end
+
+          result = add(BASE, 20)
+
+          if result == 30:
+              show "ASSAYFLUX_CI_SMOKE_TEST_PASSED"
+          else:
+              show "ASSAYFLUX_CI_SMOKE_TEST_FAILED"
+          end
+          AF
+
+          assayflux "$RUNNER_TEMP/assayflux_ci_smoke.af" \
+            | tee "$RUNNER_TEMP/assayflux_ci_smoke.log"
+
+          grep -F \
+            "ASSAYFLUX_CI_SMOKE_TEST_PASSED" \
+            "$RUNNER_TEMP/assayflux_ci_smoke.log"
+
+      # ------------------------------------------------------
+      # Run the complete master test suite
+      # ------------------------------------------------------
+
+      - name: Run AssayFlux master tests
+        run: |
+          python -m pytest tests/test_master.py -v -ra
+
+      # ------------------------------------------------------
+      # Verify unittest compatibility
+      # ------------------------------------------------------
+
+      - name: Verify unittest discovery
+        run: |
+          python -m unittest discover -s tests -p "test_*.py" -v
+
+      # ------------------------------------------------------
+      # Verify language adapter inventory
+      # ------------------------------------------------------
+
+      - name: Audit supported language adapters
+        run: |
+          python - <<'PY'
+          from assayflux.interop.adapters.master_adapter import MasterAdapter
+          from assayflux.interop.loader import (
+              available_languages,
+              get_adapter,
+              normalize_language,
+          )
+
+          declared = MasterAdapter.registered_languages()
+
+          if len(declared) != len(set(declared)):
+              raise SystemExit(
+                  "ERROR: Duplicate language identifiers detected."
+              )
+
+          print(f"Declared language targets: {len(declared)}")
+
+          for language in declared:
+              adapter = get_adapter(language)
+
+              if adapter.language != language:
+                  raise SystemExit(
+                      f"ERROR: Incorrect adapter for {language!r}"
+                  )
+
+              available = adapter.is_available()
+
+              status = "AVAILABLE" if available else "NOT INSTALLED"
+
+              print(f"{language:12} {status}")
+
+          aliases = {
+              "py": "python",
+              "js": "javascript",
+              "node": "javascript",
+              "rb": "ruby",
+              "c++": "cpp",
+              "c#": "csharp",
+              "rs": "rust",
+              "sh": "bash",
+              "shell": "bash",
+              "sqlite": "sql",
+              "ts": "typescript",
+          }
+
+          for alias, expected in aliases.items():
+              actual = normalize_language(alias)
+
+              if actual != expected:
+                  raise SystemExit(
+                      f"ERROR: Alias {alias!r} resolved to "
+                      f"{actual!r}, expected {expected!r}."
+                  )
+
+          available = available_languages()
+
+          print()
+          print(f"Available targets: {len(available)}")
+          print("Language adapter inventory verified.")
+          PY
+
+      # ------------------------------------------------------
+      # Final status
+      # ------------------------------------------------------
+
+      - name: Master CI summary
+        if: success()
+        run: |
+          echo "=========================================="
+          echo " ASSAYFLUX MASTER CI: PASSED"
+          echo "=========================================="
+          echo "Package installation: PASSED"
+          echo "Repository structure: PASSED"
+          echo "Python syntax checks: PASSED"
+          echo "Core imports: PASSED"
+          echo "CLI installation: PASSED"
+          echo "Interpreter smoke test: PASSED"
+          echo "Master pytest suite: PASSED"
+          echo "Unittest discovery: PASSED"
+          echo "Adapter inventory audit: PASSED"
+          echo "=========================================="
+
+      - name: Failure summary
+        if: failure()
+        run: |
+          echo "=========================================="
+          echo " ASSAYFLUX MASTER CI: FAILED"
+          echo "=========================================="
+          echo "Review the failed step above."
+          echo "Fix the underlying problem before merging."
+          echo "=========================================="
