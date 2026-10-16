@@ -15,29 +15,18 @@
   </p>
 
   <br>
+<div align="center">
 
-<table>
-<tr>
-<td align="center">
+<strong>PROJECT</strong>&nbsp;&nbsp;&nbsp;&nbsp;
+<strong>SOURCE FORMAT</strong>&nbsp;&nbsp;&nbsp;&nbsp;
+<strong>IMPLEMENTATION</strong>
 
+<br>
 
-<td align="center" valign="middle">
-<sub>PROJECT</sub><br>
-<strong>AssayFlux</strong>
-</td>
-<td align="center" valign="middle">
-<sub>SOURCE FORMAT</sub><br>
-<strong>.af</strong>
-</td>
-<td align="center" valign="middle">
-<sub>IMPLEMENTATION</sub><br>
-<strong>Python</strong>
-</td>
+AssayFlux&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.af&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Python
 
-
-</td>
-</tr>
-</table>
 
 </div>
   <br>
