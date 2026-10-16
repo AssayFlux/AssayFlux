@@ -4,15 +4,15 @@ Abstract Syntax Tree (AST) Nodes
 
 AST nodes represent the structure of AssayFlux programs.
 
-Version: 0.2.0
+Version: 0.3.0
 """
 
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional
 
 
 # ============================================================
-# Base Node
+# Base Nodes
 # ============================================================
 
 @dataclass
@@ -25,12 +25,12 @@ class ASTNode:
 
 @dataclass
 class Expression(ASTNode):
-    """Base class for expression nodes."""
+    """Base class for expressions."""
 
 
 @dataclass
 class Statement(ASTNode):
-    """Base class for statement nodes."""
+    """Base class for statements."""
 
 
 # ============================================================
@@ -39,7 +39,7 @@ class Statement(ASTNode):
 
 @dataclass
 class Program(ASTNode):
-    """Represents a complete AssayFlux program."""
+    """A complete AssayFlux program."""
 
     statements: List[Statement] = field(default_factory=list)
 
@@ -50,46 +50,54 @@ class Program(ASTNode):
 
 @dataclass
 class NumberLiteral(Expression):
-    """Represents an integer or floating-point literal."""
+    """An integer or floating-point literal."""
 
     value: Any = 0
 
 
 @dataclass
 class StringLiteral(Expression):
-    """Represents a string literal."""
+    """A string literal."""
 
     value: str = ""
 
 
 @dataclass
 class BooleanLiteral(Expression):
-    """Represents true or false."""
+    """A Boolean literal."""
 
     value: bool = False
 
 
 @dataclass
 class NoneLiteral(Expression):
-    """Represents an absent value, if supported by the language."""
+    """An absent value."""
 
     value: None = None
 
 
 # ============================================================
-# Variables
+# Variables and Declarations
 # ============================================================
 
 @dataclass
 class Identifier(Expression):
-    """Represents a variable or identifier name."""
+    """A variable or identifier."""
 
     name: str = ""
 
 
 @dataclass
 class Assignment(Statement):
-    """Represents a variable assignment."""
+    """An assignment to a variable."""
+
+    name: str = ""
+    value: Optional[Expression] = None
+
+
+@dataclass
+class ConstantDeclaration(Statement):
+    """A declaration of a constant value."""
 
     name: str = ""
     value: Optional[Expression] = None
@@ -97,24 +105,16 @@ class Assignment(Statement):
 
 @dataclass
 class AppDeclaration(Statement):
-    """Declares application metadata using app "Name"."""
+    """Application metadata declared using app "Name"."""
 
     name: str = ""
 
 
 @dataclass
 class ExpressionStatement(Statement):
-    """Evaluates an expression for its side effects."""
+    """An expression evaluated for its side effects."""
 
     expression: Optional[Expression] = None
-
-
-@dataclass
-class ConstantDeclaration(Statement):
-    """Represents a constant declaration."""
-
-    name: str = ""
-    value: Optional[Expression] = None
 
 
 # ============================================================
@@ -123,7 +123,7 @@ class ConstantDeclaration(Statement):
 
 @dataclass
 class BinaryOperation(Expression):
-    """Represents a binary operation such as a + b."""
+    """A binary operation, such as a + b."""
 
     left: Optional[Expression] = None
     operator: str = ""
@@ -132,7 +132,7 @@ class BinaryOperation(Expression):
 
 @dataclass
 class UnaryOperation(Expression):
-    """Represents a unary operation such as -value."""
+    """A unary operation, such as -value."""
 
     operator: str = ""
     operand: Optional[Expression] = None
@@ -140,7 +140,7 @@ class UnaryOperation(Expression):
 
 @dataclass
 class FunctionCall(Expression):
-    """Represents a function call."""
+    """A function call."""
 
     name: str = ""
     arguments: List[Expression] = field(default_factory=list)
@@ -148,7 +148,7 @@ class FunctionCall(Expression):
 
 @dataclass
 class MemberAccess(Expression):
-    """Represents member access such as module.function."""
+    """Member access, such as math.sqrt."""
 
     object: Optional[Expression] = None
     member: str = ""
@@ -160,7 +160,7 @@ class MemberAccess(Expression):
 
 @dataclass
 class ShowStatement(Statement):
-    """Represents the AssayFlux show statement."""
+    """A statement that displays a value."""
 
     value: Optional[Expression] = None
 
@@ -171,7 +171,7 @@ class ShowStatement(Statement):
 
 @dataclass
 class ConditionalBranch(ASTNode):
-    """Represents one condition and its statements."""
+    """A conditional branch and its statements."""
 
     condition: Optional[Expression] = None
     statements: List[Statement] = field(default_factory=list)
@@ -179,7 +179,7 @@ class ConditionalBranch(ASTNode):
 
 @dataclass
 class IfStatement(Statement):
-    """Represents if, otherwise, and else branches."""
+    """An if/otherwise/else statement."""
 
     condition: Optional[Expression] = None
 
@@ -198,20 +198,41 @@ class IfStatement(Statement):
 
 @dataclass
 class RepeatStatement(Statement):
-    """Represents a condition-controlled repeat loop."""
+    """
+    Represents an AssayFlux repeat loop.
+
+    Supported modes will include:
+
+    condition:
+        Repeat while the condition evaluates to true.
+
+    count:
+        Repeat a specified number of times.
+
+    forever:
+        Repeat until stopped or interrupted.
+
+    The parser and interpreter will validate and implement
+    the selected mode.
+    """
 
     condition: Optional[Expression] = None
+
     body: List[Statement] = field(default_factory=list)
+
+    mode: str = "condition"
+
+    count: Optional[Expression] = None
 
 
 @dataclass
 class StopStatement(Statement):
-    """Represents stop, which exits the nearest enclosing loop."""
+    """Exit the nearest enclosing repeat loop."""
 
 
 @dataclass
 class SkipStatement(Statement):
-    """Represents skip, which advances the nearest enclosing loop."""
+    """Skip to the next iteration of the nearest repeat loop."""
 
 
 # ============================================================
@@ -220,16 +241,18 @@ class SkipStatement(Statement):
 
 @dataclass
 class FunctionDefinition(Statement):
-    """Represents a function definition such as f.add(a, b)."""
+    """A function declaration, such as f.add(a, b)."""
 
     name: str = ""
+
     parameters: List[str] = field(default_factory=list)
+
     body: List[Statement] = field(default_factory=list)
 
 
 @dataclass
 class ReturnStatement(Statement):
-    """Represents a return statement."""
+    """Return a value from a function."""
 
     value: Optional[Expression] = None
 
@@ -240,9 +263,10 @@ class ReturnStatement(Statement):
 
 @dataclass
 class ImportStatement(Statement):
-    """Represents a module import."""
+    """Import a Python module."""
 
     module_name: str = ""
+
     alias: Optional[str] = None
 
 
@@ -252,7 +276,7 @@ class ImportStatement(Statement):
 
 @dataclass
 class ErrorNode(ASTNode):
-    """Represents an error recovered during parsing."""
+    """An error recovered during parsing."""
 
     message: str = ""
 
