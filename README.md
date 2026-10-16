@@ -1,35 +1,40 @@
 <div align="center">
 
-  <img src="assayflux-logo.png" alt="AssayFlux Logo" width="120">
+  <br>
+
+  <img src="assayflux-logo.png" alt="AssayFlux" width="240">
 
   <br><br>
 
-  <h1>AssayFlux</h1>
+  <h1>ASSAYFLUX</h1>
 
-  <p><strong>A Modern Programming Language</strong></p>
+  <p><strong>PROGRAMMING LANGUAGE & INTERPRETER</strong></p>
 
   <p>
-    Designed for clarity. Built for extensibility. Powered by Python.
+    A dedicated programming-language project focused on syntax,
+    interpretation, and execution.
   </p>
 
   <br>
 
-  <p>
-    <a href="#overview">Overview</a> ·
-    <a href="#features">Features</a> ·
-    <a href="#quick-start">Quick Start</a> ·
-    <a href="#examples">Examples</a> ·
-    <a href="#development">Development</a>
-  </p>
+  <table>
+    <tr>
+      <td align="center">
+        <sub>PROJECT</sub><br>
+        <strong>AssayFlux</strong>
+      </td>
+      <td align="center">
+        <sub>SOURCE FORMAT</sub><br>
+        <strong>.af</strong>
+      </td>
+      <td align="center">
+        <sub>IMPLEMENTATION</sub><br>
+        <strong>Python</strong>
+      </td>
+    </tr>
+  </table>
 
   <br>
-
-  <img src="https://img.shields.io/badge/Language-AssayFlux-6D597A?style=flat-square" alt="AssayFlux">
-  <img src="https://img.shields.io/badge/Runtime-Python-718096?style=flat-square" alt="Python">
-  <img src="https://img.shields.io/badge/Status-Experimental-B08968?style=flat-square" alt="Experimental">
-  <img src="https://img.shields.io/badge/Platform-Cross--Platform-70877A?style=flat-square" alt="Cross-platform">
-
-  <br><br>
 
   <hr>
 
@@ -37,106 +42,99 @@
 
 ## Overview
 
-**AssayFlux** is an experimental programming-language project focused on readable syntax, structured execution, and extensibility.
+AssayFlux is a programming-language project built around the development
+of a dedicated language and its interpreter.
 
-Built around a Python-based development environment, AssayFlux aims to establish a dedicated language experience with its own source files, language constructs, examples, and testing infrastructure.
+The repository contains AssayFlux source examples, including programs
+covering variables, conditions, loops, functions, and input.
 
-The project brings together language design and practical implementation in a foundation intended to evolve alongside its interpreter.
+The objective is to develop a coherent programming environment in which
+language syntax, interpreter behavior, and testing evolve together.
 
-<div align="center">
-
-| LANGUAGE DESIGN | INTERPRETER | DEVELOPER TOOLS |
-|:---:|:---:|:---:|
-| Readable syntax | Structured execution | Automated testing |
-| Language constructs | Expression evaluation | Development workflows |
-| Extensible design | Runtime evolution | Continuous integration |
-
-</div>
+The implementation and its documented capabilities remain the source
+of truth for determining which features are currently supported.
 
 ---
 
-## Features
+## Language Design
 
 <table>
-<tr>
-<td width="50%" valign="top">
+  <tr>
+    <td width="50%" valign="top">
 
-### Language Design
+**01 / VARIABLES**
 
-A dedicated programming-language syntax built around readability and structured code.
+Working with values and variable assignments.
 
-- Variables and expressions
-- Conditional statements
-- Loops and control flow
-- Function-related constructs
-- Dedicated `.af` source files
+    </td>
+    <td width="50%" valign="top">
 
-</td>
-<td width="50%" valign="top">
+**02 / CONDITIONS**
 
-### Interpreter Development
+Representing conditional program logic.
 
-An evolving interpreter designed to process and execute AssayFlux programs.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
 
-- Source-code processing
-- Expression evaluation
-- Runtime execution
-- Language feature expansion
-- Error handling development
+**03 / LOOPS**
 
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
+Exploring repetitive program execution.
 
-### Python Foundation
+    </td>
+    <td width="50%" valign="top">
 
-Python provides the implementation environment for developing the language.
+**04 / FUNCTIONS**
 
-- Python-based runtime
-- Access to Python development tools
-- Extensible implementation
-- Familiar development environment
+Organizing programs around reusable operations.
 
-</td>
-<td width="50%" valign="top">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
 
-### Engineering Workflow
+**05 / INPUT**
 
-Development resources designed to support reliable improvements.
+Exploring input handling in example programs.
 
-- Example programs
-- Automated test suite
-- Structured project organization
-- GitHub-based development
-- Continuous integration workflows
+    </td>
+    <td width="50%" valign="top">
 
-</td>
-</tr>
+**06 / INTERPRETER**
+
+Developing the machinery required to process AssayFlux programs.
+
+    </td>
+  </tr>
 </table>
-
-> **Project status:** AssayFlux is experimental. Features described here represent the project's intended scope; actual availability depends on the current implementation.
 
 ---
 
-## Quick Start
+## Source Examples
 
-### 1. Requirements
+The following `.af` files demonstrate the project's example categories.
 
-- Python installed and available from the command line.
-- Git for cloning the repository.
-- Project dependencies installed according to the repository configuration.
+| Source file | Subject |
+|:---|:---|
+| `hello.af` | Introductory program |
+| `variables.af` | Variables |
+| `conditions.af` | Conditional logic |
+| `loops.af` | Loops |
+| `functions.af` | Functions |
+| `input.af` | Input |
 
-### 2. Clone the Repository
+These filenames describe the examples; the actual syntax and behavior
+are defined by their source code and the interpreter implementation.
 
-```bash
-git clone https://github.com/mdsafarujjaman/AssayFlux.git
-cd AssayFlux
-```
+---
 
-### 3. Explore the Examples
+## Working With AssayFlux
 
-Start by examining the available `.af` source files.
+AssayFlux programs use the `.af` file extension.
+
+To explore the language, begin with the existing example files and
+examine how each program is written.
 
 ```text
 hello.af
@@ -147,395 +145,182 @@ functions.af
 input.af
 ```
 
-### 4. Run a Program
+The correct command for executing a program depends on the interpreter's
+actual entry point and command-line interface.
 
-The exact execution command depends on the interpreter's implemented command-line interface.
-
-Once the appropriate entry point is configured, a program should be executable through the project's interpreter.
-
-For example, the following illustrates a possible command format, not a verified command supported by every version:
-
-```bash
-python run.py examples/hello.af
-```
-
-Check the actual entry point and usage instructions in the repository before running this command.
+Consult the implementation before assuming a particular execution
+command or installation procedure.
 
 ---
 
-## Language Design
+## Interpreter Development
 
-AssayFlux uses the `.af` extension for its example source files.
+An interpreter is responsible for processing source code and producing
+the corresponding program behavior.
 
-The examples cover foundational programming concepts and provide a starting point for understanding the language's syntax.
-
-### Hello World
-
-```text
-print("Hello, AssayFlux!")
-```
-
-### Variables
-
-```text
-name = "AssayFlux"
-version = 1
-
-print(name)
-print(version)
-```
-
-### Conditional Logic
-
-```text
-if temperature > 30:
-    print("High temperature")
-else:
-    print("Normal temperature")
-```
-
-### Loops
-
-```text
-for i in range(5):
-    print(i)
-```
-
-### Functions
-
-```text
-function greet(name):
-    print("Hello", name)
-```
-
-### Input
-
-```text
-name = input("Enter your name: ")
-print("Hello", name)
-```
-
-**Important:** These snippets illustrate familiar programming-language constructs. Their precise syntax and behavior must match the current AssayFlux parser and interpreter implementation.
-
----
-
-## Examples
-
-The project includes example programs intended to demonstrate individual language concepts.
-
-| File | Purpose |
-|---|---|
-| `hello.af` | Basic program structure and output |
-| `variables.af` | Variable assignment and values |
-| `conditions.af` | Conditional execution |
-| `loops.af` | Repeated execution |
-| `functions.af` | Function-related language constructs |
-| `input.af` | Input handling |
-
-Examples should remain consistent with the syntax supported by the current interpreter.
-
----
-
-## Interpreter Architecture
-
-The interpreter is the core component responsible for translating AssayFlux source code into program behavior.
-
-Its implementation may be developed through several logical stages.
+The development of AssayFlux can be evaluated across several areas.
 
 <table>
-<tr>
-<td width="25%" align="center" valign="top">
+  <tr>
+    <td width="33%" valign="top">
 
-**01**
+**SOURCE PROCESSING**
 
-### Source
+Reading and processing language source files.
 
-Read `.af` files and obtain program text.
+    </td>
+    <td width="33%" valign="top">
 
-</td>
-<td width="25%" align="center" valign="top">
+**LANGUAGE SEMANTICS**
 
-**02**
+Defining the meaning and behavior of supported constructs.
 
-### Parse
+    </td>
+    <td width="34%" valign="top">
 
-Recognize supported syntax and language constructs.
+**EXECUTION**
 
-</td>
-<td width="25%" align="center" valign="top">
+Evaluating programs and handling runtime behavior.
 
-**03**
-
-### Evaluate
-
-Process expressions and statements.
-
-</td>
-<td width="25%" align="center" valign="top">
-
-**04**
-
-### Execute
-
-Produce program output and runtime behavior.
-
-</td>
-</tr>
+    </td>
+  </tr>
 </table>
 
-This describes a conceptual interpreter pipeline. The actual architecture depends on the implementation currently present in the repository.
+This section describes the general responsibilities of an interpreter.
+It does not assert that a particular parser architecture, execution
+engine, or runtime feature has already been implemented.
 
 ---
 
-## Project Structure
+## Testing and Reliability
 
-The following illustrates a possible organization for the project. Use the actual repository structure as the source of truth.
+Testing helps ensure that changes to the interpreter do not unexpectedly
+alter existing language behavior.
 
-```text
-AssayFlux/
-├── README.md
-├── pyproject.toml
-├── run.py
-├── assayflux/
-│   └── Interpreter implementation
-├── examples/
-│   ├── hello.af
-│   ├── variables.af
-│   ├── conditions.af
-│   ├── loops.af
-│   ├── functions.af
-│   └── input.af
-├── tests/
-│   └── Automated tests
-├── DOCS/
-│   └── Documentation
-└── .github/
-    └── workflows/
-        └── Continuous integration
-```
+Relevant areas for verification include:
 
-Directory names and entry-point filenames should be adjusted to match the files that actually exist in the repository.
+- Valid and invalid source syntax.
+- Variable assignment and expression evaluation.
+- Conditional execution.
+- Loop behavior and termination.
+- Function-related behavior.
+- Input and output handling.
+- Runtime errors and regression testing.
+
+Use the test framework and commands configured in the actual repository.
+No particular testing command is assumed here.
 
 ---
 
-## Development
+## Development Principles
 
-AssayFlux is an evolving language implementation. Development should prioritize correctness, predictable behavior, readable syntax, and maintainable architecture.
-
-### Development Principles
-
-- Keep language syntax consistent.
-- Maintain clear separation between parsing and execution where appropriate.
-- Provide meaningful errors for invalid programs.
-- Test language behavior as features are introduced.
-- Preserve compatibility with existing examples.
-- Document changes to syntax and runtime behavior.
-
-### Local Environment
-
-If the repository includes a compatible Python packaging configuration, create an isolated environment:
-
-```bash
-python -m venv .venv
-```
-
-Activate it on Linux or macOS:
-
-```bash
-source .venv/bin/activate
-```
-
-On Windows:
-
-```powershell
-.venv\Scripts\activate
-```
-
-Install development dependencies according to the project's configuration.
-
-If editable installation is supported, the following command may be used:
-
-```bash
-python -m pip install -e .
-```
-
-Do not use this installation command unless the repository defines the required packaging configuration.
-
----
-
-## Testing and Quality Assurance
-
-Testing is essential to ensuring that language features behave consistently as the interpreter evolves.
-
-### Run Tests
-
-If the repository uses `pytest`, execute:
-
-```bash
-python -m pytest
-```
-
-If `pytest` is missing, install it in the active development environment:
-
-```bash
-python -m pip install pytest
-```
-
-### Testing Priorities
-
-| Area | Objective |
-|---|---|
-| Syntax | Verify valid and invalid source programs |
-| Variables | Check assignment and value handling |
-| Conditions | Verify conditional branches |
-| Loops | Check repetition and termination |
-| Functions | Validate supported function behavior |
-| Input and output | Verify user interaction |
-| Runtime errors | Ensure failures are handled clearly |
-| Regression | Prevent previously working behavior from breaking |
-
-The actual test suite should reflect the language features currently implemented.
-
----
-
-## Continuous Integration
-
-GitHub Actions can automate testing whenever changes are pushed to the repository or a pull request is opened.
-
-A suitable workflow can:
-
-1. Check out the repository.
-2. Set up a compatible Python version.
-3. Install project dependencies.
-4. Run automated tests.
-5. Report the result through GitHub Actions.
-
-The workflow must use the repository's actual dependency configuration and test commands.
-
-A successful workflow indicates that the configured checks passed; it does not independently establish that every language feature is correct.
-
----
-
-## Development Roadmap
-
-The roadmap outlines potential areas of continued development.
+AssayFlux development should prioritize:
 
 <table>
-<tr>
-<td width="33%" valign="top">
+  <tr>
+    <td width="50%" valign="top">
 
-### 01 — Language
+**CONSISTENCY**
 
-- Refine language syntax
-- Expand supported constructs
-- Improve expression handling
-- Strengthen consistency
+Maintain predictable syntax and language behavior.
 
-</td>
-<td width="33%" valign="top">
+    </td>
+    <td width="50%" valign="top">
 
-### 02 — Runtime
+**RELIABILITY**
 
-- Improve interpreter reliability
-- Strengthen error reporting
-- Expand automated tests
-- Improve execution behavior
+Verify interpreter changes against existing examples and tests.
 
-</td>
-<td width="33%" valign="top">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
 
-### 03 — Ecosystem
+**MAINTAINABILITY**
 
-- Improve developer tooling
-- Expand documentation
-- Automate quality checks
-- Improve installation workflows
+Keep implementation changes understandable and testable.
 
-</td>
-</tr>
+    </td>
+    <td width="50%" valign="top">
+
+**DOCUMENTATION**
+
+Describe supported features accurately and distinguish completed
+functionality from planned improvements.
+
+    </td>
+  </tr>
 </table>
 
-These are development directions, not commitments that every item is already implemented or available.
+---
+
+## Project Status
+
+AssayFlux is presented here as a programming-language and interpreter
+project.
+
+The availability of individual language features, installation methods,
+runtime capabilities, and development tools must be established from
+the current repository.
+
+This README intentionally avoids claiming that unverified features
+are complete.
 
 ---
 
 ## Contributing
 
-Contributions that improve implementation quality, documentation, testing, and language design are welcome.
+When working on the project:
 
-Before proposing changes:
-
-1. Review the existing source code and project structure.
-2. Understand the current language behavior.
-3. Keep changes focused and maintainable.
-4. Add tests for new or modified functionality.
-5. Run the relevant test suite.
-6. Document any changes that affect the language syntax or behavior.
-
-Changes should preserve existing functionality unless a deliberate breaking change is necessary and documented.
+1. Review the existing implementation before modifying behavior.
+2. Preserve working language features where possible.
+3. Keep examples consistent with the actual interpreter.
+4. Test changes using the project's configured test suite.
+5. Update documentation when supported behavior changes.
+6. Clearly identify experimental or incomplete functionality.
 
 ---
 
 ## Security
 
-Security and reliability are important parts of interpreter development.
+Interpreter development requires careful handling of source programs,
+runtime errors, and interactions with the host environment.
 
-- Do not commit passwords, private tokens, or other sensitive credentials.
-- Treat source programs as untrusted input when designing execution features.
-- Validate inputs and handle runtime failures appropriately.
-- Avoid executing arbitrary host-system commands without a clearly defined security model.
-- Report vulnerabilities with sufficient technical detail to support investigation.
+Do not assume that arbitrary programs are safe to execute. Security
+controls should reflect the actual capabilities and execution model
+of the implementation.
 
-Do not assume that running a program through an interpreter automatically makes the program safe.
+Never commit private credentials, access tokens, or passwords.
 
 ---
 
 ## License
 
-The applicable license is determined by the license file included in the repository.
+Refer to the license file in the repository, if one is present, for the
+applicable licensing terms.
 
-If the repository does not yet contain a license, its licensing terms remain to be established. Do not assume that the project is open source or that unrestricted redistribution is permitted until the licensing status is clear.
-
----
-
-## Project Information
-
-| Property | Details |
-|---|---|
-| Project | AssayFlux |
-| Language | AssayFlux |
-| Source extension | `.af` |
-| Implementation foundation | Python |
-| Project category | Experimental programming language |
-| Primary repository | `mdsafarujjaman/AssayFlux` |
-
-Repository: https://github.com/mdsafarujjaman/AssayFlux
+If no license has been established, do not assume that unrestricted
+redistribution or reuse is permitted.
 
 ---
 
 <div align="center">
 
+  <br>
+
+  <img src="assayflux-logo.png" alt="AssayFlux" width="112">
+
+  <br><br>
+
+  <h3>ASSAYFLUX</h3>
+
+  <p>Programming Language · Interpreter Development</p>
+
+  <br>
+
   <hr>
 
-  <br>
-
-  <img src="assayflux-logo.png" alt="AssayFlux Logo" width="64">
-
-  <br><br>
-
-  <h3>AssayFlux</h3>
-
-  <p>Readable syntax. Structured execution. Extensible foundations.</p>
-
-  <br>
-
-  <sub>
-    An experimental programming-language project.
-  </sub>
-
-  <br><br>
-
-  <a href="https://github.com/mdsafarujjaman/AssayFlux">Explore the Repository</a>
+  <sub>Built around the development of a dedicated programming language.</sub>
 
   <br><br>
 
