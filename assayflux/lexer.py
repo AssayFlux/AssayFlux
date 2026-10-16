@@ -504,8 +504,12 @@ class Lexer:
                 "AssayFlux source code must be a string."
             )
 
-        self.source_code = source_code
-        self.filename = filename
+        self.source_code = (
+    source_code
+    .replace("\r\n", "\n")
+    .replace("\r", "\n")
+)
+self.filename = filename
 
         self.position = 0
         self.length = len(source_code)
@@ -938,57 +942,87 @@ class Lexer:
     # Numeric Literals
     # --------------------------------------------------------
 
-    def _scan_number(self) -> Token:
-        """Scan a numeric literal."""
-        start = self.position
-        line = self.line
-        column = self.column
+    
+def _scan_number(self) -> Token:
+    """
+    Scan and validate a complete numeric literal.
 
-        remaining = self.source_code[self.position:]
+    Lexical recognition and numeric validation are separate.
+    The lexer must not silently accept malformed numbers.
+    """
+    start = self.position
+    line = self.line
+    column = self.column
 
-        match = NUMBER_PATTERN.match(remaining)
+    remaining = self.source_code[self.position:]
+    match = NUMBER_PATTERN.match(remaining)
 
-        if match is None:
-            self.error(
-                f"Invalid numeric literal beginning with "
-                f"{self._current_char()!r}."
-            )
-
-        lexeme = match.group(0)
-
-        # A trailing identifier character after a numeric
-        # literal may indicate a malformed number, such as:
-        #
-        #     123abc
-        #
-        # Do not silently split that into NUMBER and IDENTIFIER.
-        next_index = self.position + len(lexeme)
-
-        if next_index < self.length:
-            next_character = self.source_code[next_index]
-
-            if (
-                next_character.isalpha()
-                or next_character == "_"
-            ):
-                self.error(
-                    f"Invalid numeric literal {lexeme + next_character!r}."
-                )
-
-        self._advance(len(lexeme))
-
-        self.logical_line_has_tokens = True
-
-        return self._emit(
-            "NUMBER",
-            lexeme,
-            start,
+    if match is None:
+        self._error_at(
+            "Invalid numeric literal.",
             line,
             column,
-            lexeme,
         )
 
-    # --------------------------------------------------------
+    lexeme = match.group(0)
+
+    if not lexeme:
+        self._error_at(
+            "Invalid numeric literal.",
+            line,
+            column,
+        )
+
+    # Reject malformed suffixes instead of splitting them
+    # into a number followed by an identifier.
+    next_index = self.position + len(lexeme)
+
+    if next_index < self.length:
+        next_character = self.source_code[next_index]
+
+        if (
+            next_character.isalpha()
+            or next_character == "_"
+        ):
+            self._error_at(
+                f"Invalid numeric literal "
+                f"{lexeme + next_character!r}.",
+                line,
+                column,
+            )
+
+    # Validate the complete numeric spelling without executing
+    # arbitrary source code.
+    try:
+        parsed_value = ast.literal_eval(lexeme)
+
+    except (ValueError, SyntaxError, TypeError, MemoryError):
+        self._error_at(
+            f"Malformed numeric literal {lexeme!r}.",
+            line,
+            column,
+        )
+
+    if type(parsed_value) not in (int, float, complex):
+        self._error_at(
+            f"Invalid numeric literal {lexeme!r}.",
+            line,
+            column,
+        )
+
+    self._advance(len(lexeme))
+
+    self.logical_line_has_tokens = True
+
+    return self._emit(
+        "NUMBER",
+        lexeme,
+        start,
+        line,
+        column,
+        lexeme,
+    )
+ --------------------------------------------------------
     # Strings
     # --------------------------------------------------------
 
