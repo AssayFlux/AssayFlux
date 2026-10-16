@@ -1,7 +1,0 @@
-// AssayFlux Sample Script (.af)
-var app_name = "AssayFlux RDMS";
-var max_connections = 100;
-
-fn initialize_system() {
-    return true;
-}
