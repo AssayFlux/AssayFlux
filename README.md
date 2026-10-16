@@ -1,79 +1,111 @@
 <div align="center">
 
-<img src="assayflux-logo.png" alt="AssayFlux Logo" width="700">
+<img src="assayflux-logo.png" alt="AssayFlux" width="680">
 
 <br>
 
+#
 
 ### A Python-Interoperable Programming Language
 
-**Explore · Create · Innovate**
-
-</div>
-
-<div align="center">
-
-# <span style="color:#19365C">Assay</span><span style="color:#008BFF">F</span><span style="color:#00BFA6">l</span><span style="color:#65C84A">u</span><span style="color:#FFB900">x</span>
-
-### A Python-Interoperable Programming Language
-
-**<span style="color:#FF4B4B">Explore</span> · <span style="color:#00A86B">Create</span> · <span style="color:#8250DF">Innovate</span>**
-
-Readable syntax. Structured execution. Python interoperability.
+**Readable syntax. Structured execution. Python interoperability.**
 
 <br>
 
-![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Language](https://img.shields.io/badge/Language-AssayFlux-00BFA6?style=for-the-badge)
-![Testing](https://img.shields.io/badge/Testing-Automated-2DA44E?style=for-the-badge&logo=githubactions&logoColor=white)
+<a href="https://github.com/AssayFlux/AssayFlux/actions">
+  <img src="https://img.shields.io/badge/BUILD-GitHub%20Actions-3776AB?style=flat-square&logo=githubactions&logoColor=white" alt="GitHub Actions">
+</a>
+<a href="https://www.python.org/">
+  <img src="https://img.shields.io/badge/POWERED%20BY-Python-4B6CB7?style=flat-square&logo=python&logoColor=white" alt="Python">
+</a>
+<img src="https://img.shields.io/badge/STATUS-Experimental-8A63D2?style=flat-square" alt="Experimental project">
 
-<br>
+<br><br>
 
-[Features](#-features) ·
-[Example](#-quick-example) ·
-[Getting Started](#-getting-started) ·
-[Testing](#-testing) ·
-[Roadmap](#-roadmap)
+[Overview](#overview) ·
+[Features](#features) ·
+[Example](#quick-example) ·
+[Getting Started](#getting-started) ·
+[Testing](#testing) ·
+[Roadmap](#roadmap)
 
 </div>
 
 ---
 
-## Explore AssayFlux
+<div align="center">
+
+`LANGUAGE DESIGN` &nbsp; | &nbsp; `PYTHON ECOSYSTEM` &nbsp; | &nbsp; `OPEN DEVELOPMENT`
+
+</div>
+
+## Overview
+
+AssayFlux is an experimental programming-language project exploring readable syntax, structured program execution, and interoperability with Python.
+
+The repository contains a language parser, an interpreter, example programs, documentation, and automated tests. Its design provides a foundation for experimenting with language features and building accessible programming tools.
+
+## Features
 
 <table>
 <tr>
-<td width="33%" valign="top">
+<td width="50%" valign="top">
 
-### About
-
-AssayFlux is an experimental programming-language project built around readable syntax, structured execution, and Python interoperability.
-
-The repository contains a parser, an interpreter, examples, and automated tests.
-
-</td>
-<td width="34%" valign="top">
-
-### Features
+#### <span style="color:#E53935">01 / Core language</span>
 
 - Variables and constants
 - Arithmetic expressions
-- Comparisons and logic
+- Comparisons and logical operations
 - Conditional execution
 - Repetition and loop control
-- User-defined functions
-- Python module imports
-- Output and error handling
 
 </td>
-<td width="33%" valign="top">
+<td width="50%" valign="top">
 
-### Quick Example
+#### <span style="color:#FB8C00">02 / Program structure</span>
+
+- User-defined functions
+- Function arguments and return values
+- Output statements
+- Structured execution
+- Parser and runtime error handling
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+#### <span style="color:#43A047">03 / Python interoperability</span>
+
+- Python module imports
+- Access to supported module functionality
+- Integration with the Python ecosystem
+
+</td>
+<td width="50%" valign="top">
+
+#### <span style="color:#5E35B1">04 / Development</span>
+
+- Automated test suite
+- Example programs
+- GitHub-based development
+- Continuous integration workflows
+
+</td>
+</tr>
+</table>
+
+Features reflect the current project implementation; capabilities and syntax may evolve during development.
+
+## Quick Example
+
+A simple AssayFlux program:
 
 ```text
 app "My First Program"
 
 constant LIMIT = 3
+
 counter = 0
 
 repeat counter < LIMIT
@@ -90,21 +122,9 @@ end
 3
 ```
 
-</td>
-</tr>
-</table>
+### Python interoperability
 
----
-
-## Python Interoperability
-
-<table>
-<tr>
-<td width="60%" valign="top">
-
-### Access Python modules
-
-AssayFlux supports importing Python modules using its language syntax.
+AssayFlux supports importing Python modules through its language syntax.
 
 ```text
 import math
@@ -112,167 +132,113 @@ import math
 show math.sqrt(25)
 ```
 
-</td>
-<td width="40%" valign="top">
-
-### Expected output
+**Output**
 
 ```text
 5.0
 ```
 
-Python interoperability makes it possible to explore integrations with Python's ecosystem.
-
-</td>
-</tr>
-</table>
-
----
+Refer to the source code and automated tests for the authoritative description of supported syntax and behavior.
 
 ## Getting Started
 
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### 1. Requirements
+### Requirements
 
 - Python 3
 - Git
 
-Install any additional dependencies specified by the project.
-
-</td>
-<td width="50%" valign="top">
-
-### 2. Clone the repository
+### Clone the repository
 
 ```bash
 git clone https://github.com/AssayFlux/AssayFlux.git
 cd AssayFlux
 ```
 
-You now have a local copy of the source code.
+### Project structure
 
-</td>
-</tr>
-<tr>
-<td colspan="2" valign="top">
-
-### 3. Explore the source
-
-| Path | Purpose |
+| Directory or file | Purpose |
 |---|---|
 | `assayflux/` | Language implementation |
 | `examples/` | Example programs |
 | `tests/` | Automated tests |
 | `DOCS/` | Project documentation |
-| `.github/` | GitHub configuration and workflows |
+| `.github/` | Repository workflows and configuration |
 | `pyproject.toml` | Python project configuration |
 
-Check the current documentation for the supported command to execute an AssayFlux program.
-
-</td>
-</tr>
-</table>
-
----
+To execute a program, follow the current project documentation and the execution interface implemented in the repository.
 
 ## Testing
 
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### Python unittest
-
-Run the tests from the repository root:
+Run the unit tests from the repository root:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-</td>
-<td width="50%" valign="top">
-
-### Pytest
-
-Alternatively, if pytest is installed:
+Alternatively, if `pytest` is installed:
 
 ```bash
 python -m pytest -v
 ```
 
-</td>
-</tr>
-</table>
+### Continuous integration
 
-### Continuous Integration
+GitHub Actions provides automated repository checks.
 
-GitHub Actions automates repository checks.
+<div align="center">
 
-[![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-View%20Workflows-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/AssayFlux/AssayFlux/actions)
+[![GitHub Actions](https://img.shields.io/badge/WORKFLOWS-View%20GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/AssayFlux/AssayFlux/actions)
 
-[View workflow runs →](https://github.com/AssayFlux/AssayFlux/actions)
-
----
+</div>
 
 ## Roadmap
 
+Potential areas of future development include:
+
 <table>
 <tr>
 <td width="50%" valign="top">
 
-### Language and Documentation
+**Language and documentation**
 
-- [ ] Expand documentation and tutorials
-- [ ] Add more example programs
-- [ ] Increase test coverage
-- [ ] Improve error messages
+- [ ] Expand language documentation
+- [ ] Add tutorials and example programs
+- [ ] Extend automated test coverage
+- [ ] Improve error diagnostics
 
 </td>
 <td width="50%" valign="top">
 
-### Developer Experience
+**Developer experience**
 
-- [ ] Explore interactive coding
-- [ ] Improve debugging tools
+- [ ] Explore interactive coding tools
+- [ ] Improve debugging support
 - [ ] Explore scientific-computing workflows
-- [ ] Improve usability
+- [ ] Improve usability and accessibility
 
 </td>
 </tr>
 </table>
 
-> Roadmap items are future possibilities, not claims of completed functionality.
-
----
+Roadmap items are development possibilities, not claims of completed functionality.
 
 ## Contributing
 
-<table>
-<tr>
-<td width="100%" valign="top">
+Contributions, bug reports, documentation improvements, and constructive suggestions are welcome.
 
-### Help improve AssayFlux
-
-Contributions, bug reports, documentation improvements, and ideas are welcome.
-
-1. Explore the existing code and tests.
-2. Open an issue to discuss significant changes.
+1. Review the existing implementation and tests.
+2. Open an issue to discuss substantial changes.
 3. Submit a pull request with a clear description and relevant tests.
 
-**Useful resources**
+Read the [contribution guidelines](CONTRIBUTING.md) before submitting changes.
 
-- [Contributing guide](CONTRIBUTING.md)
-- [Report an issue](https://github.com/AssayFlux/AssayFlux/issues)
-- [Security policy](SECURITY.md)
+## Security
 
-</td>
-</tr>
-</table>
+For information about reporting security vulnerabilities, consult the [security policy](SECURITY.md).
 
----
+## License
+
+The repository contains a `LICENSE` file. Review it for the applicable terms governing use, modification, and redistribution.
 
 ## Project Links
 
@@ -280,30 +246,30 @@ Contributions, bug reports, documentation improvements, and ideas are welcome.
 <tr>
 <td align="center" width="25%">
 
-### Source
+**Source**
 
 [Repository](https://github.com/AssayFlux/AssayFlux)
 
 </td>
 <td align="center" width="25%">
 
-### Issues
+**Support**
 
-[Report a bug](https://github.com/AssayFlux/AssayFlux/issues)
-
-</td>
-<td align="center" width="25%">
-
-### Actions
-
-[Workflow status](https://github.com/AssayFlux/AssayFlux/actions)
+[Issues](https://github.com/AssayFlux/AssayFlux/issues)
 
 </td>
 <td align="center" width="25%">
 
-### Security
+**Automation**
 
-[Security policy](SECURITY.md)
+[Actions](https://github.com/AssayFlux/AssayFlux/actions)
+
+</td>
+<td align="center" width="25%">
+
+**Guidelines**
+
+[Contributing](CONTRIBUTING.md)
 
 </td>
 </tr>
@@ -313,20 +279,10 @@ Contributions, bug reports, documentation improvements, and ideas are welcome.
 
 <div align="center">
 
-## Readable Code. Colourful Possibilities.
+### <span style="color:#E53935">R</span><span style="color:#FB8C00">e</span><span style="color:#F9A825">a</span><span style="color:#43A047">d</span><span style="color:#1E88E5">a</span><span style="color:#3949AB">b</span><span style="color:#8E24AA">l</span><span style="color:#E53935">e</span> <span style="color:#FB8C00">C</span><span style="color:#F9A825">o</span><span style="color:#43A047">d</span><span style="color:#1E88E5">e</span><span style="color:#3949AB">.</span> <span style="color:#8E24AA">S</span><span style="color:#E53935">c</span><span style="color:#FB8C00">i</span><span style="color:#F9A825">e</span><span style="color:#43A047">n</span><span style="color:#1E88E5">c</span><span style="color:#3949AB">e</span><span style="color:#8E24AA">.</span> <span style="color:#E53935">P</span><span style="color:#FB8C00">o</span><span style="color:#F9A825">s</span><span style="color:#43A047">s</span><span style="color:#1E88E5">i</span><span style="color:#3949AB">b</span><span style="color:#8E24AA">i</span><span style="color:#E53935">l</span><span style="color:#FB8C00">i</span><span style="color:#F9A825">t</span><span style="color:#43A047">i</span><span style="color:#1E88E5">e</span><span style="color:#3949AB">s</span><span style="color:#8E24AA">.</span>
 
-**AssayFlux** · Built with curiosity and code.
+**AssayFlux**
 
-<br>
-
-<span style="color:#FF0000"></span>
-<span style="color:#FF7F00"></span>
-<span style="color:#FFD700"></span>
-<span style="color:#00A550"></span>
-<span style="color:#007FFF"></span>
-<span style="color:#4B0082"></span>
-<span style="color:#8F00FF"></span>
-
-[⭐ Explore AssayFlux on GitHub](https://github.com/AssayFlux/AssayFlux)
+[Explore the source code](https://github.com/AssayFlux/AssayFlux)
 
 </div>
