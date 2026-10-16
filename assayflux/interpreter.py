@@ -769,7 +769,44 @@ class Interpreter:
         node: Identifier,
     ) -> Any:
         return self._env().get(node.name)
+    def visit_FunctionCall(
+        self,
+        node: FunctionCall,
+    ) -> Any:
+        """Evaluate and execute a function call."""
 
+        function = self._resolve_callable(
+            node.name,
+            node,
+        )
+
+        arguments = tuple(
+            self.visit(argument)
+            for argument in node.arguments
+        )
+
+        if not callable(function):
+            raise RuntimeError(
+                f"{node.name!r} is not callable.",
+                node.line,
+                node.column,
+                self.filename,
+            )
+
+        try:
+            return function(*arguments)
+
+        except RuntimeError:
+            raise
+
+        except Exception as error:
+            raise RuntimeError(
+                f"Function call {node.name!r} failed: "
+                f"{type(error).__name__}: {error}",
+                node.line,
+                node.column,
+                self.filename,
+            ) from error
     def visit_MemberAccess(
         self,
         node: MemberAccess,
