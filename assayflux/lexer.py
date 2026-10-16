@@ -1073,26 +1073,19 @@ class Lexer:
 
         return prefix
 
-    def _scan_string(self) -> Token:
+        def _scan_string(self) -> Token:
         """
         Scan a quoted string literal.
 
         Supported lexical forms include:
-
-            "text"
-            'text'
-            """multiline text"""
-            '''multiline text'''
-            r"raw text"
-            b"bytes"
-            f"formatted text"
-
+        - Single-quoted strings
+        - Double-quoted strings
+        - Triple-quoted multiline strings
+        - Raw strings
+        - Byte strings
+        - Formatted strings
+    
         Formatted strings receive the FSTRING token type.
-        Their interpolation semantics must be implemented by
-        the parser/runtime.
-
-        Ordinary strings are decoded with ast.literal_eval
-        when possible.
         """
         start = self.position
         line = self.line
