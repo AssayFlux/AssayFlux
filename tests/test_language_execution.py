@@ -29,7 +29,7 @@ SMOKE_TESTS = {
     "crystal": 'puts "ASSAYFLUX_SMOKE_OK"',
     "scala": 'object Main { def main(args: Array[String]): Unit = println("ASSAYFLUX_SMOKE_OK") }',
     "elixir": 'IO.puts("ASSAYFLUX_SMOKE_OK")',
-    "erlang": '-module(main).\n-export([start/0]).\nstart() -> io:format("ASSAYFLUX_SMOKE_OK~n"), halt().',
+    "erlang": '-module(assayflux_main).\n-export([main/0]).\nmain() -> io:format("ASSAYFLUX_SMOKE_OK~n"), halt().',
     "haskell": 'main = putStrLn "ASSAYFLUX_SMOKE_OK"',
     "ocaml": 'print_endline "ASSAYFLUX_SMOKE_OK";;',
     "fsharp": 'printfn "ASSAYFLUX_SMOKE_OK"',
