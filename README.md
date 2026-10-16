@@ -17,22 +17,30 @@
   <br>
 <div align="center">
 
-  <table align="center">
-    <tr>
-      <td align="center">
-        <sub>PROJECT</sub><br>
-        <strong>AssayFlux</strong>
-      </td>
-      <td align="center">
-        <sub>SOURCE FORMAT</sub><br>
-        <strong>.af</strong>
-      </td>
-      <td align="center">
-        <sub>IMPLEMENTATION</sub><br>
-        <strong>Python</strong>
-      </td>
-    </tr>
-  </table>
+<table>
+<tr>
+<td align="center">
+
+<table>
+<tr>
+<td align="center" valign="middle">
+<sub>PROJECT</sub><br>
+<strong>AssayFlux</strong>
+</td>
+<td align="center" valign="middle">
+<sub>SOURCE FORMAT</sub><br>
+<strong>.af</strong>
+</td>
+<td align="center" valign="middle">
+<sub>IMPLEMENTATION</sub><br>
+<strong>Python</strong>
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
 
 </div>
   <br>
