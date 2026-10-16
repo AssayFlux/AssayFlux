@@ -4,7 +4,7 @@ Parser Implementation
 
 Converts lexer tokens into an Abstract Syntax Tree (AST).
 
-Version: 0.2.0
+Version: 0.3.0
 """
 
 from typing import List, Set
@@ -241,18 +241,28 @@ class Parser:
         ):
             return self.parse_assignment()
 
-        # Any other valid expression may be used as a statement, e.g.
-        # a function call whose return value is intentionally ignored.
         expression = self.parse_expression()
+
         return ExpressionStatement(
-            line=token.line, column=token.column, expression=expression
+            line=token.line,
+            column=token.column,
+            expression=expression,
         )
 
     def parse_app(self) -> AppDeclaration:
-        """Parse application metadata: app "Application Name"."""
+        """Parse application metadata."""
         token = self.expect_value("app")
-        name = self.expect_type("STRING", "an application name string")
-        return AppDeclaration(line=token.line, column=token.column, name=name.value)
+
+        name = self.expect_type(
+            "STRING",
+            "an application name string",
+        )
+
+        return AppDeclaration(
+            line=token.line,
+            column=token.column,
+            name=name.value,
+        )
 
     def parse_show(self) -> ShowStatement:
         """Parse: show expression."""
@@ -305,11 +315,14 @@ class Parser:
         """Parse a return statement."""
         token = self.expect_value("return")
 
-        if self.current().type in (
-            "NEWLINE",
-            "EOF",
-            "DEDENT",
-        ) or self.check_value("end"):
+        if (
+            self.current().type in (
+                "NEWLINE",
+                "EOF",
+                "DEDENT",
+            )
+            or self.check_value("end")
+        ):
             return ReturnStatement(
                 line=token.line,
                 column=token.column,
@@ -417,13 +430,73 @@ class Parser:
         )
 
     def parse_repeat(self) -> RepeatStatement:
-        """Parse: repeat condition ... end."""
+        """
+        Parse repeat loops.
+
+        Supported forms:
+
+            repeat condition
+                ...
+            end
+
+            repeat count 5
+                ...
+            end
+
+            repeat forever
+                ...
+            end
+
+            repeat
+                ...
+            end
+
+        A numeric literal without a mode is treated as a
+        repetition count. Existing Boolean and comparison
+        conditions remain supported.
+        """
         start = self.expect_value("repeat")
 
+        mode = "condition"
+        condition = None
+        count = None
+
+        # A bare repeat means an unlimited loop.
         if self.current().type in ("NEWLINE", "EOF"):
-            condition = None
+            mode = "forever"
+
+        # Explicit unlimited loop.
+        elif self.match_value("forever"):
+            mode = "forever"
+
+        # Explicit counted loop.
+        elif self.match_value("count"):
+            mode = "count"
+            count = self.parse_expression()
+
         else:
-            condition = self.parse_expression()
+            expression = self.parse_expression()
+
+            # Preserve simple existing conditions, while allowing
+            # repeat 5 to mean five iterations.
+            if isinstance(expression, NumberLiteral):
+                if (
+                    isinstance(expression.value, bool)
+                    or not isinstance(expression.value, int)
+                    or expression.value < 0
+                ):
+                    raise ParserError(
+                        "A repeat count must be a "
+                        "non-negative integer.",
+                        start.line,
+                        start.column,
+                    )
+
+                mode = "count"
+                count = expression
+            else:
+                mode = "condition"
+                condition = expression
 
         self.require_newline("after repeat")
 
@@ -435,6 +508,8 @@ class Parser:
             column=start.column,
             condition=condition,
             body=body,
+            mode=mode,
+            count=count,
         )
 
     def parse_import(self) -> ImportStatement:
@@ -517,6 +592,7 @@ class Parser:
 
         else:
             token = self.current()
+
             raise ParserError(
                 "Unexpected end of file while parsing "
                 "an indented block.",
@@ -526,6 +602,7 @@ class Parser:
 
         if not statements:
             token = self.current()
+
             raise ParserError(
                 "Empty blocks are not allowed.",
                 token.line,
@@ -689,11 +766,6 @@ class Parser:
         """
         Parse literals, identifiers, member access,
         function calls, and parenthesized expressions.
-
-        Supports expressions such as:
-            add(2, 3)
-            math.sqrt(25)
-            mathematics.pow(2, 3)
         """
         token = self.current()
 
@@ -737,7 +809,7 @@ class Parser:
             expression = BooleanLiteral(
                 line=token.line,
                 column=token.column,
-                value =False,
+                value=False,
             )
 
         elif token.type == "IDENTIFIER":
@@ -761,8 +833,7 @@ class Parser:
                 token.column,
             )
 
-        # Process postfix operations in order. This permits
-        # a member access to be followed by a function call.
+        # Process postfix operations in order.
         while True:
             if self.match_value("."):
                 member = self.expect_type(
