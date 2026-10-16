@@ -41,7 +41,7 @@ from typing import Optional
 # Version and Public API
 # ============================================================
 
-LEXER_VERSION = "1.0.0"
+LEXER_VERSION = "0.2.0"
 
 
 __all__ = [
