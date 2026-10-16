@@ -39,7 +39,7 @@ Canonical core syntax:
 The parser preserves the existing AST node interfaces.
 It does not execute programs.
 
-Version: 1.0.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
