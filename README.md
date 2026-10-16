@@ -18,6 +18,7 @@
 
   <table>
     <tr>
+      <div align="center">
       <td align="center">
         <sub>PROJECT</sub><br>
         <strong>AssayFlux</strong>
