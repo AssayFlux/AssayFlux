@@ -89,7 +89,7 @@ jobs:
             -not -path './.venv/*' \
             -not -path './venv/*' \
             | grep -q .; then
-            python -m pytest -q
+            python -m pytest -q -rs
           else
             echo "No Python test files found. Skipping pytest."
           fi
