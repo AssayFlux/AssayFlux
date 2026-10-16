@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="AssayFlux is an experimental programming language exploring readable syntax, structured execution, and Python interoperability."
+    >
+
+    <meta name="theme-color" content="#ffffff">
+
+    <title>AssayFlux — A Python-Interoperable Programming Language</title>
+
+    <style>
+        :root {
+            --ink: #142747;
+            --text: #344c70;
+            --muted: #71819a;
+            --white: #ffffff;
+            --line: #e5ebf4;
+
+            --red: #ff626b;
+            --orange: #ffab35;
+            --yellow: #e7d84b;
+            --green: #32b984;
+            --blue: #36a9ed;
+            --indigo: #5268ed;
+            --violet: #a16bea;
+
+            --radius: 12px;
+            --page-width: 1120px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 24px;
+        }
+
+        body {
+            margin: 0;
+            background: #ffffff;
+            color: var(--ink);
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+            font-size: 15px;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button,
+        code,
+        pre {
+            font-family:
+                "SFMono-Regular",
+                Consolas,
+                "Liberation Mono",
+                monospace;
+        }
+
+        .page {
+            width: min(var(--page-width), calc(100% - 36px));
+            margin: 14px auto 36px;
+        }
+
+        /* HERO */
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 35px 42px 30px;
+            border: 1px solid #e5edf9;
+            border-radius: 15px;
+            background:
+                radial-gradient(
+                    ellipse at 95% 100%,
+                    rgba(161, 107, 234, 0.10),
+                    transparent 42%
+                ),
+                radial-gradient(
+                    ellipse at 5% 0%,
+                    rgba(54, 169, 237, 0.09),
+                    transparent 48%
+                ),
+                #ffffff;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            right: -60px;
+            top: -45px;
+            width: 430px;
+            height: 210px;
+            pointer-events: none;
+            opacity: 0.48;
+            background:
+                linear-gradient(
+                    165deg,
+                    transparent 25%,
+                    rgba(255, 98, 107, 0.13) 30%,
+                    rgba(255, 171, 53, 0.13) 42%,
+                    rgba(231, 216, 75, 0.13) 52%,
+                    rgba(50, 185, 132, 0.13) 62%,
+                    rgba(54, 169, 237, 0.13) 72%,
+                    rgba(82, 104, 237, 0.13) 82%,
+                    rgba(161, 107, 234, 0.13) 92%,
+                    transparent 98%
+                );
+            filter: blur(12px);
+            transform: rotate(-8deg);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 730px;
+        }
+
+        .logo {
+            display: block;
+            width: min(100%, 470px);
+            max-height: 140px;
+            object-fit: contain;
+            object-position: left center;
+            margin: 0 0 15px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            color: var(--ink);
+            font-size: clamp(25px, 4vw, 34px);
+            font-weight: 700;
+            letter-spacing: -1.1px;
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            margin: 8px 0 0;
+            font-size: clamp(16px, 2.5vw, 22px);
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .tagline {
+            margin: 7px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 22px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 6px 11px;
+            border: 1px solid;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 650;
+            letter-spacing: 0.65px;
+            line-height: 1.4;
+        }
+
+        .badge-label {
+            margin-right: 8px;
+            opacity: 0.75;
+        }
+
+        .badge-python {
+            color: #2765a8;
+            border-color: #d2e7ff;
+            background: #eef6ff;
+        }
+
+        .badge-tests {
+            color: #16875e;
+            border-color: #c9f0de;
+            background: #edfbf5;
+        }
+
+        .badge-status {
+            color: #7b4bc1;
+            border-color: #e5d6ff;
+            background: #f7f1ff;
+        }
+
+        .badge-version {
+            color: #bd5c25;
+            border-color: #ffdfc6;
+            background: #fff6ef;
+        }
+
+        /* NAVIGATION */
+
+        .navigation {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-around;
+            gap: 4px;
+            margin-top: 16px;
+            padding: 8px;
+            border: 1px solid #e0e9f7;
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        .navigation a {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 8px 15px;
+            border-radius: 7px;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 160ms ease;
+        }
+
+        .navigation a:hover {
+            background: #f5f8fd;
+        }
+
+        .navigation a::after {
+            content: "";
+            position: absolute;
+            right: 15px;
+            bottom: -8px;
+            left: 15px;
+            height: 2px;
+            background: linear-gradient(
+                90deg,
+                var(--red),
+                var(--orange),
+                var(--yellow),
+                var(--green),
+                var(--blue),
+                var(--indigo),
+                var(--violet)
+            );
+            opacity: 0;
+            transition: opacity 160ms ease;
+        }
+
+        .navigation a:hover::after {
+            opacity: 1;
+        }
+
+        /* SECTION HEADINGS */
+
+        .section {
+            margin-top: 28px;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0 0 15px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.4;
+        }
+
+        .section-heading::before {
+            content: "";
+            width: 4px;
+            height: 25px;
+            flex: 0 0 4px;
+            border-radius: 4px;
+            background: var(--heading-color, var(--blue));
+        }
+
+        .section-heading::after {
+            content: "";
+            width: 95px;
+            height: 2px;
+            margin-left: 2px;
+            background: linear-gradient(
+                90deg,
+                var(--red),
+                var(--orange),
+                var(--yellow),
+                var(--green),
+                var(--blue),
+                var(--indigo),
+                var(--violet)
+            );
+        }
+
+        /* FEATURE CARDS */
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            min-width: 0;
+            padding: 20px;
+            border: 1px solid var(--card-border, var(--line));
+            border-radius: var(--radius);
+            background: var(--card-bg, #ffffff);
+        }
+
+        .feature-card {
+            display: flex;
+            gap: 15px;
+            min-height: 172px;
+        }
+
+        .feature-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 46px;
+            flex: 0 0 46px;
+            border: 1px solid var(--icon-border);
+            border-radius: 50%;
+            background: var(--icon-bg);
+            color: var(--icon-color);
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .feature-card h3 {
+            margin: 1px 0 8px;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .feature-card ul {
+            margin: 0;
+            padding-left: 17px;
+            color: var(--text);
+            font-size: 13px;
+            line-height: 1.9;
+        }
+
+        .feature-card li::marker {
+            color: var(--icon-color);
+        }
+
+        .red {
+            --card-bg: linear-gradient(130deg, #fff7f7, #ffffff);
+            --card-border: #ffd8dc;
+            --icon-bg: #fff0f1;
+            --icon-border: #ffc8ce;
+            --icon-color: #ed5965;
+        }
+
+        .orange {
+            --card-bg: linear-gradient(130deg, #fffaf1, #ffffff);
+            --card-border: #ffe5bd;
+            --icon-bg: #fff4df;
+            --icon-border: #ffdfaa;
+            --icon-color: #e99a20;
+        }
+
+        .yellow {
+            --card-bg: linear-gradient(130deg, #fffdf1, #ffffff);
+            --card-border: #f1ebbd;
+            --icon-bg: #fffbe2;
+            --icon-border: #eee4a3;
+            --icon-color: #a99724;
+        }
+
+        .green {
+            --card-bg: linear-gradient(130deg, #f1fcf7, #ffffff);
+            --card-border: #ceefe0;
+            --icon-bg: #e8faf2;
+            --icon-border: #c0ecd9;
+            --icon-color: #20a474;
+        }
+
+        .blue {
+            --card-bg: linear-gradient(130deg, #f1f8ff, #ffffff);
+            --card-border: #d4e7ff;
+            --icon-bg: #eaf4ff;
+            --icon-border: #cce2ff;
+            --icon-color: #288dd9;
+        }
+
+        .indigo {
+            --card-bg: linear-gradient(130deg, #f4f5ff, #ffffff);
+            --card-border: #dce0ff;
+            --icon-bg: #eef0ff;
+            --icon-border: #d7dcff;
+            --icon-color: #586ce0;
+        }
+
+        .violet {
+            --card-bg: linear-gradient(130deg, #faf5ff, #ffffff);
+            --card-border: #eadbff;
+            --icon-bg: #f3eaff;
+            --icon-border: #e4d0ff;
+            --icon-color: #8f5cdb;
+        }
+
+        /* CODE PANELS */
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .example-card {
+            padding: 19px;
+            border: 1px solid #dce8f8;
+            border-radius: var(--radius);
+            background: #ffffff;
+        }
+
+        .example-card h2 {
+            margin: 0 0 8px;
+            font-size: 20px;
+            line-height: 1.5;
+            letter-spacing: -0.4px;
+        }
+
+        .example-card h2::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 22px;
+            margin-right: 10px;
+            border-radius: 4px;
+            background: var(--example-accent, var(--orange));
+            vertical-align: -4px;
+        }
+
+        .example-card p {
+            margin: 8px 0 12px;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        pre {
+            overflow-x: auto;
+            margin: 0;
+            padding: 15px;
+            border: 1px solid #dfebfb;
+            border-radius: 8px;
+            background: #f6f9fe;
+            color: #17345e;
+            font-size: 12px;
+            line-height: 1.85;
+            tab-size: 4;
+        }
+
+        pre code {
+            font-size: inherit;
+        }
+
+        .code-keyword {
+            color: #345fe2;
+        }
+
+        .code-string {
+            color: #d97706;
+        }
+
+        .code-number {
+            color: #c24172;
+        }
+
+        .output {
+            margin-top: 10px;
+            padding: 12px 14px;
+            border: 1px solid #d1efdf;
+            border-radius: 8px;
+            background: #f2fbf6;
+        }
+
+        .output-label {
+            margin-bottom: 7px;
+            color: #16845b;
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .output pre {
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #176d50;
+        }
+
+        /* OVERVIEW */
+
+        .overview-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.8fr) minmax(220px, 0.8fr);
+            gap: 24px;
+            align-items: center;
+        }
+
+        .overview-copy {
+            padding-top: 10px;
+            border-top: 1px solid var(--line);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .overview-copy p {
+            margin: 12px 0;
+        }
+
+        .quote-card {
+            padding: 20px;
+            border: 1px solid #dce8fb;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f0f7ff, #ffffff);
+            color: var(--muted);
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .quote-card::before {
+            content: "";
+            display: block;
+            width: 4px;
+            height: 35px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background: linear-gradient(
+                var(--green),
+                var(--blue),
+                var(--violet)
+            );
+        }
+
+        /* BOTTOM STRIP */
+
+        .bottom-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 24px;
+            overflow: hidden;
+            border: 1px solid #e1e8f4;
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        .bottom-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 58px;
+            padding: 12px;
+            color: var(--text);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .bottom-item + .bottom-item {
+            border-left: 1px solid var(--line);
+        }
+
+        .bottom-mark {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .bottom-item:nth-child(1) .bottom-mark {
+            color: var(--red);
+        }
+
+        .bottom-item:nth-child(2) .bottom-mark {
+            color: var(--green);
+        }
+
+        .bottom-item:nth-child(3) .bottom-mark {
+            color: var(--violet);
+        }
+
+        footer {
+            padding: 24px 10px 8px;
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        footer a {
+            text-decoration: underline;
+            text-decoration-color: #c8d3e5;
+            text-underline-offset: 3px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (min-width: 900px) {
+            .hero {
+                padding: 40px 46px 32px;
+            }
+
+            .hero-content {
+                max-width: 780px;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .page {
+                width: calc(100% - 22px);
+                margin-top: 10px;
+            }
+
+            .hero {
+                padding: 25px 20px 22px;
+            }
+
+            .logo {
+                width: min(100%, 380px);
+                max-height: 110px;
+            }
+
+            .hero::after {
+                right: -190px;
+            }
+
+            .navigation {
+                justify-content: flex-start;
+                gap: 3px;
+            }
+
+            .navigation a {
+                padding: 7px 10px;
+                font-size: 12px;
+            }
+
+            .feature-grid,
+            .example-grid,
+            .overview-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-card {
+                min-height: 0;
+            }
+
+            .section-heading {
+                font-size: 20px;
+            }
+
+            .bottom-item {
+                flex-direction: column;
+                gap: 4px;
+                padding: 10px 5px;
+                font-size: 11px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+
+        <!-- HERO -->
+        <header class="hero">
+            <div class="hero-content">
+
+                <img
+                    class="logo"
+                    src="assayflux-logo.png"
+                    alt="AssayFlux"
+                    onerror="this.style.display='none'"
+                >
+
+                <h1>AssayFlux</h1>
+
+                <p class="subtitle">
+                    A Python-Interoperable Programming Language
+                </p>
+
+                <p class="tagline">
+                    Readable syntax. Structured execution.
+                    Python interoperability.
+                </p>
+
+                <div class="badges">
+                    <span class="badge badge-python">
+                        <span class="badge-label">LANGUAGE</span>
+                        PYTHON
+                    </span>
+
+                    <span class="badge badge-tests">
+                        <span class="badge-label">BUILD</span>
+                        AUTOMATED TESTS
+                    </span>
+
+                    <span class="badge badge-status">
+                        <span class="badge-label">STATUS</span>
+                        EXPERIMENTAL
+                    </span>
+
+                    <span class="badge badge-version">
+                        <span class="badge-label">VERSION</span>
+                        0.3.0
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <!-- NAVIGATION -->
+        <nav class="navigation" aria-label="Main navigation">
+            <a href="#overview">Overview</a>
+            <a href="#features">Features</a>
+            <a href="#example">Example</a>
+            <a href="#getting-started">Getting Started</a>
+            <a href="#testing">Testing</a>
+            <a href="#roadmap">Roadmap</a>
+        </nav>
+
+        <!-- FEATURES -->
+        <section class="section" id="features">
+            <h2 class="section-heading">Features</h2>
+
+            <div class="feature-grid">
+
+                <article class="card feature-card red">
+                    <div class="feature-icon" aria-hidden="true">
+                        &lt;/&gt;
+                    </div>
+
+                    <div>
+                        <h3>Core Language</h3>
+                        <ul>
+                            <li>Variables and constants</li>
+                            <li>Arithmetic expressions</li>
+                            <li>Comparisons and conditions</li>
+                            <li>Structured execution</li>
+                            <li>Repeat loops and loop control</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="card feature-card orange">
+                    <div class="feature-icon" aria-hidden="true">
+                        f(x)
+                    </div>
+
+                    <div>
+                        <h3>Program Structure</h3>
+                        <ul>
+                         <li>User-defined functions</li>
+                            <li>Function arguments and return values</li>
+                            <li>Output statements</li>
+                            <li>Lexer and parser</li>
+                            <li>Runtime error handling</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="card feature-card green">
+                    <div class="feature-icon" aria-hidden="true">
+                        Py
+                    </div>
+
+                    <div>
+                        <h3>Python Interoperability</h3>
+                        <ul>
+                            <li>Python module imports</li>
+                            <li>Access to supported module functionality</li>
+                            <li>Python ecosystem integration</li>
+                            <li>External-runtime adapters</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="card feature-card violet">
+                    <div class="feature-icon" aria-hidden="true">
+                        { }
+                    </div>
+
+                    <div>
+                        <h3>Development</h3>
+                        <ul>
+                            <li>Automated test suite</li>
+                            <li>Example programs</li>
+                            <li>GitHub Actions workflows</li>
+                            <li>Runtime integration tests</li>
+                            <li>Language documentation</li>
+                        </ul>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- EXAMPLES -->
+        <section class="section" id="example">
+            <div class="example-grid">
+
+                <article class="example-card" style="--example-accent: var(--orange)">
+                    <h2>Quick Example</h2>
+
+                    <p>A simple AssayFlux program:</p>
+
+                    <pre><code><span class="code-keyword">app</span> <span class="code-string">"Hello AssayFlux"</span>
+
+<span class="code-keyword">constant</span> GREETING = <span class="code-string">"Hello, AssayFlux!"</span>
+
+<span class="code-keyword">show</span> GREETING</code></pre>
+
+                    <div class="output">
+                        <div class="output-label">OUTPUT</div>
+                        <pre><code>Hello, AssayFlux!</code></pre>
+                    </div>
+                </article>
+
+                <article class="example-card" style="--example-accent: var(--blue)">
+                    <h2>Python Interoperability</h2>
+
+                    <p>Importing and using a Python module:</p>
+
+                    <pre><code><span class="code-keyword">import</span> math
+
+<span class="code-keyword">show</span> math.sqrt(<span class="code-number">25</span>)</code></pre>
+
+                    <div class="output">
+                        <div class="output-label">OUTPUT</div>
+                        <pre><code>5.0</code></pre>
+                    </div>
+
+                    <p>
+                        Python import behavior depends on the modules and
+                        functionality supported by the current interpreter.
+                    </p>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- OVERVIEW -->
+        <section class="section" id="overview">
+            <h2 class="section-heading" style="--heading-color: var(--red)">
+                Overview
+            </h2>
+
+            <div class="overview-layout">
+                <div class="overview-copy">
+                    <p>
+                        AssayFlux is an experimental programming-language
+                        project exploring readable syntax, structured
+                        program execution, and interoperability with Python.
+                    </p>
+
+                    <p>
+                        The repository contains a language lexer, parser,
+                        interpreter, abstract syntax tree, command-line
+                        interface, examples, documentation, and automated
+                        tests.
+                    </p>
+
+                    <p>
+                        External language adapters provide an integration
+                        layer for supported runtimes. Availability and
+                        compatibility depend on the installed environment.
+                    </p>
+                </div>
+
+                <aside class="quote-card">
+                    A foundation for exploring language design and building
+                    accessible programming tools.
+                </aside>
+            </div>
+        </section>
+
+        <!-- GETTING STARTED -->
+        <section class="section" id="getting-started">
+            <h2 class="section-heading" style="--heading-color: var(--green)">
+                Getting Started
+            </h2>
+
+            <article class="card green">
+                <h3>Install AssayFlux</h3>
+
+                <p>
+                    Requirements: Python 3.10 or newer and Git.
+                </p>
+
+                <pre><code>git clone https://github.com/AssayFlux/AssayFlux.git
+cd AssayFlux
+python -m pip install -e .
+assayflux examples/hello.af</code></pre>
+
+                <p>
+                    You can also run a source file with
+                    <code>python -m assayflux examples/hello.af</code>.
+                </p>
+            </article>
+        </section>
+
+        <!-- TESTING -->
+        <section class="section" id="testing">
+            <h2 class="section-heading" style="--heading-color: var(--blue)">
+                Testing
+            </h2>
+
+            <article class="card blue">
+                <h3>Run the test suite</h3>
+
+                <pre><code>python -m pip install -e ".[dev]"
+python -m pytest -q</code></pre>
+
+                <p>
+                    GitHub Actions can execute automated checks for
+                    repository changes.
+                </p>
+            </article>
+        </section>
+
+        <!-- ROADMAP -->
+        <section class="section" id="roadmap">
+            <h2 class="section-heading" style="--heading-color: var(--violet)">
+                Roadmap
+            </h2>
+
+            <div class="feature-grid">
+
+                <article class="card red">
+                    <h3>Language Quality</h3>
+                    <p>
+                        Strengthen parsing, interpretation, diagnostics,
+                        and language conformance tests.
+                    </p>
+                </article>
+
+                <article class="card violet">
+                    <h3>Interoperability</h3>
+                    <p>
+                        Improve runtime detection, adapter reliability,
+                        documentation, and developer tooling.
+                    </p>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- BOTTOM STRIP -->
+        <div class="bottom-strip">
+            <a
+                class="bottom-item"
+                href="https://github.com/AssayFlux/AssayFlux"
+            >
+                <span class="bottom-mark">&lt;/&gt;</span>
+                <span>Language Design</span>
+            </a>
+
+            <a
+                class="bottom-item"
+                href="https://www.python.org/"
+            >
+                <span class="bottom-mark">Py</span>
+                <span>Python Ecosystem</span>
+            </a>
+
+            <a
+                class="bottom-item"
+                href="https://github.com/AssayFlux/AssayFlux"
+            >
+                <span class="bottom-mark">{ }</span>
+                <span>Open Development</span>
+            </a>
+        </div>
+
+        <footer>
+            <p>
+                <strong>AssayFlux</strong> · Explore. Create. Innovate.
+            </p>
+
+            <p>
+                Experimental language development · Python interoperability
+            </p>
+
+            <p>
+                <a href="https://github.com/AssayFlux/AssayFlux">
+                    GitHub Repository
+                </a>
+                &nbsp; · &nbsp;
+                <a href="DOCS/">
+                    Documentation
+                </a>
+            </p>
+        </footer>
+
+    </main>
+</body>
+</html>
