@@ -1,32 +1,172 @@
+# ============================================================================
+# AssayFlux — pyproject.toml
+# ============================================================================
+
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
+
+# ----------------------------------------------------------------------------
+# Project metadata
+# ----------------------------------------------------------------------------
 [project]
 name = "assayflux"
 version = "0.2.0"
-description = "A multi-domain meta-language compiler, transpiler, and runtime."
+description = "A scientific computing language with multi-language interoperability."
 readme = "README.md"
-authors = [
-    { name = "AssayFlux Developer" }
-]
+requires-python = ">=3.10"
 license = { text = "MIT" }
+authors = [
+    { name = "AssayFlux" },
+]
+keywords = [
+    "language",
+    "interpreter",
+    "scientific-computing",
+    "dsl",
+    "assayflux",
+]
 classifiers = [
-    "Programming Language :: Python :: 3",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Interpreters",
+    "Topic :: Scientific/Engineering",
 ]
-requires-python = ">=3.10"
 dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.1",
+    "mypy>=1.8",
+    "pyright>=1.1.350",
+    "build>=1.0",
+    "twine>=5.0",
+]
 
 [project.scripts]
 assayflux = "assayflux.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/AssayFlux/AssayFlux"
+Repository = "https://github.com/AssayFlux/AssayFlux"
+Issues = "https://github.com/AssayFlux/AssayFlux/issues"
+Documentation = "https://github.com/AssayFlux/AssayFlux/tree/main/DOCS"
+
+
+# ----------------------------------------------------------------------------
+# Setuptools package discovery
+# ----------------------------------------------------------------------------
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.packages.find]
-include = ["assayflux", "assayflux.*"]
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0",
-    "mypy>=1.8",
-    "pyright>=1.1.350",
+where = ["."]
+include = ["assayflux*"]
+exclude = ["tests*", "examples*", "DOCS*"]
+
+
+# ----------------------------------------------------------------------------
+# mypy
+# ----------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unreachable = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+show_error_codes = true
+show_error_context = true
+pretty = true
+exclude = ["build/", "dist/", "\\.venv/", "examples/"]
+
+# Loosen rules for the experimental code-generation and interop layers
+# until they are fully typed. Remove these overrides once they are clean.
+[[tool.mypy.overrides]]
+module = ["assayflux.generator.*", "assayflux.interop.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+warn_return_any = false
+
+# Tests may omit annotations
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+
+# ----------------------------------------------------------------------------
+# pyright
+# ----------------------------------------------------------------------------
+[tool.pyright]
+include = ["assayflux", "tests"]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    ".venv",
+    "build",
+    "dist",
+]
+pythonVersion = "3.10"
+typeCheckingMode = "strict"
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportUnusedImport = true
+reportUnusedVariable = true
+
+
+# ----------------------------------------------------------------------------
+# pytest
+# ----------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "interop: marks tests exercising external-language adapters",
+]
+
+
+# ----------------------------------------------------------------------------
+# coverage
+# ----------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["assayflux"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/examples/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
 ]
