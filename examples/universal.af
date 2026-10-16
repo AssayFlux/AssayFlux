@@ -1,128 +1,270 @@
 # ============================================================
-# AssayFlux Universal Language Example
-# Demonstrates the supported core language syntax.
+# ASSAYFLUX — UNIVERSAL LANGUAGE SHOWCASE
+# ============================================================
+#
+# Purpose:
+#   Demonstrate the core AssayFlux language in one file.
+#
+# Sections:
+#   01. Variables and constants
+#   02. Data literals
+#   03. Arithmetic operators
+#   04. Comparison operators
+#   05. Logical operators
+#   06. Expression precedence
+#   07. Conditional statements
+#   08. Nested conditionals
+#   09. Basic functions
+#   10. Functions with multiple parameters
+#   11. Return values
+#   12. Recursive functions
+#   13. Count-controlled loops
+#   14. Condition-controlled loops
+#   15. Loop control
+#   16. Nested loops
+#   17. Variable updates
+#   18. Scientific calculations
+#   19. String operations
+#   20. Boolean expressions
+#   21. Function-based calculations
+#   22. Reusable calculations
+#   23. Practical laboratory example
+#   24. Program summary
+#
+# Notes:
+#   - Comments begin with #.
+#   - Indentation uses four spaces per level.
+#   - Blocks use indentation and explicit end statements.
+#   - Block headers follow the syntax of the inspected grammar.
+#   - Import and input examples are documented separately below.
+#
 # ============================================================
 
 
-# ------------------------------------------------------------
-# 1. Application declaration
-# ------------------------------------------------------------
+# ============================================================
+# 01. VARIABLES AND CONSTANTS
+# ============================================================
 
-app "AssayFlux Universal Example"
-
-
-# ------------------------------------------------------------
-# 2. Variables and constants
-# ------------------------------------------------------------
-
-constant APP_VERSION = "1.0.0"
-constant MAX_SCORE = 100
+show "==================================================="
+show "01. VARIABLES AND CONSTANTS"
+show "==================================================="
 
 app_name = "AssayFlux"
-student_name = "Medical Biochemistry"
-score = 85
-temperature = 25.5
-is_ready = True
-is_finished = False
+app_version = "1.0.0"
+language_name = "AssayFlux Language"
 
-show "=== AssayFlux Universal Example ==="
+constant MAX_SCORE = 100
+constant MIN_SCORE = 0
+constant PASS_MARK = 50
+
 show app_name
-show APP_VERSION
-show student_name
+show app_version
+show language_name
 
-show "Numeric variables:"
-show score
-show temperature
-
-show "Boolean variables:"
-show is_ready
-show is_finished
+show MAX_SCORE
+show MIN_SCORE
+show PASS_MARK
 
 
-# ------------------------------------------------------------
-# 3. Arithmetic operators
-# ------------------------------------------------------------
+# ============================================================
+# 02. DATA LITERALS
+# ============================================================
 
-a = 20
-b = 6
+show "==================================================="
+show "02. DATA LITERALS"
+show "==================================================="
 
-show "=== Arithmetic ==="
+integer_value = 42
+decimal_value = 3.14159
+text_value = "Hello, AssayFlux!"
+true_value = true
+false_value = false
 
-show a + b
-show a - b
-show a * b
-show a / b
-show a // b
-show a % b
-show a ** 2
+show integer_value
+show decimal_value
+show text_value
+show true_value
+show false_value
 
+negative_value = -25
+positive_value = +25
 
-# ------------------------------------------------------------
-# 4. Comparison operators
-# ------------------------------------------------------------
-
-show "=== Comparisons ==="
-
-show a == b
-show a != b
-show a > b
-show a < b
-show a >= b
-show a <= b
+show negative_value
+show positive_value
 
 
-# ------------------------------------------------------------
-# 5. Logical operators
-# ------------------------------------------------------------
+# ============================================================
+# 03. ARITHMETIC OPERATORS
+# ============================================================
 
-show "=== Logical operations ==="
+show "==================================================="
+show "03. ARITHMETIC OPERATORS"
+show "==================================================="
 
-show True and True
-show True and False
-show True or False
-show not False
+number_a = 20
+number_b = 6
+
+show "Addition"
+show number_a + number_b
+
+show "Subtraction"
+show number_a - number_b
+
+show "Multiplication"
+show number_a * number_b
+
+show "Division"
+show number_a / number_b
+
+show "Remainder"
+show number_a % number_b
+
+show "Exponentiation, if enabled by the parser"
+show number_a ** 2
+
+show "Floor division, if enabled by the parser"
+show number_a // number_b
 
 
-# ------------------------------------------------------------
-# 6. Conditional statements
-# ------------------------------------------------------------
+# ============================================================
+# 04. COMPARISON OPERATORS
+# ============================================================
 
-show "=== Conditional statements ==="
+show "==================================================="
+show "04. COMPARISON OPERATORS"
+show "==================================================="
+
+left_value = 10
+right_value = 20
+
+show left_value == right_value
+show left_value != right_value
+
+show left_value < right_value
+show left_value > right_value
+
+show left_value <= right_value
+show left_value >= right_value
+
+
+# ============================================================
+# 05. LOGICAL OPERATORS
+# ============================================================
+
+show "==================================================="
+show "05. LOGICAL OPERATORS"
+show "==================================================="
+
+show true and true
+show true and false
+
+show true or false
+show false or false
+
+show not true
+show not false
+
+logical_a = true
+logical_b = false
+
+show logical_a and logical_b
+show logical_a or logical_b
+show not logical_a
+
+
+# ============================================================
+# 06. EXPRESSION PRECEDENCE
+# ============================================================
+
+show "==================================================="
+show "06. EXPRESSION PRECEDENCE"
+show "==================================================="
+
+precedence_a = 2 + 3 * 4
+precedence_b = (2 + 3) * 4
+
+show precedence_a
+show precedence_b
+
+precedence_c = 20 - 5 - 3
+precedence_d = 20 / 5 * 2
+
+show precedence_c
+show precedence_d
+
+precedence_e = 10 + 5 * 2 - 3
+show precedence_e
+
+
+# ============================================================
+# 07. CONDITIONAL STATEMENTS
+# ============================================================
+
+show "==================================================="
+show "07. CONDITIONAL STATEMENTS"
+show "==================================================="
+
+score = 85
 
 if score >= 90:
-    show "Excellent performance!"
-otherwise score >= 70:
-    show "Good performance!"
+    show "Excellent performance"
+otherwise score >= 75:
+    show "Very good performance"
 otherwise score >= 50:
-    show "Satisfactory performance."
+    show "Satisfactory performance"
 else:
-    show "More practice is required."
+    show "Improvement required"
 end
 
 
-# ------------------------------------------------------------
-# 7. Nested conditional statements
-# ------------------------------------------------------------
+# ============================================================
+# 08. NESTED CONDITIONALS
+# ============================================================
 
-show "=== Nested conditions ==="
+show "==================================================="
+show "08. NESTED CONDITIONALS"
+show "==================================================="
 
-if is_ready:
-    show "The application is ready."
+is_registered = true
+has_permission = true
 
-    if score >= 70:
-        show "The score meets the target."
+if is_registered:
+    show "Registration verified"
+
+    if has_permission:
+        show "Access granted"
     else:
-        show "The score is below the target."
+        show "Access denied"
     end
 
 else:
-    show "The application is not ready."
+    show "Registration required"
 end
 
 
-# ------------------------------------------------------------
-# 8. Function definitions
-# ------------------------------------------------------------
+# ============================================================
+# 09. BASIC FUNCTIONS
+# ============================================================
+
+show "==================================================="
+show "09. BASIC FUNCTIONS"
+show "==================================================="
+
+f.greet():
+    return "Welcome to AssayFlux"
+end
+
+greeting = greet()
+show greeting
+
+
+# ============================================================
+# 10. FUNCTIONS WITH MULTIPLE PARAMETERS
+# ============================================================
+
+show "==================================================="
+show "10. MULTI-PARAMETER FUNCTIONS"
+show "==================================================="
 
 f.add(a, b):
     return a + b
@@ -136,67 +278,94 @@ f.multiply(a, b):
     return a * b
 end
 
-f.square(number):
-    return number * number
+f.divide(a, b):
+    return a / b
 end
 
-f.describe_score(value):
-    if value >= 90:
-        return "Excellent"
-    otherwise value >= 70:
-        return "Good"
-    otherwise value >= 50:
-        return "Satisfactory"
+addition_result = add(12, 8)
+subtraction_result = subtract(12, 8)
+multiplication_result = multiply(12, 8)
+division_result = divide(12, 8)
+
+show addition_result
+show subtraction_result
+show multiplication_result
+show division_result
+
+
+# ============================================================
+# 11. FUNCTIONS WITH RETURN VALUES
+# ============================================================
+
+show "==================================================="
+show "11. FUNCTION RETURN VALUES"
+show "==================================================="
+
+f.square(value):
+    return value * value
+end
+
+f.cube(value):
+    return value * value * value
+end
+
+f.calculate_average(total, count):
+    return total / count
+end
+
+square_result = square(5)
+cube_result = cube(3)
+average_result = calculate_average(150, 3)
+
+show square_result
+show cube_result
+show average_result
+
+
+# ============================================================
+# 12. RECURSIVE FUNCTIONS
+# ============================================================
+
+show "==================================================="
+show "12. RECURSIVE FUNCTIONS"
+show "==================================================="
+
+f.factorial(number):
+    if number <= 1:
+        return 1
     else:
-        return "Needs improvement"
+        return number * factorial(number - 1)
     end
 end
 
-
-# ------------------------------------------------------------
-# 9. Function calls and return values
-# ------------------------------------------------------------
-
-show "=== Functions ==="
-
-sum_result = add(10, 20)
-difference_result = subtract(20, 5)
-product_result = multiply(5, 6)
-square_result = square(8)
-score_description = describe_score(score)
-
-show "Addition:"
-show sum_result
-
-show "Subtraction:"
-show difference_result
-
-show "Multiplication:"
-show product_result
-
-show "Square:"
-show square_result
-
-show "Score description:"
-show score_description
+factorial_result = factorial(5)
+show factorial_result
 
 
-# ------------------------------------------------------------
-# 10. Count-controlled repetition
-# ------------------------------------------------------------
+# ============================================================
+# 13. COUNT-CONTROLLED LOOPS
+# ============================================================
 
-show "=== Count-controlled loop ==="
+show "==================================================="
+show "13. COUNT-CONTROLLED LOOPS"
+show "==================================================="
 
 repeat count 3:
     show "Count-controlled iteration"
 end
 
+repeat count 5:
+    show "Processing a repeated task"
+end
 
-# ------------------------------------------------------------
-# 11. Condition-controlled repetition
-# ------------------------------------------------------------
 
-show "=== Condition-controlled loop ==="
+# ============================================================
+# 14. CONDITION-CONTROLLED LOOPS
+# ============================================================
+
+show "==================================================="
+show "14. CONDITION-CONTROLLED LOOPS"
+show "==================================================="
 
 counter = 0
 
@@ -205,12 +374,16 @@ repeat while counter < 5:
     counter = counter + 1
 end
 
+show "Condition-controlled loop completed"
 
-# ------------------------------------------------------------
-# 12. Conditional loop with skip
-# ------------------------------------------------------------
 
-show "=== Loop with skip ==="
+# ============================================================
+# 15. LOOP CONTROL: SKIP
+# ============================================================
+
+show "==================================================="
+show "15. LOOP CONTROL — SKIP"
+show "==================================================="
 
 counter = 0
 
@@ -225,46 +398,60 @@ repeat while counter < 5:
 end
 
 
-# ------------------------------------------------------------
-# 13. Loop with stop
-# ------------------------------------------------------------
+# ============================================================
+# 16. LOOP CONTROL: STOP
+# ============================================================
 
-show "=== Loop with stop ==="
+show "==================================================="
+show "16. LOOP CONTROL — STOP"
+show "==================================================="
 
 counter = 0
 
 repeat forever:
     counter = counter + 1
 
-    if counter >= 3:
+    if counter >= 4:
         stop
     end
 
     show counter
 end
 
-
-# ------------------------------------------------------------
-# 14. Additional expressions
-# ------------------------------------------------------------
-
-show "=== Expressions ==="
-
-expression_result = (10 + 5) * 2
-show expression_result
-
-comparison_result = score >= 70
-show comparison_result
-
-logical_result = is_ready and not is_finished
-show logical_result
+show "Loop terminated"
 
 
-# ------------------------------------------------------------
-# 15. Updating variables
-# ------------------------------------------------------------
+# ============================================================
+# 17. NESTED LOOPS
+# ============================================================
 
-show "=== Variable updates ==="
+show "==================================================="
+show "17. NESTED LOOPS"
+show "==================================================="
+
+outer_counter = 0
+
+repeat while outer_counter < 3:
+    show "Outer iteration"
+
+    inner_counter = 0
+
+    repeat while inner_counter < 2:
+        show inner_counter
+        inner_counter = inner_counter + 1
+    end
+
+    outer_counter = outer_counter + 1
+end
+
+
+# ============================================================
+# 18. VARIABLE UPDATES
+# ============================================================
+
+show "==================================================="
+show "18. VARIABLE UPDATES"
+show "==================================================="
 
 value = 10
 show value
@@ -272,29 +459,200 @@ show value
 value = value + 5
 show value
 
+value = value - 3
+show value
+
 value = value * 2
 show value
 
+value = value / 4
+show value
 
-# ------------------------------------------------------------
-# 16. Application summary
-# ------------------------------------------------------------
 
-show "=== Summary ==="
+# ============================================================
+# 19. STRING OPERATIONS
+# ============================================================
 
-show "Application:"
-show app_name
+show "==================================================="
+show "19. STRING OPERATIONS"
+show "==================================================="
+
+first_word = "Assay"
+second_word = "Flux"
+
+show first_word
+show second_word
+
+combined_text = first_word + second_word
+show combined_text
+
+welcome_text = "Welcome to " + app_name
+show welcome_text
+
+laboratory_name = "Clinical Biochemistry Laboratory"
+show laboratory_name
+
+
+# ============================================================
+# 20. BOOLEAN EXPRESSIONS
+# ============================================================
+
+show "==================================================="
+show "20. BOOLEAN EXPRESSIONS"
+show "==================================================="
+
+quality_control_passed = true
+instrument_ready = true
+sample_available = false
+
+if quality_control_passed and instrument_ready:
+    show "System checks passed"
+else:
+    show "System checks failed"
+end
+
+if sample_available:
+    show "Sample is available"
+else:
+    show "Sample is unavailable"
+end
+
+
+# ============================================================
+# 21. FUNCTION-BASED CALCULATIONS
+# ============================================================
+
+show "==================================================="
+show "21. FUNCTION-BASED CALCULATIONS"
+show "==================================================="
+
+f.percentage(part, whole):
+    return part / whole * 100
+end
+
+f.difference(value_a, value_b):
+    return value_a - value_b
+end
+
+f.mean_of_two(value_a, value_b):
+    return (value_a + value_b) / 2
+end
+
+percentage_result = percentage(25, 100)
+difference_result = difference(80, 65)
+mean_result = mean_of_two(20, 40)
+
+show percentage_result
+show difference_result
+show mean_result
+
+
+# ============================================================
+# 22. REUSABLE CALCULATIONS
+# ============================================================
+
+show "==================================================="
+show "22. REUSABLE CALCULATIONS"
+show "==================================================="
+
+f.is_passing(mark):
+    if mark >= PASS_MARK:
+        return true
+    else:
+        return false
+    end
+end
+
+f.classify_mark(mark):
+    if mark >= 90:
+        return "Excellent"
+    otherwise mark >= 75:
+        return "Very good"
+    otherwise mark >= PASS_MARK:
+        return "Pass"
+    else:
+        return "Fail"
+    end
+end
+
+student_mark = 82
+pass_status = is_passing(student_mark)
+mark_category = classify_mark(student_mark)
+
+show pass_status
+show mark_category
+
+
+# ============================================================
+# 23. PRACTICAL LABORATORY CALCULATION
+# ============================================================
+
+show "==================================================="
+show "23. PRACTICAL LABORATORY CALCULATION"
+show "==================================================="
+
+# Illustrative absorbance measurements.
+# These are demonstration values, not clinical reference limits.
+
+blank_absorbance = 0.020
+standard_absorbance = 0.500
+sample_absorbance = 0.250
+
+standard_concentration = 100
+
+corrected_standard = standard_absorbance - blank_absorbance
+corrected_sample = sample_absorbance - blank_absorbance
+
+f.calculate_concentration(sample_signal, standard_signal, standard_value):
+    return sample_signal / standard_signal * standard_value
+end
+
+calculated_concentration = calculate_concentration(
+    corrected_sample,
+    corrected_standard,
+    standard_concentration
+)
+
+show "Blank absorbance:"
+show blank_absorbance
+
+show "Corrected standard signal:"
+show corrected_standard
+
+show "Corrected sample signal:"
+show corrected_sample
+
+show "Calculated concentration:"
+show calculated_concentration
+
+
+# ============================================================
+# 24. FINAL SUMMARY
+# ============================================================
+
+show "==================================================="
+show "ASSAYFLUX UNIVERSAL EXAMPLE COMPLETED"
+show "==================================================="
+
+show "Language:"
+show language_name
 
 show "Version:"
-show APP_VERSION
+show app_version
 
-show "Maximum score:"
-show MAX_SCORE
+show "Arithmetic test:"
+show addition_result
 
-show "Final score:"
-show score
+show "Function test:"
+show square_result
 
-show "Final counter:"
+show "Recursion test:"
+show factorial_result
+
+show "Loop test:"
 show counter
 
-show "All universal example sections completed."
+show "Laboratory calculation:"
+show calculated_concentration
+
+show "All enabled demonstration sections have finished."
