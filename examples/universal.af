@@ -1,0 +1,300 @@
+# ============================================================
+# AssayFlux Universal Language Example
+# Demonstrates the supported core language syntax.
+# ============================================================
+
+
+# ------------------------------------------------------------
+# 1. Application declaration
+# ------------------------------------------------------------
+
+app "AssayFlux Universal Example"
+
+
+# ------------------------------------------------------------
+# 2. Variables and constants
+# ------------------------------------------------------------
+
+constant APP_VERSION = "1.0.0"
+constant MAX_SCORE = 100
+
+app_name = "AssayFlux"
+student_name = "Medical Biochemistry"
+score = 85
+temperature = 25.5
+is_ready = True
+is_finished = False
+
+show "=== AssayFlux Universal Example ==="
+show app_name
+show APP_VERSION
+show student_name
+
+show "Numeric variables:"
+show score
+show temperature
+
+show "Boolean variables:"
+show is_ready
+show is_finished
+
+
+# ------------------------------------------------------------
+# 3. Arithmetic operators
+# ------------------------------------------------------------
+
+a = 20
+b = 6
+
+show "=== Arithmetic ==="
+
+show a + b
+show a - b
+show a * b
+show a / b
+show a // b
+show a % b
+show a ** 2
+
+
+# ------------------------------------------------------------
+# 4. Comparison operators
+# ------------------------------------------------------------
+
+show "=== Comparisons ==="
+
+show a == b
+show a != b
+show a > b
+show a < b
+show a >= b
+show a <= b
+
+
+# ------------------------------------------------------------
+# 5. Logical operators
+# ------------------------------------------------------------
+
+show "=== Logical operations ==="
+
+show True and True
+show True and False
+show True or False
+show not False
+
+
+# ------------------------------------------------------------
+# 6. Conditional statements
+# ------------------------------------------------------------
+
+show "=== Conditional statements ==="
+
+if score >= 90:
+    show "Excellent performance!"
+otherwise score >= 70:
+    show "Good performance!"
+otherwise score >= 50:
+    show "Satisfactory performance."
+else:
+    show "More practice is required."
+end
+
+
+# ------------------------------------------------------------
+# 7. Nested conditional statements
+# ------------------------------------------------------------
+
+show "=== Nested conditions ==="
+
+if is_ready:
+    show "The application is ready."
+
+    if score >= 70:
+        show "The score meets the target."
+    else:
+        show "The score is below the target."
+    end
+
+else:
+    show "The application is not ready."
+end
+
+
+# ------------------------------------------------------------
+# 8. Function definitions
+# ------------------------------------------------------------
+
+f.add(a, b):
+    return a + b
+end
+
+f.subtract(a, b):
+    return a - b
+end
+
+f.multiply(a, b):
+    return a * b
+end
+
+f.square(number):
+    return number * number
+end
+
+f.describe_score(value):
+    if value >= 90:
+        return "Excellent"
+    otherwise value >= 70:
+        return "Good"
+    otherwise value >= 50:
+        return "Satisfactory"
+    else:
+        return "Needs improvement"
+    end
+end
+
+
+# ------------------------------------------------------------
+# 9. Function calls and return values
+# ------------------------------------------------------------
+
+show "=== Functions ==="
+
+sum_result = add(10, 20)
+difference_result = subtract(20, 5)
+product_result = multiply(5, 6)
+square_result = square(8)
+score_description = describe_score(score)
+
+show "Addition:"
+show sum_result
+
+show "Subtraction:"
+show difference_result
+
+show "Multiplication:"
+show product_result
+
+show "Square:"
+show square_result
+
+show "Score description:"
+show score_description
+
+
+# ------------------------------------------------------------
+# 10. Count-controlled repetition
+# ------------------------------------------------------------
+
+show "=== Count-controlled loop ==="
+
+repeat count 3:
+    show "Count-controlled iteration"
+end
+
+
+# ------------------------------------------------------------
+# 11. Condition-controlled repetition
+# ------------------------------------------------------------
+
+show "=== Condition-controlled loop ==="
+
+counter = 0
+
+repeat while counter < 5:
+    show counter
+    counter = counter + 1
+end
+
+
+# ------------------------------------------------------------
+# 12. Conditional loop with skip
+# ------------------------------------------------------------
+
+show "=== Loop with skip ==="
+
+counter = 0
+
+repeat while counter < 5:
+    counter = counter + 1
+
+    if counter == 3:
+        skip
+    end
+
+    show counter
+end
+
+
+# ------------------------------------------------------------
+# 13. Loop with stop
+# ------------------------------------------------------------
+
+show "=== Loop with stop ==="
+
+counter = 0
+
+repeat forever:
+    counter = counter + 1
+
+    if counter >= 3:
+        stop
+    end
+
+    show counter
+end
+
+
+# ------------------------------------------------------------
+# 14. Additional expressions
+# ------------------------------------------------------------
+
+show "=== Expressions ==="
+
+expression_result = (10 + 5) * 2
+show expression_result
+
+comparison_result = score >= 70
+show comparison_result
+
+logical_result = is_ready and not is_finished
+show logical_result
+
+
+# ------------------------------------------------------------
+# 15. Updating variables
+# ------------------------------------------------------------
+
+show "=== Variable updates ==="
+
+value = 10
+show value
+
+value = value + 5
+show value
+
+value = value * 2
+show value
+
+
+# ------------------------------------------------------------
+# 16. Application summary
+# ------------------------------------------------------------
+
+show "=== Summary ==="
+
+show "Application:"
+show app_name
+
+show "Version:"
+show APP_VERSION
+
+show "Maximum score:"
+show MAX_SCORE
+
+show "Final score:"
+show score
+
+show "Final counter:"
+show counter
+
+show "All universal example sections completed."
