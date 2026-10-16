@@ -1839,3 +1839,50 @@ The long-term goal is to let developers express workflows in AssayFlux and use o
 Achieving this goal requires a stable grammar, a well-tested interpreter, a clear runtime architecture, robust adapter interfaces, and automated conformance testing.
 
 The priority is correctness and maintainability: a small set of dependable language features is more valuable than a large list of unimplemented promises.
+
+---
+
+# Canonical Core Grammar and Conformance Contract
+
+## Purpose
+
+This section defines the canonical syntax contract for the AssayFlux
+core language.
+
+The specification and implementation are separate things. A syntax
+feature is not considered implemented merely because it appears in
+this document or because the lexer recognizes its keyword.
+
+The lexer, parser, abstract syntax tree, interpreter and automated
+tests must agree on the syntax and behavior of every implemented
+feature.
+
+## Source and formatting rules
+
+- Source files use UTF-8 encoding.
+- Source line endings are normalized to LF before token positions
+  are calculated.
+- Line and column positions are one-based.
+- Identifiers are case-sensitive.
+- Custom keywords use their specified lowercase spelling.
+- Four spaces per indentation level are the canonical style.
+- Tabs must not be mixed with spaces for indentation.
+- Blank lines and comment-only lines do not create statements.
+- A comment begins with `#` outside a string and continues to the
+  end of the physical line.
+- A compound statement header ends with a colon.
+- A compound statement body is indented one level deeper than
+  its header.
+- The keyword `end` closes the corresponding compound statement.
+- Each compound statement must have exactly one matching `end`.
+- An extra `end`, missing `end`, or invalid indentation must produce
+  a useful syntax error.
+- Empty blocks are rejected unless an implemented `pass` statement
+  explicitly permits them.
+
+Example:
+
+```text
+if temperature > 25:
+    show "Temperature is high"
+end
