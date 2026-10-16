@@ -1,8 +1,9 @@
-"""Tests for the AssayFlux code generation system."""
+"""Tests for the AssayFlux Scientific Systems code generators."""
 
 from __future__ import annotations
 
 import ast
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -21,7 +22,7 @@ from assayflux.generator import (
 
 
 class TestGeneratorContracts(unittest.TestCase):
-    """Verify the common interface used by all generators."""
+    """Verify the shared generator interface."""
 
     def setUp(self):
         self.spec = {
@@ -71,7 +72,7 @@ class TestGeneratorContracts(unittest.TestCase):
             {"html", "css", "javascript", "python", "sql"},
         )
 
-    def test_all_generators_return_generation_results(self):
+    def test_all_generators_return_successful_results(self):
         for generator in self.generators:
             with self.subTest(generator=generator.name):
                 result = generator.generate(self.spec)
@@ -84,9 +85,15 @@ class TestGeneratorContracts(unittest.TestCase):
                 self.assertTrue(result.files)
 
                 for generated_file in result.files:
-                    self.assertIsInstance(generated_file, GeneratedFile)
+                    self.assertIsInstance(
+                        generated_file,
+                        GeneratedFile,
+                    )
                     self.assertTrue(generated_file.path)
-                    self.assertIsInstance(generated_file.content, str)
+                    self.assertIsInstance(
+                        generated_file.content,
+                        str,
+                    )
                     self.assertTrue(generated_file.language)
 
     def test_generated_paths_are_expected(self):
@@ -102,27 +109,46 @@ class TestGeneratorContracts(unittest.TestCase):
             with self.subTest(generator=generator.name):
                 result = generator.generate(self.spec)
 
-                self.assertTrue(result.success, msg=str(result.errors))
+                self.assertTrue(
+                    result.success,
+                    msg=str(result.errors),
+                )
                 self.assertIn(
                     expected_paths[generator.name],
-                    {file.path for file in result.files},
+                    {item.path for item in result.files},
                 )
+
+    def test_non_dictionary_specifications_are_rejected(self):
+        for generator in self.generators:
+            with self.subTest(generator=generator.name):
+                result = generator.generate(None)
+
+                self.assertFalse(result.success)
+                self.assertTrue(result.errors)
 
 
 class TestHtmlGenerator(unittest.TestCase):
-    """Verify HTML generation."""
+    """Verify HTML generation, validation, and text escaping."""
+
+    def setUp(self):
+        self.generator = HtmlGenerator()
 
     def test_generates_default_page(self):
-        result = HtmlGenerator().generate({})
+        result = self.generator.generate({})
 
         self.assertTrue(result.success, msg=str(result.errors))
         self.assertEqual(len(result.files), 1)
         self.assertEqual(result.files[0].path, "index.html")
-        self.assertIn("<!DOCTYPE html>", result.files[0].content)
-        self.assertIn("Welcome to AssayFlux", result.files[0].content)
+
+        html = result.files[0].content
+
+        self.assertIn("<!DOCTYPE html>", html)
+        self.assertIn("Welcome to AssayFlux", html)
+        self.assertIn('lang="en"', html)
+        self.assertIn("AssayFlux Scientific Systems", html)
 
     def test_uses_supplied_title_and_content(self):
-        result = HtmlGenerator().generate(
+        result = self.generator.generate(
             {
                 "title": "Laboratory Portal",
                 "content": "Experiment dashboard",
@@ -130,13 +156,37 @@ class TestHtmlGenerator(unittest.TestCase):
         )
 
         self.assertTrue(result.success, msg=str(result.errors))
-        content = result.files[0].content
 
-        self.assertIn("Laboratory Portal", content)
-        self.assertIn("Experiment dashboard", content)
+        html = result.files[0].content
+
+        self.assertIn("Laboratory Portal", html)
+        self.assertIn("Experiment dashboard", html)
+
+    def test_escapes_html_in_titles_and_content(self):
+        result = self.generator.generate(
+            {
+                "title": '<script>alert("title")</script>',
+                "content": '<img src=x onerror="alert(1)">',
+            }
+        )
+
+        self.assertTrue(result.success, msg=str(result.errors))
+
+        html = result.files[0].content
+
+        self.assertNotIn(
+            '<script>alert("title")</script>',
+            html,
+        )
+        self.assertNotIn(
+            '<img src=x onerror="alert(1)">',
+            html,
+        )
+        self.assertIn("&lt;script&gt;", html)
+        self.assertIn("&lt;img", html)
 
     def test_generates_multiple_pages(self):
-        result = HtmlGenerator().generate(
+        result = self.generator.generate(
             {
                 "title": "Research Portal",
                 "pages": [
@@ -155,79 +205,354 @@ class TestHtmlGenerator(unittest.TestCase):
         )
 
         self.assertTrue(result.success, msg=str(result.errors))
-        paths = {file.path for file in result.files}
-
         self.assertEqual(
-            paths,
+            {item.path for item in result.files},
             {"experiments.html", "reports.html"},
         )
 
-
-class TestCssGenerator(unittest.TestCase):
-    """Verify CSS generation."""
-
-    def test_generates_stylesheet(self):
-        result = CssGenerator().generate({})
-
-        self.assertTrue(result.success, msg=str(result.errors))
-        self.assertEqual(result.files[0].path, "css/style.css")
-        self.assertIn(":root", result.files[0].content)
-        self.assertIn("body", result.files[0].content)
-
-    def test_uses_supplied_primary_color(self):
-        result = CssGenerator().generate(
-            {"primary_color": "#24434A"}
+    def test_creates_filename_from_page_title(self):
+        result = self.generator.generate(
+            {
+                "pages": [
+                    {
+                        "title": "Research Results 2026",
+                        "content": "Results",
+                    }
+                ]
+            }
         )
 
         self.assertTrue(result.success, msg=str(result.errors))
-        self.assertIn("--primary: #24434A;", result.files[0].content)
+        self.assertEqual(
+            result.files[0].path,
+            "research-results-2026.html",
+        )
 
-    def test_supports_dark_theme(self):
-        result = CssGenerator().generate({"theme": "dark"})
+    def test_rejects_non_dictionary_specification(self):
+        result = self.generator.generate([])
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_empty_application_title(self):
+        result = self.generator.generate({"title": "   "})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_non_string_page_content(self):
+        result = self.generator.generate({"content": 123})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_non_list_pages(self):
+        result = self.generator.generate({"pages": "not a list"})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_non_dictionary_page(self):
+        result = self.generator.generate({"pages": ["invalid"]})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_path_traversal(self):
+        unsafe_filenames = [
+            "../outside.html",
+            "pages/../../outside.html",
+            "/tmp/outside.html",
+            r"pages\outside.html",
+        ]
+
+        for filename in unsafe_filenames:
+            with self.subTest(filename=filename):
+                result = self.generator.generate(
+                    {
+                        "pages": [
+                            {
+                                "title": "Unsafe Page",
+                                "filename": filename,
+                                "content": "Test",
+                            }
+                        ]
+                    }
+                )
+
+                self.assertFalse(result.success)
+                self.assertTrue(result.errors)
+
+    def test_rejects_non_html_filename(self):
+        result = self.generator.generate(
+            {
+                "pages": [
+                    {
+                        "title": "Reports",
+                        "filename": "reports.txt",
+                        "content": "Reports",
+                    }
+                ]
+            }
+        )
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_duplicate_filenames(self):
+        result = self.generator.generate(
+            {
+                "pages": [
+                    {
+                        "title": "First",
+                        "filename": "reports.html",
+                        "content": "First page",
+                    },
+                    {
+                        "title": "Second",
+                        "filename": "reports.html",
+                        "content": "Second page",
+                    },
+                ]
+            }
+        )
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+
+class TestCssGenerator(unittest.TestCase):
+    """Verify CSS themes, colors, and responsive styling."""
+
+    def setUp(self):
+        self.generator = CssGenerator()
+
+    def test_generates_stylesheet(self):
+        result = self.generator.generate({})
 
         self.assertTrue(result.success, msg=str(result.errors))
-        self.assertIn("--bg: #0f172a;", result.files[0].content)
+        self.assertEqual(result.files[0].path, "css/style.css")
+
+        css = result.files[0].content
+
+        self.assertIn(":root", css)
+        self.assertIn("body", css)
+        self.assertIn("--primary: #24434A;", css)
+        self.assertIn("--bg: #F6F4EF;", css)
+
+    def test_uses_supplied_primary_color(self):
+        result = self.generator.generate(
+            {"primary_color": "#2563eb"}
+        )
+
+        self.assertTrue(result.success, msg=str(result.errors))
+        self.assertIn(
+            "--primary: #2563eb;",
+            result.files[0].content,
+        )
+
+    def test_supports_dark_theme(self):
+        result = self.generator.generate({"theme": "dark"})
+
+        self.assertTrue(result.success, msg=str(result.errors))
+        self.assertIn(
+            "--bg: #0f172a;",
+            result.files[0].content,
+        )
+        self.assertIn(
+            "--surface: #1e293b;",
+            result.files[0].content,
+        )
+
+    def test_accepts_short_hex_colors(self):
+        for color in ("#123", "#1234", "#AABBCC", "#AABBCCDD"):
+            with self.subTest(color=color):
+                result = self.generator.generate(
+                    {"primary_color": color}
+                )
+
+                self.assertTrue(
+                    result.success,
+                    msg=str(result.errors),
+                )
+
+    def test_rejects_invalid_colors(self):
+        invalid_colors = [
+            "red",
+            "url(javascript:alert(1))",
+            "#12",
+            "#12345",
+            "#1234567",
+            "#123456789",
+            "#12; color: red",
+            "",
+        ]
+
+        for color in invalid_colors:
+            with self.subTest(color=color):
+                result = self.generator.generate(
+                    {"primary_color": color}
+                )
+
+                self.assertFalse(result.success)
+                self.assertTrue(result.errors)
+
+    def test_rejects_unknown_theme(self):
+        result = self.generator.generate({"theme": "neon"})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_non_string_theme(self):
+        result = self.generator.generate({"theme": None})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_non_string_color(self):
+        result = self.generator.generate({"primary_color": 123})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_includes_responsive_layout(self):
+        result = self.generator.generate({})
+
+        self.assertTrue(result.success, msg=str(result.errors))
+
+        css = result.files[0].content
+
+        self.assertIn("@media (max-width: 600px)", css)
+        self.assertIn("prefers-reduced-motion", css)
+        self.assertIn(":focus-visible", css)
 
 
 class TestJavaScriptGenerator(unittest.TestCase):
-    """Verify JavaScript generation."""
+    """Verify JavaScript generation and safe string encoding."""
+
+    def setUp(self):
+        self.generator = JsGenerator()
 
     def test_generates_javascript_file(self):
-        result = JsGenerator().generate(
+        result = self.generator.generate(
             {"title": "AssayFlux Laboratory"}
         )
 
         self.assertTrue(result.success, msg=str(result.errors))
         self.assertEqual(result.files[0].path, "js/main.js")
-        self.assertIn("DOMContentLoaded", result.files[0].content)
-        self.assertIn("AssayFlux Laboratory", result.files[0].content)
+
+        source = result.files[0].content
+
+        self.assertIn("DOMContentLoaded", source)
+        self.assertIn("AssayFlux Laboratory", source)
+        self.assertIn('"use strict";', source)
+        self.assertIn("const APP_NAME", source)
+
+    def test_encodes_quotes_and_newlines_safely(self):
+        title = 'Lab "Alpha"\\Beta\nSecond line'
+
+        result = self.generator.generate({"title": title})
+
+        self.assertTrue(result.success, msg=str(result.errors))
+
+        source = result.files[0].content
+        encoded_title = json.dumps(title, ensure_ascii=True)
+
+        self.assertIn(
+            f"const APP_NAME = {encoded_title};",
+            source,
+        )
+
+    def test_rejects_empty_title(self):
+        result = self.generator.generate({"title": "   "})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_non_string_title(self):
+        result = self.generator.generate({"title": 123})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_non_dictionary_specification(self):
+        result = self.generator.generate(None)
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
 
 
 class TestPythonGenerator(unittest.TestCase):
-    """Verify generated Python source code."""
+    """Verify generated Python source and validation."""
+
+    def setUp(self):
+        self.generator = PythonGenerator()
 
     def test_generates_valid_simple_backend(self):
-        result = PythonGenerator().generate(
-            {"title": "AssayFlux Backend", "backend": "simple"}
+        result = self.generator.generate(
+            {
+                "title": "AssayFlux Backend",
+                "backend": "simple",
+            }
         )
 
         self.assertTrue(result.success, msg=str(result.errors))
         self.assertEqual(result.files[0].path, "backend/app.py")
 
-        # Parse the generated source without executing it.
         ast.parse(result.files[0].content)
 
-    def test_generates_valid_flask_backend_source(self):
-        result = PythonGenerator().generate(
-            {"title": "AssayFlux API", "backend": "flask"}
+    def test_generates_valid_flask_backend(self):
+        result = self.generator.generate(
+            {
+                "title": "AssayFlux API",
+                "backend": "flask",
+            }
         )
 
         self.assertTrue(result.success, msg=str(result.errors))
+
         source = result.files[0].content
 
         self.assertIn("from flask import Flask, jsonify", source)
         self.assertIn("/api/health", source)
+
         ast.parse(source)
+
+    def test_escapes_title_in_generated_python(self):
+        title = 'Research "Alpha"\\Beta\nSecond line'
+
+        result = self.generator.generate({"title": title})
+
+        self.assertTrue(result.success, msg=str(result.errors))
+
+        source = result.files[0].content
+
+        ast.parse(source)
+        self.assertIn(json.dumps(title, ensure_ascii=True), source)
+
+    def test_rejects_empty_title(self):
+        result = self.generator.generate({"title": "   "})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_non_string_title(self):
+        result = self.generator.generate({"title": 123})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_unsupported_backend(self):
+        result = self.generator.generate({"backend": "unknown"})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
+
+    def test_rejects_non_string_backend(self):
+        result = self.generator.generate({"backend": None})
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.errors)
 
 
 class TestSqlGenerator(unittest.TestCase):
@@ -272,7 +597,9 @@ class TestSqlGenerator(unittest.TestCase):
         self.assertIn('"description" TEXT NOT NULL', sql)
 
     def test_escapes_single_quotes_in_string_defaults(self):
-        rendered = SqlGenerator.sanitize_value("researcher's notes")
+        rendered = SqlGenerator.sanitize_value(
+            "researcher's notes"
+        )
 
         self.assertEqual(rendered, "'researcher''s notes'")
 
@@ -384,6 +711,20 @@ class TestProjectBuilder(unittest.TestCase):
         )
 
         ast.parse(backend.read_text(encoding="utf-8"))
+
+    def test_generated_javascript_preserves_title(self):
+        result = self.builder.build_website(self.spec)
+
+        self.assertTrue(result.success, msg=str(result.errors))
+
+        javascript = (
+            self.output_directory
+            / "website"
+            / "js"
+            / "main.js"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("AssayFlux Research Portal", javascript)
 
     def test_rejects_non_dictionary_specification(self):
         result = self.builder.build_website([])
