@@ -701,44 +701,115 @@ class Lexer:
                 ) * 8
 
         return visual_column
+def _handle_indentation(self):
+    """
+    Process indentation at the beginning of a physical line.
 
-    def _handle_indentation(self):
-        """
-        Process indentation at the beginning of a physical line.
+    Rules:
+        1. Blank lines do not change indentation levels.
+        2. Comment-only lines do not change indentation levels.
+        3. Parenthesized expressions suppress indentation changes.
+        4. Explicitly continued lines suppress indentation changes.
+        5. Indentation increases emit INDENT.
+        6. Indentation decreases emit DEDENT.
+        7. Inconsistent indentation raises LexError.
 
-        Blank lines and comment-only lines do not change the
-        indentation stack.
+    Explicit continuation example:
 
-        Inside parentheses, brackets, and braces, indentation
-        does not create INDENT or DEDENT tokens.
-        """
-        if not self.at_line_start:
-            return
+        show 10 + \\
+            20
 
-        if self.delimiter_stack:
-            # Continuation lines inside delimiters do not
-            # introduce new indentation scopes.
-            while self._current_char() in (" ", "\t", "\f"):
-                self._advance()
+    The continued line is part of the same logical statement.
+    Its leading whitespace must not generate INDENT or DEDENT.
+    """
 
-            self.at_line_start = False
-            return
+    if not self.at_line_start:
+        return
 
-        indentation_start = self.position
-        indentation_line = self.line
-        indentation_column = self.column
+    # --------------------------------------------------------
+    # Explicit line continuation
+    # --------------------------------------------------------
 
+    # A backslash followed by a newline continues the current
+    # logical statement. Ignore indentation on the next
+    # physical line instead of treating it as a new block.
+    if self.explicit_line_continuation:
         while self._current_char() in (" ", "\t", "\f"):
             self._advance()
 
-        whitespace = self.source_code[
-            indentation_start:self.position
-        ]
+        self.at_line_start = False
+        return
 
-        current_char = self._current_char()
+    # --------------------------------------------------------
+    # Multiline expressions inside delimiters
+    # --------------------------------------------------------
 
-        # Blank line.
-        if current_char == "\n":
+    # Newlines inside parentheses, brackets, and braces do not
+    # create indentation-based blocks.
+    if self.delimiter_stack:
+        while self._current_char() in (" ", "\t", "\f"):
+            self._advance()
+
+        self.at_line_start = False
+        return
+
+    # --------------------------------------------------------
+    # Read the indentation prefix
+    # --------------------------------------------------------
+
+    indentation_start = self.position
+    indentation_line = self.line
+    indentation_column = self.column
+
+    while self._current_char() in (" ", "\t", "\f"):
+        self._advance()
+
+    whitespace = self.source_code[
+        indentation_start:self.position
+    ]
+
+    current_char = self._current_char()
+
+    # --------------------------------------------------------
+    # Blank line
+    # --------------------------------------------------------
+
+    if current_char == "\n":
+        newline_start = self.position
+        newline_line = self.line
+        newline_column = self.column
+
+        self._advance()
+
+        self._emit(
+            "NEWLINE",
+            "\n",
+            newline_start,
+            newline_line,
+            newline_column,
+            "\n",
+        )
+
+        self.at_line_start = True
+        self.logical_line_has_tokens = False
+        return
+
+    # --------------------------------------------------------
+    # End of file after whitespace
+    # --------------------------------------------------------
+
+    if current_char == "":
+        self.at_line_start = False
+        return
+
+    # --------------------------------------------------------
+    # Comment-only line
+    # --------------------------------------------------------
+
+    if current_char == "#":
+        self._consume_comment()
+
+        if self._current_char() == "\n":
             newline_start = self.position
             newline_line = self.line
             newline_column = self.column
@@ -754,86 +825,73 @@ class Lexer:
                 "\n",
             )
 
-            self.at_line_start = True
-            self.logical_line_has_tokens = False
-            return
+        self.at_line_start = True
+        self.logical_line_has_tokens = False
+        return
 
-        # End of file after whitespace.
-        if current_char == "":
-            self.at_line_start = False
-            return
+    # --------------------------------------------------------
+    # Calculate visual indentation
+    # --------------------------------------------------------
 
-        # Comment-only line.
-        if current_char == "#":
-            self._consume_comment()
+    indentation = self._visual_indentation(
+        whitespace,
+        indentation_line,
+        indentation_column,
+    )
 
-            if self._current_char() == "\n":
-                newline_start = self.position
-                newline_line = self.line
-                newline_column = self.column
+    previous_indentation = self.indentation_stack[-1]
 
-                self._advance()
+    # --------------------------------------------------------
+    # Increased indentation
+    # --------------------------------------------------------
 
-                self._emit(
-                    "NEWLINE",
-                    "\n",
-                    newline_start,
-                    newline_line,
-                    newline_column,
-                    "\n",
-                )
+    if indentation > previous_indentation:
+        self.indentation_stack.append(indentation)
 
-            self.at_line_start = True
-            self.logical_line_has_tokens = False
-            return
-
-        indentation = self._visual_indentation(
-            whitespace,
-            indentation_line,
-            indentation_column,
+        self._emit(
+            "INDENT",
+            str(indentation),
+            self.position,
+            self.line,
+            self.column,
+            "",
         )
 
-        previous_indentation = self.indentation_stack[-1]
+    # --------------------------------------------------------
+    # Decreased indentation
+    # --------------------------------------------------------
 
-        if indentation > previous_indentation:
-            self.indentation_stack.append(indentation)
+    elif indentation < previous_indentation:
+        while (
+            len(self.indentation_stack) > 1
+            and indentation < self.indentation_stack[-1]
+        ):
+            self.indentation_stack.pop()
 
             self._emit(
-                "INDENT",
-                str(indentation),
+                "DEDENT",
+                str(self.indentation_stack[-1]),
                 self.position,
                 self.line,
                 self.column,
                 "",
             )
 
-        elif indentation < previous_indentation:
-            while (
-                len(self.indentation_stack) > 1
-                and indentation < self.indentation_stack[-1]
-            ):
-                self.indentation_stack.pop()
+        if self.indentation_stack[-1] != indentation:
+            self._error_at(
+                "Inconsistent indentation. "
+                "The indentation does not match "
+                "any previously opened block.",
+                self.line,
+                self.column,
+            )
 
-                self._emit(
-                    "DEDENT",
-                    str(self.indentation_stack[-1]),
-                    self.position,
-                    self.line,
-                    self.column,
-                    "",
-                )
+    # --------------------------------------------------------
+    # Finish indentation processing
+    # --------------------------------------------------------
 
-            if self.indentation_stack[-1] != indentation:
-                self._error_at(
-                    "Inconsistent indentation. "
-                    "The indentation does not match "
-                    "any previously opened block.",
-                    self.line,
-                    self.column,
-                )
-
-        self.at_line_start = False
-
+    self.at_line_start = False
+    
     # --------------------------------------------------------
     # Comments
     # --------------------------------------------------------
