@@ -701,7 +701,8 @@ class Lexer:
                 ) * 8
 
         return visual_column
-    def _handle_indentation(self):
+    
+def _handle_indentation(self):
     """
     Process indentation at the beginning of a physical line.
 
@@ -725,8 +726,6 @@ class Lexer:
 
     if not self.at_line_start:
         return
-
-
 
     # --------------------------------------------------------
     # Explicit line continuation
