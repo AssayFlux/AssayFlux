@@ -1,35 +1,95 @@
-# Publishing AssayFlux to GitHub and installing it
+# AssayFlux Specification Status
 
-## 1. Before publishing
+This document tracks the relationship between the AssayFlux
+language specification, its implementation, and its automated tests.
 
-1. Create a GitHub repository named `AssayFlux` (or choose your own name).
-2. Upload the contents of this project folder, not the ZIP file nested inside the repository.
-3. Confirm `pyproject.toml`, `assayflux/`, `tests/`, `examples/`, and `docs/` are at the repository root.
-4. Run the test suite locally: `python -m pip install -e ".[dev]"` then `python -m pytest`.
-5. Push the repository to GitHub and wait for the CI workflow to pass.
+The presence of a source file does not, by itself, establish that
+a feature is complete or supported.
 
-## 2. Install from GitHub
+## Status definitions
 
-Replace `OWNER` and `REPOSITORY` with the actual account and repository names:
+- **Specified:** The intended behavior is documented.
+- **Implemented:** An implementation exists in the source code.
+- **Tested:** Automated tests verify the documented behavior.
+- **Verified:** The feature has been checked against its intended
+  behavior in a defined environment.
+- **Planned:** The feature is intended but is not yet complete.
+
+A feature should be described as supported only when its documented
+behavior has been verified.
+
+## Language core
+
+| Component | Implementation location | Verification requirement |
+|---|---|---|
+| Lexical analysis | `assayflux/lexer.py` | Token and lexical-error tests |
+| Parsing | `assayflux/parser.py` | Grammar and parser tests |
+| Abstract syntax tree | `assayflux/ast_nodes.py` | AST construction tests |
+| Interpretation | `assayflux/interpreter.py` | Runtime behavior tests |
+| Semantic validation | `assayflux/validator.py` | AST compatibility and semantic tests |
+| Command-line interface | `assayflux/cli.py` | CLI execution tests |
+| Package entry point | `assayflux/__main__.py` | Invocation tests |
+
+## Language features
+
+| Feature | Verification requirement |
+|---|---|
+| Variables and assignments | Assignment, scope, and reassignment tests |
+| Constants | Declaration and reassignment tests |
+| Numeric literals | Integer, floating-point, and supported numeric-form tests |
+| String literals | Valid strings, escapes, and unterminated strings |
+| Boolean literals | `true` and `false` evaluation |
+| Arithmetic operators | Precedence, evaluation, and error tests |
+| Comparison operators | Comparison behavior tests |
+| Logical operators | Truth behavior and short-circuit tests |
+| `show` | Output tests |
+| `if` / `otherwise` / `else` | Branch-selection tests |
+| `repeat` | Condition, count, and forever-loop tests |
+| `stop` and `skip` | Loop-control tests |
+| `pass` | No-operation behavior |
+| Functions | Definition, calls, arguments, return values, and scope |
+| Imports | Module resolution, aliases, and import errors |
+| Member access | Module and object attribute tests |
+| Error locations | Filename, line, and column tests |
+
+## Interoperability
+
+| Component | Implementation location | Verification requirement |
+|---|---|---|
+| Adapter interface | `assayflux/interop/base.py` | Interface contract tests |
+| Adapter registry | `assayflux/interop/registry.py` | Registration and lookup tests |
+| Adapter loader | `assayflux/interop/loader.py` | Resolution and availability tests |
+| Interoperability runtime | `assayflux/interop/runtime.py` | Dispatch and error tests |
+| Master adapter | `assayflux/interop/adapters/master_adapter.py` | Language-specific integration tests |
+| Universal adapter | `assayflux/interop/adapters/universal_adapter.py` | Compatibility tests |
+
+For each external language, distinguish between:
+
+1. Adapter registered.
+2. Required runtime available.
+3. Execution implemented.
+4. Integration tests passing.
+5. Feature documented as supported.
+
+These states must not be treated as equivalent.
+
+## Code generation
+
+| Generator | Implementation location | Verification requirement |
+|---|---|---|
+| HTML | `assayflux/generator/html_generator.py` | Generated document tests |
+| CSS | `assayflux/generator/css_generator.py` | Generated stylesheet tests |
+| JavaScript | `assayflux/generator/js_generator.py` | Generated source tests |
+| Python | `assayflux/generator/python_generator.py` | Generated source tests |
+| SQL | `assayflux/generator/sql_generator.py` | Generated query tests |
+| Project builder | `assayflux/generator/project_builder.py` | End-to-end project tests |
+
+Code generation does not automatically imply that the generated language
+can be executed directly by the AssayFlux interpreter.
+
+## Automated tests
+
+The primary test suite is:
 
 ```bash
-python -m pip install "git+https://github.com/OWNER/REPOSITORY.git"
-assayflux path/to/program.af
-```
-
-For a private repository, configure Git authentication before installation. Do not embed access tokens in shell history or project files.
-
-## 3. Install locally for development
-
-```bash
-python -m pip install -e ".[dev]"
-python -m pytest
-assayflux examples/hello.af
-```
-
-## 4. Release discipline
-
-- Keep the language specification and tests in the same commit as behavior changes.
-- Tag published versions (for example `v0.2.0`) only after CI passes.
-- Record supported Python versions and external runtime versions in release notes.
-- Do not claim a language adapter is supported until its runtime and integration tests pass in a defined environment.
+python -m pytest -q
