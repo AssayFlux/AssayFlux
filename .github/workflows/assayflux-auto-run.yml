@@ -192,6 +192,40 @@ jobs:
       # Execute real AssayFlux program
       # ------------------------------------------------------
 
+      - name: Diagnose AssayFlux Lexer Import
+        run: |
+          python - <<'PY'
+          import inspect
+          import sys
+          import assayflux
+          import assayflux.lexer
+          import assayflux.interpreter
+
+          from assayflux.lexer import Lexer
+
+          print("Python executable:", sys.executable)
+          print("AssayFlux package:", assayflux.__file__)
+          print("Lexer module:", assayflux.lexer.__file__)
+          print("Interpreter module:", assayflux.interpreter.__file__)
+          print("Lexer class:", Lexer)
+          print("Lexer source file:", inspect.getfile(Lexer))
+          print("Lexer methods:", [
+              name for name, value in inspect.getmembers(Lexer)
+              if callable(value) and not name.startswith("__")
+          ])
+
+          lexer = Lexer("show 1")
+          print("Lexer instance:", type(lexer))
+          print("Has tokenize:", hasattr(lexer, "tokenize"))
+          print("Has run:", hasattr(lexer, "run"))
+
+          if not hasattr(lexer, "tokenize"):
+              raise SystemExit(
+                  "DIAGNOSTIC FAILED: The imported Lexer "
+                  "does not provide tokenize()."
+              )
+          PY
+
       - name: Run AssayFlux CLI smoke test
         run: |
           cat > "$RUNNER_TEMP/assayflux_ci_smoke.af" <<'AF'
