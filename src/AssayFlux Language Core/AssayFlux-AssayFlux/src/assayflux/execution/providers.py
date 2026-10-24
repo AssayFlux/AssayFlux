@@ -15,7 +15,11 @@ from urllib.request import Request as URLRequest
 from urllib.request import urlopen
 
 from assayflux.diagnostics.model import RuntimeErrorAF, SecurityError
-from assayflux.execution.models import ExecutionProvider, ExecutionRequest, ExecutionResult
+from assayflux.execution.models import (
+    ExecutionProvider,
+    ExecutionRequest,
+    ExecutionResult,
+)
 
 _MAX_CODE_BYTES = 1_000_000
 _MAX_RESPONSE_BYTES = 8_000_000
