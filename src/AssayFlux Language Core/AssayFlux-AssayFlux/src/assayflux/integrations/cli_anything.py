@@ -9,11 +9,11 @@ import os
 import re
 import shutil
 import subprocess
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from collections.abc import Sequence
 
-from assayflux.diagnostics.model import SecurityError, RuntimeErrorAF
+from assayflux.diagnostics.model import RuntimeErrorAF, SecurityError
 
 _TOOL_NAME = re.compile(r"(?:cli-anything-[a-z0-9][a-z0-9-]*|cli-hub)\Z")
 _DEFAULT_TIMEOUT = 60
