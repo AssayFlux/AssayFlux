@@ -67,6 +67,26 @@ The counts above cover the nested imported source trees, not the small AssayFlux
 - **Security boundaries require evidence.** Language validation is not equivalent to operating-system isolation; sandbox and deployment controls require dedicated tests.
 - **Repository size is a material risk.** The OS and other large upstream trees should be assessed for repository suitability, history/provenance, licensing, and build needs before deciding whether to keep full source trees in this repository.
 
+## License and notice filename inventory
+
+This is a filename-pattern scan of each visible source-tree response. It is a triage aid only—not a determination of license compatibility, completeness, or redistribution rights.
+
+| Project source tree | Matching license/notice filenames | Completeness |
+|---|---:|---|
+| Assistant / project-nomad | 1 | Complete recursive response |
+| Execution engine / Piston | 1 | Complete recursive response |
+| CLI automation | 2 | Complete recursive response |
+| Security tools | 1 | Complete recursive response |
+| Interpreter / sandbox | 2 | Complete recursive response |
+| Language core | 1 | Complete recursive response |
+| Linux kernel | 10 | Truncated recursive response; also contains a `LICENSES/` directory |
+| macOS / XNU | 6 | Complete recursive response |
+| Quantum provider | 1 | Complete recursive response |
+| Reverse engineering | 4 | Complete recursive response |
+| Windows-compatible OS | 60 | Complete recursive response |
+
+The counts show why a root-level license alone is insufficient for this repository. Each component needs an origin/version record and a component-level review of license texts, third-party notices, embedded dependencies, and redistribution obligations. Do not replace upstream license or copyright text with AssayFlux branding.
+
 ## Branding and artifact scan findings
 
 The first metadata pass found upstream package identities in build files, including `project-nomad`, `piston-api`, `hackingtool`, `e2b-code-interpreter-root`, `pennylane`, and `rea-agents`. These identifiers are not being globally renamed in this pass: package names, executable names, imports, URLs, and release configuration can be compatibility-sensitive. Their AssayFlux-facing module entry points are branded, while upstream identities remain visible in source metadata until dependency and build checks prove a safe migration.
