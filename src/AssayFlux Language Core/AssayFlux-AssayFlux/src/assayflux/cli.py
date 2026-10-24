@@ -170,8 +170,8 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 for item in languages:
                     versions = ", ".join(item.get("versions", []))
-                    version_text = f"\\t{versions}" if versions else ""
-                    print(f"{item['language']}\\t{item['provider']}\\t{item['status']}{version_text}")
+                    version_text = f"\t{versions}" if versions else ""
+                    print(f"{item['language']}\t{item['provider']}\t{item['status']}{version_text}")
             return 0
         except AssayFluxError as exc:
             print(f"AssayFlux: {exc}", file=sys.stderr)
@@ -185,7 +185,7 @@ def main(argv: list[str] | None = None) -> int:
                 for runtime in runtimes:
                     aliases = ", ".join(runtime.get("aliases", []))
                     suffix = f" (aliases: {aliases})" if aliases else ""
-                    print(f"{runtime.get('language', '?')}\\t{runtime.get('version', '?')}{suffix}")
+                    print(f"{runtime.get('language', '?')}\t{runtime.get('version', '?')}{suffix}")
             return 0
         except AssayFluxError as exc:
             print(f"AssayFlux: {exc}", file=sys.stderr)
