@@ -41,3 +41,26 @@ def test_code_interpreter_adapter_reads_newline_delimited_events():
 
     assert result.stdout == "hello\n"
     assert result.exit_code == 0
+
+
+def test_cli_requires_explicit_external_execution_opt_in(capsys):
+    from assayflux.cli import main
+
+    status = main(["execute", "--provider", "piston", "--code", "print(1)"])
+
+    assert status == 1
+    assert "--allow-external-execution" in capsys.readouterr().err
+
+
+def test_cli_runtime_discovery_uses_provider_factory(monkeypatch, capsys):
+    from assayflux.cli import main
+
+    class FakePiston:
+        def list_runtimes(self):
+            return [{"language": "python", "version": "3.12.0", "aliases": ["py"]}]
+
+    monkeypatch.setattr("assayflux.cli.get_provider", lambda name: FakePiston())
+    status = main(["runtimes", "--json"])
+
+    assert status == 0
+    assert '"language": "python"' in capsys.readouterr().out
