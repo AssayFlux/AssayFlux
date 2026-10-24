@@ -50,14 +50,14 @@ def _infer(node, env, known_functions, imports):
                 raise TypeCheckError("Ordered comparisons do not support complex numbers",location=node.loc)
         return "bool"
     if isinstance(node,A.Binary):
-        l=_infer(node.left,env,known_functions,imports);r=_infer(node.right,env,known_functions,imports)
+        left_type=_infer(node.left,env,known_functions,imports);right_type=_infer(node.right,env,known_functions,imports)
         if node.op in {"and","or"}:return "unknown"
         if node.op in {"==","!=","<",">","<=",">=","in","not in","is","is not"}:return "bool"
         if node.op=="@":
-            if l not in {"collection","unknown"} or r not in {"collection","unknown"}: raise TypeCheckError("Matrix multiplication requires collection operands",location=node.loc)
+            if left_type not in {"collection","unknown"} or right_type not in {"collection","unknown"}: raise TypeCheckError("Matrix multiplication requires collection operands",location=node.loc)
             return "unknown"
-        if node.op=="+" and l==r and l in {"string","collection"}:return l
-        if node.op=="+" and "unknown" in {l,r}: return "unknown"
+        if node.op=="+" and left_type==right_type and left_type in {"string","collection"}:return left_type
+        if node.op=="+" and "unknown" in {left_type,right_type}: return "unknown"
         if node.op=="*" and ((l in {"string","collection"} and r in _NUM) or (r in {"string","collection"} and l in _NUM)):
             return l if l in {"string","collection"} else r
         if l not in _NUM or r not in _NUM:raise TypeCheckError(f"Operator '{node.op}' expects compatible numeric operands",location=node.loc)
