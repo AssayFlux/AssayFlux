@@ -176,14 +176,20 @@ class PistonProvider:
         compile_result = value.get("compile") or {}
         compile_stderr = compile_result.get("stderr", "") if isinstance(compile_result, dict) else ""
         compile_stdout = compile_result.get("stdout", "") if isinstance(compile_result, dict) else ""
+        exit_code = run.get("code")
+        signal = run.get("signal")
+        if exit_code is not None and (isinstance(exit_code, bool) or not isinstance(exit_code, int)):
+            raise RuntimeErrorAF("Piston returned an invalid exit code")
+        if signal is not None and not isinstance(signal, str):
+            raise RuntimeErrorAF("Piston returned an invalid signal")
         return ExecutionResult(
             provider=self.name,
             language=str(value.get("language", request.language)),
             version=str(value.get("version", request.version)),
             stdout=str(run.get("stdout", "")),
             stderr=str(compile_stderr) + str(run.get("stderr", "")),
-            exit_code=run.get("code"),
-            signal=run.get("signal"),
+            exit_code=exit_code,
+            signal=signal,
             metadata={
                 "compile_stdout": str(compile_stdout),
                 "compile_stderr": str(compile_stderr),
