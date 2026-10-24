@@ -95,7 +95,7 @@ The adapter permits only a bounded set of gates, up to 16 wires and 1,000 gates,
 
 ## Local diagnostic assistant
 
-The assistant adapter uses the imported Project NOMAD API by default at `http://127.0.0.1:8080`, calling `/api/health`, `/api/ollama/installed-models`, and `/api/ollama/chat`. This preserves NOMAD's local chat and RAG pipeline. Set `ASSAYFLUX_ASSISTANT_BACKEND=ollama` to use Ollama directly instead (default direct endpoint `http://127.0.0.1:11434`). `ASSAYFLUX_ASSISTANT_URL` overrides the chosen backend's base URL; `ASSAYFLUX_ASSISTANT_MODEL` selects a model when installed, otherwise NOMAD's first installed model is used. Remote endpoints are rejected unless `ASSAYFLUX_ASSISTANT_ALLOW_REMOTE=1` is explicitly set after review.
+The assistant adapter uses the imported Project NOMAD API by default at `http://127.0.0.1:8080`, calling `/api/health`, `/api/ollama/remote-status`, `/api/ollama/installed-models`, and `/api/ollama/chat`. It refuses to perform inference when NOMAD reports a remote Ollama endpoint configured, so the default offline mode does not silently use that remote endpoint. This preserves NOMAD's local chat and RAG pipeline. Set `ASSAYFLUX_ASSISTANT_BACKEND=ollama` to use Ollama directly instead (default direct endpoint `http://127.0.0.1:11434`). `ASSAYFLUX_ASSISTANT_URL` overrides the chosen backend's base URL; `ASSAYFLUX_ASSISTANT_MODEL` selects a model when installed, otherwise NOMAD's first installed model is used. Remote endpoints are rejected unless `ASSAYFLUX_ASSISTANT_ALLOW_REMOTE=1` is explicitly set after review.
 
 ```bash
 assayflux assistant status
