@@ -21,7 +21,7 @@ def test_registry_uses_live_piston_inventory_and_marks_default_interpreter():
     )
     assert any(
         item["language"] == "python" and item["provider"] == "code-interpreter"
-        and item["status"] == "configured-default"
+        and item["status"] == "available"
         for item in languages
     )
 
