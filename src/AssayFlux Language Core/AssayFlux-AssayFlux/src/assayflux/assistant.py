@@ -154,6 +154,8 @@ class OfflineAssistant:
                     {"role": "user", "content": f"Error:\n{error}\n\nContext:\n{context}"},
                 ],
             })
+            if not isinstance(result, dict):
+                return fallback
             message = result.get("message", {})
             content = message.get("content") if isinstance(message, dict) else None
             parsed = json.loads(content) if isinstance(content, str) else None
@@ -165,12 +167,15 @@ class OfflineAssistant:
             uncertainty = parsed.get("uncertainty", "Model uncertainty was not supplied.")
             if not isinstance(uncertainty, str):
                 uncertainty = "Model uncertainty was not supplied."
+            confidence = parsed.get("confidence")
+            if not isinstance(confidence, str) or confidence not in {"low", "medium", "high"}:
+                confidence = "low"
             return {
                 "provider": "project-nomad-local" if self.backend == "nomad" else "ollama-local",
                 "model": model,
                 "cause": parsed["cause"][:2000],
                 "suggestions": [s[:1000] for s in suggestions if isinstance(s, str)][:8],
-                "confidence": parsed.get("confidence") if parsed.get("confidence") in {"low", "medium", "high"} else "low",
+                "confidence": confidence,
                 "uncertainty": uncertainty[:2000],
                 "requires_review": True,
             }
