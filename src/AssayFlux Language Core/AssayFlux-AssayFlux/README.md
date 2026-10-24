@@ -81,7 +81,7 @@ The adapter uses argument arrays (never `shell=True`), validates executable name
 
 ## Python library interoperability
 
-AssayFlux and its language core run on Python 3.11+. The host environment can install compatible Python packages with `pip`; the language's Python bridge is intentionally more restrictive than ordinary Python. By default it exposes a small set of approved modules and callables. The bridge requires explicit module and callable grants and validates values crossing the language boundary.
+AssayFlux and its language core run on Python 3.11+. The host environment can install compatible Python packages with `pip`; the language's Python bridge is intentionally more restrictive than ordinary Python. Its default allowlist is small, and privileged Python-call capabilities remain disabled unless explicitly granted through trusted project configuration. The bridge validates values crossing the language boundary.
 
 This supports packages such as NumPy, pandas, Pillow, and scientific or machine-learning libraries, but **an installed package is not automatically callable from an `.af` program**. Add explicit trusted grants to an `assayflux.toml` file beside the source file:
 
