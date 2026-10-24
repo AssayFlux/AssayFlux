@@ -134,13 +134,16 @@ class OfflineAssistant:
             suggestions = parsed.get("suggestions", [])
             if not isinstance(suggestions, list):
                 suggestions = []
+            uncertainty = parsed.get("uncertainty", "Model uncertainty was not supplied.")
+            if not isinstance(uncertainty, str):
+                uncertainty = "Model uncertainty was not supplied."
             return {
                 "provider": "ollama-local",
                 "model": self.model,
                 "cause": parsed["cause"][:2000],
                 "suggestions": [s[:1000] for s in suggestions if isinstance(s, str)][:8],
                 "confidence": parsed.get("confidence") if parsed.get("confidence") in {"low", "medium", "high"} else "low",
-                "uncertainty": parsed.get("uncertainty", "Model uncertainty was not supplied."),
+                "uncertainty": uncertainty[:2000],
                 "requires_review": True,
             }
         except (RuntimeErrorAF, SecurityError, json.JSONDecodeError):
