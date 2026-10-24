@@ -63,3 +63,48 @@ def test_nomad_installed_model_list_accepts_json_array():
     with patch("assayflux.assistant.urlopen", return_value=FakeResponse()):
         result = assistant._request("/api/ollama/installed-models")
     assert result == [{"name": "llama3.2"}]
+
+
+def test_nomad_chat_payload_matches_supported_api_contract():
+    assistant = OfflineAssistant()
+    calls = []
+
+    def fake_request(path, payload=None):
+        calls.append((path, payload))
+        if path == "/api/health":
+            return {"status": "ok"}
+        if path == "/api/ollama/installed-models":
+            return [{"name": "llama3.2"}]
+        return {"message": {"content": '{"cause":"Bad syntax","suggestions":["Check brackets"],"confidence":[],"uncertainty":17}'}}
+
+    with patch.object(assistant, "_request", side_effect=fake_request):
+        result = assistant.diagnose("SyntaxError: unexpected token")
+
+    assert [path for path, _ in calls] == [
+        "/api/health", "/api/ollama/installed-models", "/api/ollama/chat"
+    ]
+    payload = calls[-1][1]
+    assert payload["model"] == "llama3.2"
+    assert payload["stream"] is False
+    assert "format" not in payload and "options" not in payload
+    assert result["cause"] == "Bad syntax"
+    assert result["confidence"] == "low"
+    assert result["uncertainty"] == "Model uncertainty was not supplied."
+
+
+def test_assistant_handles_non_object_chat_response_without_crashing():
+    assistant = OfflineAssistant()
+    with patch.object(assistant, "_request", side_effect=[
+        {"status": "ok"}, [{"name": "llama3.2"}], [{"unexpected": "list"}]
+    ]):
+        result = assistant.diagnose("Example error")
+    assert result["provider"] == "deterministic-fallback"
+    assert result["requires_review"] is True
+
+
+def test_assistant_rejects_oversized_inputs():
+    assistant = OfflineAssistant()
+    with pytest.raises(SecurityError):
+        assistant.diagnose("x" * 20_001)
+    with pytest.raises(SecurityError):
+        assistant.diagnose("error", "x" * 20_001)
