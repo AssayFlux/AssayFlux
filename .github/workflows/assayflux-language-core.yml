@@ -25,6 +25,9 @@ jobs:
     steps:
       - name: Check out AssayFlux
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            src/AssayFlux Language Core/AssayFlux-AssayFlux
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
