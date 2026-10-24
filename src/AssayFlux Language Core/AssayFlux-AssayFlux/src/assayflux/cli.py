@@ -93,9 +93,9 @@ def _run_tools(args: argparse.Namespace) -> int:
         cwd=args.cwd,
     )
     if result.stdout:
-        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
+        print(result.stdout, end="")
     if result.stderr:
-        print(result.stderr, file=sys.stderr, end="" if result.stderr.endswith("\n") else "\n")
+        print(result.stderr, file=sys.stderr, end="")
     return result.returncode
 
 
