@@ -156,7 +156,7 @@ def _run_external_execution(args: argparse.Namespace) -> int:
     )
     provider_name = args.provider
     if provider_name == "auto":
-        provider_name = "piston" if request.version else "code-interpreter"
+        provider_name = "piston" if request.version or request.stdin or request.args else "code-interpreter"
     provider = get_provider(provider_name)
     result = provider.execute(request)
     if args.json_output:
