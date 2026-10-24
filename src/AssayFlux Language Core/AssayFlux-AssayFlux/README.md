@@ -149,3 +149,31 @@ python -m ruff check src tests
 Separate services and application adapters should connect through explicit, tested APIs. No photo-editing functionality is part of the language core.
 
 AssayFlux is experimental software, not an OS-enforced sandbox. Do not run untrusted programs with sensitive privileges.
+
+
+## Python quality checks
+
+Install the development extras, then run the same checks used by CI:
+
+```bash
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m ruff check src/assayflux tests
+python -m mypy
+python -m pyright
+python -m pylint src/assayflux
+python -m build
+python -m twine check dist/*
+```
+
+- **Ruff** checks lint rules and import ordering.
+- **Mypy** and **Pyright** provide independent static type analysis.
+- **Pylint** adds a separate set of maintainability and correctness diagnostics.
+- **Pylance** is the Visual Studio Code language-server extension built on Pyright, not a standalone Python CLI package. Install the Microsoft Python and Pylance extensions in VS Code; project type-checking settings live in `pyproject.toml`. CI runs Pyright directly so editor availability is not required.
+- These tools complement, not replace, tests and security review. CI must stay green before release.
+
+## PyPI publishing
+
+The repository workflow `.github/workflows/publish-assayflux-pypi.yml` builds the source and wheel distributions, runs tests and static checks, validates the artifacts with Twine, and publishes the **same verified artifacts** only when a GitHub Release is published. The release tag must match the package version in `pyproject.toml` (for example, `v0.1.0` for version `0.1.0`).
+
+Before the first release, configure PyPI Trusted Publishing for this GitHub repository and the workflow filename `publish-assayflux-pypi.yml`, using the GitHub environment named `pypi`. The workflow uses OIDC and does not store a PyPI API token in repository secrets. Publishing is not triggered by ordinary pushes or pull requests. Check the package name's availability and ownership on PyPI before publishing; a successful build does not guarantee the name is available.
