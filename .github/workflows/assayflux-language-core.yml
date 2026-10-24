@@ -38,6 +38,19 @@ jobs:
         run: python -m pip install -e ".[dev]"
       - name: Run language-core tests
         run: python -m pytest
+      - name: Build and validate distributable artifacts
+        run: |
+          python -m pip install build twine
+          python -m build
+          python -m twine check dist/*
+      - name: Ruff lint
+        run: python -m ruff check src/assayflux tests
+      - name: Mypy static analysis
+        run: python -m mypy
+      - name: Pyright static analysis
+        run: python -m pyright
+      - name: Pylint static analysis
+        run: python -m pylint src/assayflux
       - name: Verify assistant adapter with non-loopback sockets disabled
         run: python -m pytest tests/test_assistant.py --disable-socket --allow-hosts=127.0.0.1,localhost -q
       - name: Lint language core and tests
