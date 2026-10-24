@@ -15,7 +15,7 @@ from typing import Sequence
 
 from assayflux.diagnostics.model import SecurityError, RuntimeErrorAF
 
-_TOOL_NAME = re.compile(r"(?:cli-anything-[a-z0-9][a-z0-9-]*|cli-hub)\\Z")
+_TOOL_NAME = re.compile(r"(?:cli-anything-[a-z0-9][a-z0-9-]*|cli-hub)\Z")
 _DEFAULT_TIMEOUT = 60
 _MAX_TIMEOUT = 300
 
