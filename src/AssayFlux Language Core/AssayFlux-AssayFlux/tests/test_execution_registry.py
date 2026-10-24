@@ -61,8 +61,7 @@ def test_auto_execution_routes_versioned_requests_to_piston(monkeypatch, capsys)
 
     class FakeProvider:
         def execute(self, request):
-            from assayflux.execution.models import ExecutionResult
-            return ExecutionResult(provider="piston", language=request.language or "python",
+                return ExecutionResult(provider="piston", language=request.language or "python",
                                    version=request.version, stdout="42\\n", exit_code=0)
 
     monkeypatch.setattr("assayflux.cli.get_provider", lambda name: (
