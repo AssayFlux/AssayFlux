@@ -35,8 +35,7 @@ else_branch: "else" ":" _NL _INDENT block _DEDENT
 while_stmt: "while" expr ":" _NL _INDENT block _DEDENT "end"
 for_stmt: "for" NAME "in" expr ":" _NL _INDENT block _DEDENT "end"
 repeat_stmt: "repeat" expr ":" _NL _INDENT block _DEDENT "end"
-counted_loop: NUMBER COUNTED_LOOP_MARKER ":"
-            | NUMBER "times" ":" _NL _INDENT block _DEDENT "end"
+counted_loop: NUMBER "times" ":" _NL _INDENT block _DEDENT "end"
 function_def: F_PREFIX NAME "(" [parameters] ")" ["->" type_expr] ":" _NL _INDENT block _DEDENT "end"
 parameters: parameter ("," parameter)* [","]
 ?parameter: KWSTAR NAME -> kwargs_parameter
@@ -111,7 +110,6 @@ dict_or_set_items: dict_item ("," dict_item)* [","]
           | expr -> set_item
 
 F_PREFIX.5: "f."
-COUNTED_LOOP_MARKER.5: /x\./
 AUG_OP.5: "+=" | "-=" | "*=" | "/=" | "%=" | "**="
 OR_OP: "or"
 AND_OP: "and"

@@ -39,6 +39,11 @@ def test_counted_repetition_runs_exactly_n_times():
     assert result.output == ["again", "again", "again"]
 
 
+def test_legacy_counted_loop_marker_is_rejected():
+    with pytest.raises(ParseError):
+        parse("3x.:\n")
+
+
 def test_function_declaration_and_default_argument():
     program = parse(
         "f.multiply(value, factor = 2):\n"
