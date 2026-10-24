@@ -59,7 +59,7 @@ def _run_tools(args: argparse.Namespace) -> int:
             print("No CLI-Anything harnesses found on PATH.")
         else:
             for item in harnesses:
-                print(f"{item.name}\\t{item.executable}")
+                print(f"{item.name}\t{item.executable}")
         return 0
 
     harness_args = list(args.harness_args)
@@ -73,9 +73,9 @@ def _run_tools(args: argparse.Namespace) -> int:
         cwd=args.cwd,
     )
     if result.stdout:
-        print(result.stdout, end="" if result.stdout.endswith("\\n") else "\\n")
+        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
     if result.stderr:
-        print(result.stderr, file=sys.stderr, end="" if result.stderr.endswith("\\n") else "\\n")
+        print(result.stderr, file=sys.stderr, end="" if result.stderr.endswith("\n") else "\n")
     return result.returncode
 
 
