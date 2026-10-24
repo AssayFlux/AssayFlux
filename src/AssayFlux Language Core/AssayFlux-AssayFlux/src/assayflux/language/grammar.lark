@@ -1,0 +1,143 @@
+// Executable core subset based on the canonical AssayFlux grammar.
+// Canonical executable grammar. Documentation and examples mirror these productions.
+start: (_NL | statement _NL*)*
+
+?statement: project_decl
+          | let_decl
+          | constant_decl
+          | assign_stmt
+          | aug_assign
+          | show_stmt
+          | if_stmt
+          | while_stmt
+          | for_stmt
+          | repeat_stmt
+          | counted_loop
+          | function_def
+          | return_stmt
+          | stop_stmt
+          | skip_stmt
+          | import_stmt
+          | from_import_stmt
+          | try_stmt
+          | raise_stmt
+          | expr_stmt
+
+project_decl: "project" STRING
+let_decl: "let" NAME "=" expr
+constant_decl: "constant" NAME "=" expr
+assign_stmt: NAME "=" expr
+aug_assign: NAME AUG_OP expr
+show_stmt: "show" [expr_list]
+if_stmt: "if" expr ":" _NL _INDENT block _DEDENT otherwise_branch* [else_branch] "end"
+otherwise_branch: "otherwise" expr ":" _NL _INDENT block _DEDENT
+else_branch: "else" ":" _NL _INDENT block _DEDENT
+while_stmt: "while" expr ":" _NL _INDENT block _DEDENT "end"
+for_stmt: "for" NAME "in" expr ":" _NL _INDENT block _DEDENT "end"
+repeat_stmt: "repeat" expr ":" _NL _INDENT block _DEDENT "end"
+counted_loop: NUMBER COUNTED_LOOP_MARKER ":"
+            | NUMBER "times" ":" _NL _INDENT block _DEDENT "end"
+function_def: F_PREFIX NAME "(" [parameters] ")" ["->" type_expr] ":" _NL _INDENT block _DEDENT "end"
+parameters: parameter ("," parameter)* [","]
+?parameter: KWSTAR NAME -> kwargs_parameter
+          | "*" NAME -> args_parameter
+          | NAME [":" type_expr] ["=" expr] -> normal_parameter
+type_expr: NAME
+return_stmt: "return" [expr]
+stop_stmt: "stop"
+skip_stmt: "skip"
+import_stmt: "import" dotted_name ["as" NAME]
+from_import_stmt: "from" dotted_name "import" import_names
+try_stmt: "try" ":" _NL _INDENT block _DEDENT except_clause* [try_else_clause] [finally_clause] "end"
+except_clause: "except" [exception_types] ["as" NAME] ":" _NL _INDENT block _DEDENT
+exception_types: NAME ("|" NAME)*
+try_else_clause: "else" ":" _NL _INDENT block _DEDENT
+finally_clause: "finally" ":" _NL _INDENT block _DEDENT
+raise_stmt: "raise" expr
+import_names: NAME ("," NAME)*
+dotted_name: NAME ("." NAME)*
+block: statement (_NL* statement)* _NL*
+expr_stmt: expr
+expr_list: expr ("," expr)* [","]
+
+?expr: lambda_expr | conditional_expr
+lambda_expr: "lambda" [lambda_parameters] ":" expr
+lambda_parameters: lambda_parameter ("," lambda_parameter)* [","]
+lambda_parameter: NAME ["=" expr]
+?conditional_expr: or_expr ["if" or_expr "else" expr] -> conditional
+?or_expr: and_expr (OR_OP and_expr)* -> fold_binary
+?and_expr: not_expr (AND_OP not_expr)* -> fold_binary
+?not_expr: NOT_OP not_expr -> unary
+         | comparison
+?comparison: bit_or ((COMP_OP | NOT_IN | IS_NOT) bit_or)* -> comparison
+?bit_or: bit_xor (BIT_OR bit_xor)* -> fold_binary
+?bit_xor: bit_and (BIT_XOR bit_and)* -> fold_binary
+?bit_and: shift (BIT_AND shift)* -> fold_binary
+?shift: sum (SHIFT_OP sum)* -> fold_binary
+?sum: term (ADD_OP term)* -> fold_binary
+?term: factor (MUL_OP factor)* -> fold_binary
+?factor: UNARY_OP factor -> unary
+       | power
+?power: postfix [POW_OP factor] -> power_expr
+?postfix: atom postfix_part* -> postfix_expr
+?postfix_part: "(" [arguments] ")" -> call_part
+             | "." NAME -> attr_part
+             | "[" expr "]" -> index_part
+arguments: argument ("," argument)* [","]
+?argument: NAME "=" expr -> keyword_argument
+         | "*" expr -> star_argument
+         | "**" expr -> kwstar_argument
+         | expr -> positional_argument
+?atom: NUMBER -> number
+     | STRING -> string
+     | FSTRING -> fstring
+     | TRUE -> true
+     | FALSE -> false
+     | NONE -> none
+     | NAME -> variable
+     | list_literal
+     | tuple_or_group
+     | dict_or_set
+     | "(" expr ")" -> grouped
+list_literal: "[" [list_comprehension | expr_list] "]"
+list_comprehension: or_expr "for" NAME "in" or_expr ["if" or_expr]
+tuple_or_group: "(" ")" -> empty_tuple
+               | "(" expr "," [expr_list] ")" -> tuple_literal
+dict_or_set: "{" "}" -> empty_dict
+           | "{" dict_or_set_items [comprehension_clause] "}"
+comprehension_clause: "for" NAME "in" or_expr ["if" or_expr]
+dict_or_set_items: dict_item ("," dict_item)* [","]
+?dict_item: expr ":" expr -> dict_item
+          | expr -> set_item
+
+F_PREFIX.5: "f."
+COUNTED_LOOP_MARKER.5: /x\./
+AUG_OP.5: "+=" | "-=" | "*=" | "/=" | "%=" | "**="
+OR_OP: "or"
+AND_OP: "and"
+NOT_OP: "not"
+NOT_IN.5: /not[ \t]+in/
+IS_NOT.5: /is[ \t]+not/
+COMP_OP.4: "==" | "!=" | "<=" | ">=" | "<" | ">" | "in" | "is"
+BIT_OR: "|"
+BIT_XOR: "^"
+BIT_AND: "&"
+SHIFT_OP.5: "<<" | ">>"
+ADD_OP.3: "+" | "-"
+MUL_OP: "*" | "/" | "//" | "%" | "@"
+UNARY_OP.2: "+" | "-" | "~"
+KWSTAR.6: "**"
+POW_OP.5: "**"
+TRUE.3: "true"
+FALSE.3: "false"
+NONE.3: "null"
+FSTRING.3: /[fF](?:"([^"\\]|\\.)*"|'([^'\\]|\\.)*')/
+NUMBER: /(?:0[xX][0-9a-fA-F]+|0[oO][0-7]+|0[bB][01]+|(?:0|[1-9][0-9]*)(?:\.[0-9]*)?(?:[eE][+-]?[0-9]+)?[jJ]?|\.[0-9]+(?:[eE][+-]?[0-9]+)?[jJ]?)/
+STRING: /("""[\s\S]*?"""|'''[\s\S]*?'''|"([^"\\]|\\.)*"|'([^'\\]|\\.)*')/
+NAME: /[A-Za-z_][A-Za-z0-9_]*/
+COMMENT: /#[^\n]*/
+_NL: /(\r?\n[ \t]*)+/
+%import common.WS_INLINE
+%ignore WS_INLINE
+%ignore COMMENT
+%declare _INDENT _DEDENT

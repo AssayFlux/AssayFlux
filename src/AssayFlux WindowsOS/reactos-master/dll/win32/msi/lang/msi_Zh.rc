@@ -1,0 +1,349 @@
+/*
+ * MSI (Chinese Resources)
+ *
+ * Copyright 2005 Mike McCormack
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
+ *
+ * TRANSLATORS: Copyright 2008 Hongbo Ni <hongbo@njstar.com>
+ *              Copyright 2021 Chan Chilung <eason066@gmail.com>
+ */
+
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+
+STRINGTABLE
+{
+    4 "不能打开所指定的安装软件包. 请检查文件路径后再试."
+    5 "路径 %s 没找到"
+    9 "插入软盘 %s"
+    10 "Windows Installer %s\n\nUsage:\nmsiexec command {required parameter} [optional parameter]\n\nInstall a product:\n\t/i {package|productcode} [property]\n\t/package {package|productcode} [property]\n\t/a package [property]\nRepair an installation:\n\t/f[p|o|e|d|c|a|u|m|s|v] {package|productcode}\nUninstall a product:\n\t/uninstall {package|productcode} [property]\n\t/x {package|productcode} [property]\nAdvertise a product:\n\t/j[u|m] package [/t transform] [/g languageid]\nApply a patch:\n\t/p patchpackage [property]\n\t/p patchpackage /a package [property]\nLog and UI Modifiers for above commands:\n\t/l[*][i|w|e|a|r|u|c|m|o|p|v|][+|!] logfile\n\t/q{|n|b|r|f|n+|b+|b-}\nRegister MSI Service:\n\t/y\nUnregister MSI Service:\n\t/z\nDisplay this help:\n\t/help\n\t/?\n"
+    11 "输入包含 %s 的文件夹"
+    12 "本功能的安装源不存在"
+    13 "本功能的网络驱动器不存在"
+    14 "功能来自:"
+    15 "选择包含 %s 的文件夹"
+#ifdef __REACTOS__
+    34 "ReactOS Installer 软件包" // zh-TW/HK: ReactOS 安裝套件
+    35 "ReactOS Installer 补丁"
+    36 "安装" // zh-TW/HK: 安裝 //FIXME: add accel
+    37 "修复" // zh-TW/HK: 修復 //FIXME: add accel
+    38 "卸载" // zh-TW/HK: 解除安裝 //FIXME: add accel
+    39 "应用(&A)"
+#endif
+    100 "New Folder"
+}
+
+/* Error messages */
+STRINGTABLE
+{
+    IDS_FATALEXIT "{{严重错误： }}"
+    IDS_ERROR "{{错误 [1]。 }}"
+    IDS_WARNING "警告 [1]。"
+    IDS_INFO "信息 [1]。"
+    IDS_INSTALLERROR "安装此软件包时发生意外错误，软件包可能存在问题。错误代码为 [1]。{{参数为：[2]、[3]、[4]}}"
+    IDS_OUTOFDISKSPACE "{{磁盘已满： }}"
+    IDS_ACTIONSTART "操作 [Time]：[1]。[2]"
+    IDS_COMMONDATA "消息类型：[1]，参数：[2]{、[3]}"
+    IDS_INFO_ACTIONSTART "操作开始 [Time]：[1]。"
+    IDS_INFO_ACTIONENDED "操作结束 [Time]：[1]。返回值为 [2]。"
+    IDS_INFO_LOGGINGSTART "=== 开始记录：[Date]  [Time] ==="
+
+    IDS_ERR_INSERTDISK "请插入磁盘：[2]"
+    IDS_ERR_CABNOTFOUND "找不到源文件{{(cabinet)}}：[2]。请检查文件是否存在并且可以访问。"
+}
+
+/* Standard action description strings */
+STRINGTABLE
+{
+    IDS_DESC_ALLOCATEREGISTRYSPACE "正在分配注册表空间"
+    IDS_DESC_APPSEARCH "正在查找已安装的应用程序"
+    IDS_DESC_BINDIMAGE "正在绑定可执行文件"
+    IDS_DESC_CCPSEARCH "正在查找符合条件的产品"
+    IDS_DESC_COSTFINALIZE "正在计算所需空间"
+    IDS_DESC_COSTINITIALIZE "正在计算所需空间"
+    IDS_DESC_CREATEFOLDERS "正在创建文件夹"
+    IDS_DESC_CREATESHORTCUTS "正在创建快捷方式"
+    IDS_DESC_DELETESERVICES "正在删除服务"
+    IDS_DESC_DUPLICATEFILES "正在创建文件副本"
+    IDS_DESC_FILECOST "正在计算所需空间"
+    IDS_DESC_FINDRELATEDPRODUCTS "正在查找相关应用程序"
+    IDS_DESC_INSTALLADMINPACKAGE "正在复制网络安装文件"
+    IDS_DESC_INSTALLFILES "正在复制新文件"
+    IDS_DESC_INSTALLODBC "正在安装 ODBC 组件"
+    IDS_DESC_INSTALLSERVICES "正在安装新服务"
+    IDS_DESC_INSTALLSFPCATALOGFILE "正在安装系统编录"
+    IDS_DESC_INSTALLVALIDATE "正在验证安装"
+    IDS_DESC_LAUNCHCONDITIONS "正在检查启动条件"
+    IDS_DESC_MIGRATEFEATURESTATES "正在迁移相关应用程序的功能状态"
+    IDS_DESC_MOVEFILES "正在移动文件"
+    IDS_DESC_MSIPUBLISHASSEMBLIES "正在发布程序集信息"
+    IDS_DESC_MSIUNPUBLISHASSEMBLIES "正在撤销程序集信息的发布"
+    IDS_DESC_PATCHFILES "正在为文件应用补丁"
+    IDS_DESC_PROCESSCOMPONENTS "正在更新组件注册信息"
+    IDS_DESC_PUBLISHCOMPONENTS "正在发布限定组件"
+    IDS_DESC_PUBLISHFEATURES "正在发布产品功能"
+    IDS_DESC_PUBLISHPRODUCT "正在发布产品信息"
+    IDS_DESC_REGISTERCLASSINFO "正在注册类服务器"
+    IDS_DESC_REGISTERCOMPLUS "正在注册 COM+ 应用程序和组件"
+    IDS_DESC_REGISTEREXTENSIONINFO "正在注册扩展名服务器"
+    IDS_DESC_REGISTERFONTS "正在注册字体"
+    IDS_DESC_REGISTERMIMEINFO "正在注册 MIME 信息"
+    IDS_DESC_REGISTERPRODUCT "正在注册产品"
+    IDS_DESC_REGISTERPROGIDINFO "正在注册程序标识符"
+    IDS_DESC_REGISTERTYPELIBRARIES "正在注册类型库"
+    IDS_DESC_REGISTERUSER "正在注册用户"
+    IDS_DESC_REMOVEDUPLICATEFILES "正在删除文件副本"
+    IDS_DESC_REMOVEENVIRONMENTSTRINGS "正在更新环境字符串"
+    IDS_DESC_REMOVEEXISTINGPRODUCTS "正在移除应用程序"
+    IDS_DESC_REMOVEFILES "正在删除文件"
+    IDS_DESC_REMOVEFOLDERS "正在删除文件夹"
+    IDS_DESC_REMOVEINIVALUES "正在删除 INI 文件条目"
+    IDS_DESC_REMOVEODBC "正在移除 ODBC 组件"
+    IDS_DESC_REMOVEREGISTRYVALUES "正在删除系统注册表值"
+    IDS_DESC_REMOVESHORTCUTS "正在删除快捷方式"
+    IDS_DESC_RMCCPSEARCH "正在查找符合条件的产品"
+    IDS_DESC_SELFREGMODULES "正在注册模块"
+    IDS_DESC_SELFUNREGMODULES "正在注销模块"
+    IDS_DESC_SETODBCFOLDERS "正在初始化 ODBC 目录"
+    IDS_DESC_STARTSERVICES "正在启动服务"
+    IDS_DESC_STOPSERVICES "正在停止服务"
+    IDS_DESC_UNPUBLISHCOMPONENTS "正在撤销限定组件的发布"
+    IDS_DESC_UNPUBLISHFEATURES "正在撤销产品功能的发布"
+    IDS_DESC_UNPUBLISHPRODUCT "正在撤销产品信息的发布"
+    IDS_DESC_UNREGISTERCLASSINFO "正在注销类服务器"
+    IDS_DESC_UNREGISTERCOMPLUS "正在注销 COM+ 应用程序和组件"
+    IDS_DESC_UNREGISTEREXTENSIONINFO "正在注销扩展名服务器"
+    IDS_DESC_UNREGISTERFONTS "正在注销字体"
+    IDS_DESC_UNREGISTERMIMEINFO "正在注销 MIME 信息"
+    IDS_DESC_UNREGISTERPROGIDINFO "正在注销程序标识符"
+    IDS_DESC_UNREGISTERTYPELIBRARIES "正在注销类型库"
+    IDS_DESC_WRITEENVIRONMENTSTRINGS "正在更新环境字符串"
+    IDS_DESC_WRITEINIVALUES "正在写入 INI 文件值"
+    IDS_DESC_WRITEREGISTRYVALUES "正在写入系统注册表值"
+}
+
+/* Standard action template strings */
+STRINGTABLE
+{
+    IDS_TEMP_ALLOCATEREGISTRYSPACE "可用空间： [1]"
+    IDS_TEMP_APPSEARCH "属性： [1], 签名： [2]"
+    IDS_TEMP_BINDIMAGE "文件： [1]"
+    IDS_TEMP_CREATEFOLDERS "文件夹： [1]"
+    IDS_TEMP_CREATESHORTCUTS "快捷方式： [1]"
+    IDS_TEMP_DELETESERVICES "服务： [1]"
+    IDS_TEMP_DUPLICATEFILES "文件： [1],  目录： [9],  大小： [6]"
+    IDS_TEMP_FINDRELATEDPRODUCTS "找到应用程序： [1]"
+    IDS_TEMP_INSTALLADMINPACKAGE "文件： [1], 目录： [9], 大小： [6]"
+    IDS_TEMP_INSTALLFILES "文件： [1],  目录： [9],  大小： [6]"
+    IDS_TEMP_INSTALLSERVICES "服务： [2]"
+    IDS_TEMP_INSTALLSFPCATALOGFILE "文件： [1],  依赖项： [2]"
+    IDS_TEMP_MIGRATEFEATURESTATES "应用程序： [1]"
+    IDS_TEMP_MOVEFILES "文件： [1],  目录： [9],  大小： [6]"
+    IDS_TEMP_MSIPUBLISHASSEMBLIES "应用程序上下文：[1], 程序集名称：[2]"
+    IDS_TEMP_MSIUNPUBLISHASSEMBLIES "应用程序上下文：[1], 程序集名称：[2]"
+    IDS_TEMP_PATCHFILES "文件： [1],  目录： [2],  大小： [3]"
+    IDS_TEMP_PUBLISHCOMPONENTS "组件 ID： [1], 限定符： [2]"
+    IDS_TEMP_PUBLISHFEATURES "功能： [1]"
+    IDS_TEMP_REGISTERCLASSINFO "类 ID： [1]"
+    IDS_TEMP_REGISTERCOMPLUS "应用程序 ID： [1]{{, 应用程序类型： [2], 用户： [3], RSN: [4]}}"
+    IDS_TEMP_REGISTEREXTENSIONINFO "扩展名： [1]"
+    IDS_TEMP_REGISTERFONTS "字体： [1]"
+    IDS_TEMP_REGISTERMIMEINFO "MIME 内容类型： [1], 扩展名： [2]"
+    IDS_TEMP_REGISTERPROGIDINFO "ProgId: [1]"
+    IDS_TEMP_REGISTERTYPELIBRARIES "LibID: [1]"
+    IDS_TEMP_REMOVEDUPLICATEFILES "文件： [1], 目录： [9]"
+    IDS_TEMP_REMOVEENVIRONMENTSTRINGS "名称： [1], 值： [2], 操作 [3]"
+    IDS_TEMP_REMOVEEXISTINGPRODUCTS "应用程序： [1], 命令行： [2]"
+    IDS_TEMP_REMOVEFILES "文件： [1], 目录： [9]"
+    IDS_TEMP_REMOVEFOLDERS "文件夹： [1]"
+    IDS_TEMP_REMOVEINIVALUES "文件： [1],  节： [2],  键： [3], 值： [4]"
+    IDS_TEMP_REMOVEREGISTRYVALUES "键： [1], 名称： [2]"
+    IDS_TEMP_REMOVESHORTCUTS "快捷方式： [1]"
+    IDS_TEMP_SELFREGMODULES "文件： [1], 文件夹： [2]"
+    IDS_TEMP_SELFUNREGMODULES "文件： [1], 文件夹： [2]"
+    IDS_TEMP_STARTSERVICES "服务： [1]"
+    IDS_TEMP_STOPSERVICES "服务： [1]"
+    IDS_TEMP_UNPUBLISHCOMPONENTS "组件 ID： [1], 限定符： [2]"
+    IDS_TEMP_UNPUBLISHFEATURES "功能： [1]"
+    IDS_TEMP_UNREGISTERCLASSINFO "类 ID： [1]"
+    IDS_TEMP_UNREGISTERCOMPLUS "应用程序 ID： [1]{{, 应用程序类型： [2]}}"
+    IDS_TEMP_UNREGISTEREXTENSIONINFO "扩展名： [1]"
+    IDS_TEMP_UNREGISTERFONTS "字体： [1]"
+    IDS_TEMP_UNREGISTERMIMEINFO "MIME 内容类型： [1], 扩展名： [2]"
+    IDS_TEMP_UNREGISTERPROGIDINFO "ProgId: [1]"
+    IDS_TEMP_UNREGISTERTYPELIBRARIES "LibID: [1]"
+    IDS_TEMP_WRITEENVIRONMENTSTRINGS "名称： [1], 值： [2], 操作 [3]"
+    IDS_TEMP_WRITEINIVALUES "文件： [1],  节： [2],  键： [3], 值： [4]"
+    IDS_TEMP_WRITEREGISTRYVALUES "键： [1], 名称： [2], 值： [3]"
+}
+
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
+
+STRINGTABLE
+{
+    4 "無法開啟指定的安裝套件。請檢查檔案路徑後再試。"
+    5 "找不到路徑 %s"
+    9 "插入磁碟 %s"
+    10 "Windows 安裝程式 %s\n\n用法:\nmsiexec 命令 {必要參數} [可選參數]\n\n安裝產品:\n\t/i {套件|產品編號} [內容]\n\t/package {套件|產品編號} [內容]\n\t/a 套件 [內容]\n修復安裝:\n\t/f[p|o|e|d|c|a|u|m|s|v] {套件|產品編號}\n解除安裝產品:\n\t/uninstall {套件|產品編號} [內容]\n\t/x {套件|產品編號} [內容]\n通告產品:\n\t/j[u|m] 套件 [/t 變換] [/g 語言識別號]\n套用修補程式:\n\t/p 修補套件 [內容]\n\t/p 修補套件/a 套件 [內容]\n用於以上命令的記錄檔和 UI 修飾鍵:\n\t/l[*][i|w|e|a|r|u|c|m|o|p|v|][+|!] 日誌檔案\n\t/q{|n|b|r|f|n+|b+|b-}\n註冊 MSI 服務:\n\t/y\n移除註冊 MSI 服務:\n\t/z\n顯示這份說明:\n\t/help\n\t/?\n"
+    11 "輸入包含 %s 的資料夾"
+    12 "本功能的安裝來源不存在"
+    13 "本功能的網路儲存裝置不存在"
+    14 "功能來自:"
+    15 "選擇包含 %s 的檔案夾"
+}
+
+/* Error messages */
+STRINGTABLE
+{
+    IDS_FATALEXIT "{{嚴重錯誤: }}"
+    IDS_ERROR "{{錯誤 [1]. }}"
+    IDS_WARNING "警告 [1]."
+    IDS_INFO "警告 [1]."
+    IDS_INSTALLERROR "安裝程式在安裝這個封裝時發生意外的錯誤。這表示這個封裝可能有問題。錯誤碼: [1]。{{引數: [2], [3], [4]}}"
+    IDS_OUTOFDISKSPACE "{{磁碟已滿: }}"
+    IDS_ACTIONSTART "動作 [Time]: [1]. [2]"
+    IDS_COMMONDATA "訊息類型: [1]，引數: [2]{，[3]}"
+    IDS_INFO_ACTIONSTART "動作開始 [Time]: [1]。"
+    IDS_INFO_ACTIONENDED "動作結束 [Time]: [1]。傳回的值 [2]。"
+    IDS_INFO_LOGGINGSTART "=== 開啟記錄時間: [Date]  [Time] ==="
+
+    IDS_ERR_INSERTDISK "請插入磁片: [2]"
+    IDS_ERR_CABNOTFOUND "找不到來源檔案{{(cabinet)}}: [2]。請確認檔案是否存在，以及您是否有存取它的權限。"
+}
+
+/* Standard action description strings */
+STRINGTABLE
+{
+    IDS_DESC_ALLOCATEREGISTRYSPACE "正在分配註冊表空間"
+    IDS_DESC_APPSEARCH "正在搜尋已安裝的應用程式"
+    IDS_DESC_BINDIMAGE "正在繫結可執行檔"
+    IDS_DESC_CCPSEARCH "正在搜尋可用的產品"
+    IDS_DESC_COSTFINALIZE "正在計算所需空間"
+    IDS_DESC_COSTINITIALIZE "正在計算所需空間"
+    IDS_DESC_CREATEFOLDERS "正在建立資料夾"
+    IDS_DESC_CREATESHORTCUTS "正在建立捷徑"
+    IDS_DESC_DELETESERVICES "正在刪除服務"
+    IDS_DESC_DUPLICATEFILES "正在建立重複的檔案"
+    IDS_DESC_FILECOST "正在計算所需空間"
+    IDS_DESC_FINDRELATEDPRODUCTS "正在搜尋關聯的應用程式"
+    IDS_DESC_INSTALLADMINPACKAGE "正在複製網路安裝檔案"
+    IDS_DESC_INSTALLFILES "正在複製新檔案"
+    IDS_DESC_INSTALLODBC "正在安裝 ODBC 元件"
+    IDS_DESC_INSTALLSERVICES "正在安裝新服務"
+    IDS_DESC_INSTALLSFPCATALOGFILE "正在安裝系統目錄"
+    IDS_DESC_INSTALLVALIDATE "正在驗證安裝"
+    IDS_DESC_LAUNCHCONDITIONS "正在檢驗啟動條件"
+    IDS_DESC_MIGRATEFEATURESTATES "正在從相關應用程式移轉功能狀態"
+    IDS_DESC_MOVEFILES "正在移動檔案"
+    IDS_DESC_MSIPUBLISHASSEMBLIES "正在發布組合資訊"
+    IDS_DESC_MSIUNPUBLISHASSEMBLIES "正在解除發布組合資訊"
+    IDS_DESC_PATCHFILES "正在修補檔案"
+    IDS_DESC_PROCESSCOMPONENTS "正在更新元件登錄"
+    IDS_DESC_PUBLISHCOMPONENTS "正在發布合格的元件"
+    IDS_DESC_PUBLISHFEATURES "正在發布產品功能"
+    IDS_DESC_PUBLISHPRODUCT "正在發布產品資訊"
+    IDS_DESC_REGISTERCLASSINFO "正在登錄類別伺服器"
+    IDS_DESC_REGISTERCOMPLUS "正在登錄 COM+ 應用程式和元件"
+    IDS_DESC_REGISTEREXTENSIONINFO "正在登錄延伸伺服器"
+    IDS_DESC_REGISTERFONTS "正在登錄字型"
+    IDS_DESC_REGISTERMIMEINFO "正在登錄 MIME 資訊"
+    IDS_DESC_REGISTERPRODUCT "正在登錄產品"
+    IDS_DESC_REGISTERPROGIDINFO "正在登錄程式識別碼"
+    IDS_DESC_REGISTERTYPELIBRARIES "正在登錄型別程式庫"
+    IDS_DESC_REGISTERUSER "正在登錄使用者"
+    IDS_DESC_REMOVEDUPLICATEFILES "正在移除重複的檔案"
+    IDS_DESC_REMOVEENVIRONMENTSTRINGS "正在更新環境字串"
+    IDS_DESC_REMOVEEXISTINGPRODUCTS "正在移除程式"
+    IDS_DESC_REMOVEFILES "正在移除檔案"
+    IDS_DESC_REMOVEFOLDERS "正在移除資料夾"
+    IDS_DESC_REMOVEINIVALUES "正在移除 INI 檔案項目"
+    IDS_DESC_REMOVEODBC "正在移除 ODBC 元件"
+    IDS_DESC_REMOVEREGISTRYVALUES "正在移除系統登錄值"
+    IDS_DESC_REMOVESHORTCUTS "正在移除捷徑"
+    IDS_DESC_RMCCPSEARCH "正在搜尋可用的產品"
+    IDS_DESC_SELFREGMODULES "正在登錄模組"
+    IDS_DESC_SELFUNREGMODULES "正在解除登錄模組"
+    IDS_DESC_SETODBCFOLDERS "正在初始化 ODBC 目錄"
+    IDS_DESC_STARTSERVICES "正在啟動服務"
+    IDS_DESC_STOPSERVICES "正在停止服務"
+    IDS_DESC_UNPUBLISHCOMPONENTS "正在解除發布合格的元件"
+    IDS_DESC_UNPUBLISHFEATURES "正在解除發布產品功能"
+    IDS_DESC_UNPUBLISHPRODUCT "正在解除發布產品資訊"
+    IDS_DESC_UNREGISTERCLASSINFO "解除登錄類別伺服器"
+    IDS_DESC_UNREGISTERCOMPLUS "正在解除登錄 COM+ 應用程式和元件"
+    IDS_DESC_UNREGISTEREXTENSIONINFO "正在解除登錄延伸伺服器"
+    IDS_DESC_UNREGISTERFONTS "正在解除登錄字型"
+    IDS_DESC_UNREGISTERMIMEINFO "正在解除登錄 MIME 資訊"
+    IDS_DESC_UNREGISTERPROGIDINFO "正在解除登錄程式識別碼"
+    IDS_DESC_UNREGISTERTYPELIBRARIES "正在解除登錄型別程式庫"
+    IDS_DESC_WRITEENVIRONMENTSTRINGS "正在更新環境字串"
+    IDS_DESC_WRITEINIVALUES "正在寫入 INI 檔案項目"
+    IDS_DESC_WRITEREGISTRYVALUES "正在寫入系統登錄值"
+}
+
+/* Standard action template strings */
+STRINGTABLE
+{
+    IDS_TEMP_ALLOCATEREGISTRYSPACE "可用空間: [1]"
+    IDS_TEMP_APPSEARCH "屬性: [1]，簽章: [2]"
+    IDS_TEMP_BINDIMAGE "檔案: [1]"
+    IDS_TEMP_CREATEFOLDERS "資料夾: [1]"
+    IDS_TEMP_CREATESHORTCUTS "資料夾: [1]"
+    IDS_TEMP_DELETESERVICES "服務: [1]"
+    IDS_TEMP_DUPLICATEFILES "檔案: [1]， 目錄: [9]， 大小: [6]"
+    IDS_TEMP_FINDRELATEDPRODUCTS "找到的應用程式: [1]"
+    IDS_TEMP_INSTALLADMINPACKAGE "檔案: [1]，目錄: [9]，大小: [6]"
+    IDS_TEMP_INSTALLFILES "檔案: [1]， 目錄: [9]， 大小: [6]"
+    IDS_TEMP_INSTALLSERVICES "服務: [2]"
+    IDS_TEMP_INSTALLSFPCATALOGFILE "檔案: [1]， 相依性: [2]"
+    IDS_TEMP_MIGRATEFEATURESTATES "應用程式: [1]"
+    IDS_TEMP_MOVEFILES "檔案: [1]， 目錄: [9]， 大小: [6]"
+    IDS_TEMP_MSIPUBLISHASSEMBLIES "應用程式內容:[1]，組件名稱:[2]"
+    IDS_TEMP_MSIUNPUBLISHASSEMBLIES "應用程式內容:[1]，組件名稱:[2]"
+    IDS_TEMP_PATCHFILES "檔案: [1]， 目錄: [2]， 大小: [3]"
+    IDS_TEMP_PUBLISHCOMPONENTS "元件識別碼: [1]，辨識符號: [2]"
+    IDS_TEMP_PUBLISHFEATURES "功能: [1]"
+    IDS_TEMP_REGISTERCLASSINFO "類別識別碼: [1]"
+    IDS_TEMP_REGISTERCOMPLUS "應用程式識別碼: [1]{{，應用程式類型: [2]，使用者: [3]，RSN: [4]}}"
+    IDS_TEMP_REGISTEREXTENSIONINFO "延伸: [1]"
+    IDS_TEMP_REGISTERFONTS "字型: [1]"
+    IDS_TEMP_REGISTERMIMEINFO "MIME 內容類型: [1]，延伸: [2]"
+    IDS_TEMP_REGISTERPROGIDINFO "ProgId: [1]"
+    IDS_TEMP_REGISTERTYPELIBRARIES "LibID: [1]"
+    IDS_TEMP_REMOVEDUPLICATEFILES "檔案: [1], 目錄: [9]"
+    IDS_TEMP_REMOVEENVIRONMENTSTRINGS "名稱: [1]，值: [2]，動作 [3]"
+    IDS_TEMP_REMOVEEXISTINGPRODUCTS "應用程式: [1]，命令列: [2]"
+    IDS_TEMP_REMOVEFILES "檔案: [1]，資料夾: [9]"
+    IDS_TEMP_REMOVEFOLDERS "資料夾: [1]"
+    IDS_TEMP_REMOVEINIVALUES "檔案: [1]， 區段: [2]， 機碼: [3]，值: [4]"
+    IDS_TEMP_REMOVEREGISTRYVALUES "機碼: [1]，名稱: [2]"
+    IDS_TEMP_REMOVESHORTCUTS "捷徑: [1]"
+    IDS_TEMP_SELFREGMODULES "檔案: [1]，資料夾: [2]"
+    IDS_TEMP_SELFUNREGMODULES "檔案: [1]，資料夾: [2]"
+    IDS_TEMP_STARTSERVICES "服務: [1]"
+    IDS_TEMP_STOPSERVICES "服務: [1]"
+    IDS_TEMP_UNPUBLISHCOMPONENTS "元件識別碼: [1]，辨識符號: [2]"
+    IDS_TEMP_UNPUBLISHFEATURES "功能: [1]"
+    IDS_TEMP_UNREGISTERCLASSINFO "類別識別碼: [1]"
+    IDS_TEMP_UNREGISTERCOMPLUS "應用程式識別碼: [1]{{，應用程式類型: [2]}}"
+    IDS_TEMP_UNREGISTEREXTENSIONINFO "延伸: [1]"
+    IDS_TEMP_UNREGISTERFONTS "字型: [1]"
+    IDS_TEMP_UNREGISTERMIMEINFO "MIME 內容類型: [1]，延伸: [2]"
+    IDS_TEMP_UNREGISTERPROGIDINFO "ProgId: [1]"
+    IDS_TEMP_UNREGISTERTYPELIBRARIES "LibID: [1]"
+    IDS_TEMP_WRITEENVIRONMENTSTRINGS "名稱: [1]，值: [2]，動作 [3]"
+    IDS_TEMP_WRITEINIVALUES "檔案: [1]， 區段: [2]， 機碼: [3]，值: [4]"
+    IDS_TEMP_WRITEREGISTRYVALUES "機碼: [1]，名稱: [2]，值: [3]"
+}

@@ -1,0 +1,20 @@
+/*
+ * PROJECT:     ReactOS User Environment DLL
+ * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
+ * PURPOSE:     Spanish (Basque) resource file
+ * TRANSLATOR:  Copyright 2021 Julen Urizar Compains <julenuri@hotmail.com>
+ */
+
+LANGUAGE LANG_BASQUE, SUBLANG_NEUTRAL
+
+IDD_ERRORDLG DIALOGEX 0, 0, 250, 95
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "User Profile"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    ICON IDI_USERENV, IDC_STATIC, 6, 10, 18, 20
+    DEFPUSHBUTTON "OK", IDOK, 190, 10, 50, 14, BS_NOTIFY | WS_TABSTOP
+    EDITTEXT IDC_ERRORDESC, 37, 10, 145, 66, ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL | WS_BORDER | WS_TABSTOP
+    RTEXT "Time remaining:", IDC_TIMEOUTSTATIC, 172, 80, 54, 8
+    LTEXT "", IDC_TIMEOUT, 230, 80, 12, 8
+END

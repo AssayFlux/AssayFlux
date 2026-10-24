@@ -1,0 +1,19 @@
+name: validate renovate config
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-renovate-config:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Validate Renovate config
+        uses: suzuki-shunsuke/github-action-renovate-config-validator@ca480cb7ec89a9e1cd8c214ad33bda1617184027 # v2.0.0
