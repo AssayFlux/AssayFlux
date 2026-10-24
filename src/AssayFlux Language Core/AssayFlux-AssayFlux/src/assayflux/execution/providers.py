@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import os
 import re
+from collections.abc import Callable
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
@@ -296,7 +297,7 @@ class CodeInterpreterProvider:
 
 
 PROVIDER_API_VERSION = "1.0"
-_PROVIDER_FACTORIES = {
+_PROVIDER_FACTORIES: dict[str, Callable[[], ExecutionProvider]] = {
     "piston": PistonProvider,
     "code-interpreter": CodeInterpreterProvider,
 }
