@@ -224,7 +224,7 @@ class Interpreter:
                 raise RuntimeErrorAF(f"Undefined name '{node.name}'",location=node.loc)
             if isinstance(node,A.ListLiteral):
                 if len(node.values)>100_000: raise RuntimeErrorAF("Collection exceeds configured item limit",location=node.loc)
-                result=[]; estimated= sys.getsizeof(result); seen=set()
+                result: Any = []; estimated= sys.getsizeof(result); seen: set[int] = set()
                 for child in node.values:
                     value=self._eval(child)
                     estimated += sys.getsizeof(None) + _estimate_value_bytes(value,self.policy.max_value_bytes-estimated,seen)
@@ -236,8 +236,8 @@ class Interpreter:
                 if not isinstance(iterable,(list,tuple,set,dict,str,range)): raise RuntimeErrorAF("Comprehension requires a bounded built-in iterable",location=node.loc)
                 if len(iterable)>100_000: raise RuntimeErrorAF("Comprehension iterable exceeds item limit",location=node.loc)
                 old_present=node.name in self.env; old=self.env.get(node.name); was_constant=node.name in self.constants
-                self.constants.discard(node.name); result=[] if node.kind=="list" else set() if node.kind=="set" else {}
-                estimated=sys.getsizeof(result); seen=set()
+                self.constants.discard(node.name); result: Any = [] if node.kind=="list" else set() if node.kind=="set" else {}
+                estimated=sys.getsizeof(result); seen: set[int] = set()
                 try:
                     for item in iterable:
                         self._step(node.loc); self.env[node.name]=item
@@ -280,7 +280,7 @@ class Interpreter:
                 return self._guard_value(tuple(result),node.loc)
             if isinstance(node,A.SetLiteral):
                 if len(node.values)>100_000: raise RuntimeErrorAF("Collection exceeds configured item limit",location=node.loc)
-                result=set(); estimated=sys.getsizeof(result); seen=set()
+                result: set[Any] = set(); estimated=sys.getsizeof(result); seen: set[int] = set()
                 for child in node.values:
                     value=self._eval(child)
                     estimated += sys.getsizeof(None) + _estimate_value_bytes(value,self.policy.max_value_bytes-estimated,seen)
@@ -289,7 +289,7 @@ class Interpreter:
                 return self._guard_value(result,node.loc)
             if isinstance(node,A.DictLiteral):
                 if len(node.values)>100_000: raise RuntimeErrorAF("Collection exceeds configured item limit",location=node.loc)
-                result={}; estimated=sys.getsizeof(result); seen=set()
+                result: dict[Any, Any] = {}; estimated=sys.getsizeof(result); seen: set[int] = set()
                 for key_node,value_node in node.values:
                     key=self._eval(key_node); value=self._eval(value_node)
                     estimated += 2*sys.getsizeof(None) + _estimate_value_bytes(key,self.policy.max_value_bytes-estimated,seen)
@@ -470,7 +470,7 @@ class Interpreter:
         if not right_is_matrix:return self._guard_value([row[0] for row in result],loc)
         return self._guard_value(result,loc)
     def _call(self,node):
-        target=self._eval(node.function); args=[]; kwargs={}
+        target=self._eval(node.function); args: list[Any]=[]; kwargs: dict[str, Any]={}
         for arg in node.arguments:
             value=self._eval(arg.value)
             if arg.kind=="positional":
@@ -510,7 +510,7 @@ class Interpreter:
             if target.name=="extend":
                 if len(args)!=1 or kwargs or not isinstance(args[0],(list,tuple,range)): raise RuntimeErrorAF("extend requires one bounded sequence",location=node.loc)
                 if len(target.value)+len(args[0])>100_000: raise RuntimeErrorAF("Collection size limit exceeded",location=node.loc)
-                estimated=_estimate_value_bytes(target.value,self.policy.max_value_bytes); seen=set()
+                estimated=_estimate_value_bytes(target.value,self.policy.max_value_bytes); seen: set[int]=set()
                 for value in args[0]:
                     estimated += sys.getsizeof(None) + _estimate_value_bytes(value,self.policy.max_value_bytes-estimated,seen)
                     if estimated>self.policy.max_value_bytes: raise RuntimeErrorAF("Value memory budget exceeded",location=node.loc)
@@ -526,8 +526,8 @@ class Interpreter:
                     total+=len(item)
                     if total>self.policy.max_output_chars:
                         raise RuntimeErrorAF("join result exceeds configured output budget",location=node.loc)
-                result=separator.join(args[0])
-                return self._guard_value(result,node.loc)
+                joined=separator.join(args[0])
+                return self._guard_value(joined,node.loc)
             if target.name=="split":
                 if len(args)>2 or kwargs:
                     raise RuntimeErrorAF("split accepts at most two positional arguments",location=node.loc)
@@ -626,6 +626,7 @@ class Interpreter:
         if limit < 0: raise RuntimeErrorAF("Output budget exceeded",location=loc)
         if seen is None: seen=set()
         if depth > 64: raise RuntimeErrorAF("Output formatting depth limit exceeded",location=loc)
+        text: str | None
         if isinstance(value,str):
             text=repr(value) if nested else value
             if len(text)>limit: raise RuntimeErrorAF("Output budget exceeded",location=loc)
