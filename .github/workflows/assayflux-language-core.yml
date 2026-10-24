@@ -45,7 +45,7 @@ jobs:
             src/assayflux/diagnostics src/assayflux/language \
             src/assayflux/runtime/interpreter.py src/assayflux/runtime/python_bridge.py \
             src/assayflux/execution \
-            src/assayflux/quantum.py src/assayflux/assistant.py \\
+            src/assayflux/quantum.py src/assayflux/assistant.py \
             src/assayflux/security/checkpoints.py tests
 
   quantum-simulator:
