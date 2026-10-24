@@ -8,7 +8,6 @@ from pathlib import Path
 
 from assayflux.api import (
     Interpreter,
-    SecurityPolicy,
     check,
     parse,
     read_source,
@@ -16,6 +15,7 @@ from assayflux.api import (
 )
 from assayflux.diagnostics.model import AssayFluxError, SourceError, SourceLocation
 from assayflux.integrations.cli_anything import discover_harnesses, run_harness
+from assayflux.security.project_config import load_security_policy
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -88,7 +88,6 @@ def main(argv: list[str] | None = None) -> int:
             print(f"AssayFlux: {exc}", file=sys.stderr)
             return 1
 
-    policy = SecurityPolicy()
     try:
         if args.file.suffix != ".af":
             raise SourceError(
@@ -96,6 +95,7 @@ def main(argv: list[str] | None = None) -> int:
                 location=SourceLocation(str(args.file)),
                 suggestion="Rename the source file with a .af extension.",
             )
+        policy = load_security_policy(args.file.resolve().parent)
         source = read_source(args.file, policy)
         validate_source(source, str(args.file), policy)
         tree = parse(source, filename=str(args.file))
