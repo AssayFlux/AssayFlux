@@ -94,6 +94,13 @@ class OfflineAssistant:
             health = self._request("/api/health")
             if not isinstance(health, dict) or health.get("status") != "ok":
                 raise RuntimeErrorAF("Project NOMAD health check did not report status=ok")
+            remote = self._request("/api/ollama/remote-status")
+            if not isinstance(remote, dict):
+                raise RuntimeErrorAF("Project NOMAD remote-model status response was invalid")
+            if remote.get("configured") is True:
+                raise RuntimeErrorAF(
+                    "Project NOMAD is configured for remote Ollama; refusing remote inference in offline mode"
+                )
             installed = self._request("/api/ollama/installed-models")
             if not isinstance(installed, list):
                 raise RuntimeErrorAF("Project NOMAD installed-model endpoint returned an invalid response")
