@@ -11,14 +11,14 @@ The AssayFlux CLI is intended to be the primary developer entry point for creati
 
 ## Current integration status
 
-**Imported — integration not yet verified.** The presence of CLI harnesses does not mean that they already implement native AssayFlux commands or follow the final language grammar. Inventory each harness, dependencies, supported applications, and licenses before adapting it.
+**Initial host-side integration added; application compatibility is not yet verified.** The AssayFlux language-core CLI now discovers installed `cli-anything-*` and `cli-hub` executables with `assayflux tools list`, and can invoke a discovered harness with `assayflux tools run ... --allow-external-tools -- ...`. The adapter does not auto-install packages and never uses a shell. The harnesses remain external programs, not native `.af` syntax. Inventory each harness's dependencies, supported applications, side effects, and licenses before use.
 
 ## Integration requirements
 
-- Establish a stable command registry and plugin contract.
+- Expand the adapter into a versioned provider/command registry with per-harness metadata and capability declarations.
 - Add consistent structured diagnostics and exit codes.
 - Validate inputs and make potentially destructive actions explicit.
-- Test command discovery, execution, failure handling, and packaging.
+- Run the language-core test suite and validate representative harnesses in an environment with their target applications installed.
 - Preserve required notices and compatibility references for third-party applications.
 
 ## Reference documentation
