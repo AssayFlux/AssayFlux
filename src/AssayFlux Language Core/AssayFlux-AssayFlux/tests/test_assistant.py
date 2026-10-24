@@ -25,3 +25,19 @@ def test_assistant_deterministic_fallback_when_local_model_is_unavailable():
         result = assistant.diagnose("SyntaxError: unexpected token")
     assert result["provider"] == "deterministic-fallback"
     assert result["requires_review"] is True
+
+
+def test_assistant_parses_structured_local_model_response():
+    assistant = OfflineAssistant()
+    response = {
+        "message": {
+            "content": '{"cause":"Missing import","suggestions":["Add the required import"],"confidence":"medium","uncertainty":"Check the module name."}'
+        }
+    }
+    with patch.object(assistant, "_request", return_value=response):
+        result = assistant.diagnose("NameError: np is not defined")
+    assert result["provider"] == "ollama-local"
+    assert result["cause"] == "Missing import"
+    assert result["suggestions"] == ["Add the required import"]
+    assert result["confidence"] == "medium"
+    assert result["requires_review"] is True
