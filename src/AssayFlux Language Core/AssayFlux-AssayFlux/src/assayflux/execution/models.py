@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Any
+from typing import Any, Protocol, runtime_checkable
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,3 +32,14 @@ class ExecutionResult:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+@runtime_checkable
+class ExecutionProvider(Protocol):
+    """Stable interface implemented by external execution backends."""
+
+    name: str
+
+    def execute(self, request: ExecutionRequest) -> ExecutionResult:
+        """Execute a request and return normalized output."""
+        ...
