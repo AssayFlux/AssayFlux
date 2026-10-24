@@ -22,7 +22,7 @@ def test_registry_uses_live_piston_inventory_and_marks_default_interpreter():
     )
     assert any(
         item["language"] == "python" and item["provider"] == "code-interpreter"
-        and item["status"] == "configured-default"
+        and item["status"] == "available"
         for item in languages
     )
 
@@ -61,7 +61,7 @@ def test_languages_cli_emits_machine_readable_inventory(capsys, monkeypatch):
         "assayflux.execution.registry.list_languages",
         lambda provider: [
             {"language": "python", "provider": "code-interpreter",
-             "status": "configured-default", "versions": [], "aliases": ["py"]}
+             "status": "available", "versions": [], "aliases": ["py"]}
         ],
     )
     assert main(["languages", "--json"]) == 0
