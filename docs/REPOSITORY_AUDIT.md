@@ -107,6 +107,15 @@ A follow-up branding pass updated descriptive metadata on the default branch for
 
 Only descriptive metadata was changed. Package names, import paths, executable names, dependency coordinates, author fields, source URLs, licenses, and attribution notices were deliberately preserved because they can be compatibility-sensitive or legally required. These metadata edits do not establish that the services are integrated or verified. The affected packages still require manifest/build tests in a local checkout.
 
+### Assistant UI branding pass — completed
+
+- Updated the assistant web application's document title from the upstream product title to **AssayFlux Assistant**.
+- Replaced the active primary logo asset with a new AssayFlux geometric mark and preserved the original SVG as `UPSTREAM_nomad-primary.svg`.
+- Added an AssayFlux SVG favicon and updated the browser favicon reference. Removed the explicit legacy Apple touch-icon reference rather than continuing to advertise the upstream icon; the old PNG assets remain in the repository pending a binary-asset migration/rebuild.
+- Kept the original `powered_by_crosstalk` attribution assets unchanged pending license/attribution review.
+
+These are user-facing branding changes only. They do not claim that the imported assistant is integrated with the canonical AssayFlux runtime. A frontend build and browser-level visual check are still required in a local checkout.
+
 ## Remaining Phase 1 work
 
 - [ ] Obtain a complete file inventory using paginated directory traversal or a local checkout; the recursive GitHub tree result is truncated.
