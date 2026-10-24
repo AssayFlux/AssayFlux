@@ -22,6 +22,22 @@ AssayFlux follows the project conventions defined for the language: `.af` files,
 
 The `src/` tree contains eleven imported project codebases. Their outer AssayFlux directories provide integration entry points; nested upstream code remains isolated until dependencies, licensing, build requirements, and service contracts are reconciled.
 
+### AssayFlux service and platform entry points
+
+- [AssayFlux Assistant](src/AssayFlux%20Assistant/README.md)
+- [AssayFlux Code Execution Engine](src/AssayFlux%20Code%20Execution%20Engine/README.md)
+- [AssayFlux Command Line Interface](src/AssayFlux%20Command%20Line%20Interface/README.md)
+- [AssayFlux Ethical Hacking Tools](src/AssayFlux%20Ethical%20Hacking%20Tools/README.md)
+- [AssayFlux Interpreter and Sandbox Infrastructure](src/AssayFlux%20Interpreter/README.md)
+- [AssayFlux Language Core](src/AssayFlux%20Language%20Core/README.md)
+- [AssayFlux Linux Platform Integration](src/AssayFlux%20LinuxOS/README.md)
+- [AssayFlux macOS Platform Integration](src/AssayFlux%20MacOS/README.md)
+- [AssayFlux Quantum Computing Services](src/AssayFlux%20Quantum%20Computing/README.md)
+- [AssayFlux Reverse Engineering Services](src/AssayFlux%20Reverse%20Engeneering%20Tool/README.md)
+- [AssayFlux Windows Platform Integration](src/AssayFlux%20WindowsOS/README.md)
+
+These are branded integration entry points, not a claim that every imported implementation is already integrated or verified.
+
 ## Phase 1: repository intelligence
 
 The initial audit confirmed all eleven top-level service/platform directories and found that the imported repository is exceptionally large. GitHub reports that the merge of PR #1 introduced 135,902 changed files and 59,950,683 added lines. The recursive tree response is truncated, so this is not yet a complete file-by-file audit.
