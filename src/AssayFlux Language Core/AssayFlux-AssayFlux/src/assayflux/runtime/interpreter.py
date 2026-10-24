@@ -1,6 +1,8 @@
 """Budgeted interpreter for the canonical AssayFlux core (not an OS sandbox)."""
 from __future__ import annotations
 
+import contextlib
+
 import math
 import operator
 import re
@@ -92,7 +94,7 @@ def _safe_enumerate(value, start=0):
 def _safe_zip(*values):
     if not all(isinstance(v,(list,tuple,str,range)) for v in values): raise TypeError("zip requires bounded sequences")
     if any(len(v)>100_000 for v in values): raise ValueError("sequence exceeds item limit")
-    return list(zip(*values))
+    return list(zip(*values, strict=False))
 def _safe_reversed(value):
     if not isinstance(value,(list,tuple,str,range)): raise TypeError("reversed requires a bounded sequence")
     if len(value)>100_000: raise ValueError("sequence exceeds item limit")
@@ -305,7 +307,7 @@ class Interpreter:
             if isinstance(node,A.Binary): return self._binary(node)
             if isinstance(node,A.Compare):
                 left=self._eval(node.operands[0])
-                for op_name, right_node in zip(node.operators,node.operands[1:]):
+                for op_name, right_node in zip(node.operators,node.operands[1:], strict=False):
                     right=self._eval(right_node)
                     if op_name=="in": ok=left in right
                     elif op_name=="not in": ok=left not in right
@@ -834,12 +836,11 @@ class Interpreter:
                 handler=next((h for h in node.handlers if _matches_exception(exc,h.exception_types)),None)
                 if handler is None: raise
                 error_loc=getattr(exc,"location",node.loc)
-                try:
+                with contextlib.suppress(OSError):
                     write_report(Diagnostic("AF-RUNTIME-HANDLED","runtime",Severity.WARNING,
                         "A runtime error was caught by an AssayFlux exception handler",error_loc,
                         details=f"{getattr(exc,'code','AF-RUNTIME-001')}: {getattr(exc,'message',str(exc))}",
                         suggestion="Review the handled condition to ensure the recovery is intentional."))
-                except OSError: pass
                 err=_ErrorValue(exc,getattr(exc,"code","AF-ERROR"),getattr(exc,"message",str(exc)),getattr(exc,"category","runtime"),getattr(error_loc,"line",node.loc.line),getattr(error_loc,"column",node.loc.column))
                 self.scope_declared.append(set()); self.scope_shadowed.append({})
                 try:
