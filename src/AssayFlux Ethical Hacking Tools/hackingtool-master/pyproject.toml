@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hackingtool"
 dynamic = ["version"]                       # single-sourced from constants.VERSION
-description = "All-in-one hacking tool launcher for security researchers and pentesters"
+description = "AssayFlux Security Services integration candidate for authorized security assessment; upstream package identity is retained for compatibility and attribution"
 readme = "README.md"
 requires-python = ">=3.10"                  # floor: code uses 3.10 union syntax; no upper cap so newer Pythons work
 license = { text = "MIT" }
