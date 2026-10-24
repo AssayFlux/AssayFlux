@@ -80,6 +80,25 @@ assayflux tools run --allow-external-tools cli-anything-blender -- --json projec
 
 The adapter uses argument arrays (never `shell=True`), validates executable names, and applies a configurable timeout capped at 300 seconds. It does not install harnesses automatically. Install the relevant harness in the active Python environment and review its license, dependencies, and side effects before use.
 
+## Universal external execution interface
+
+Use one `execute` command for external code, and `languages` to inspect what the configured providers report. `--provider auto` is the default: requests with an explicit runtime version route to Piston; requests without a version route to the Code Interpreter service. Specify `--provider` to force a backend. The native `.af` `run` and `check` commands remain separate and never fall back to an external runtime.
+
+```bash
+# Inspect the provider-backed runtime inventory
+assayflux languages
+assayflux languages --json
+
+# One execution interface; explicit version selects Piston
+assayflux execute --allow-external-execution --language python \\
+  --version 3.12.0 --code 'print(6 * 7)'
+
+# No version selects the Code Interpreter default
+assayflux execute --allow-external-execution --code 'print(6 * 7)'
+```
+
+`languages` reports live Piston runtimes as `available` and the Code Interpreter's documented default Python path as `configured-default`. Inventory is provider/deployment-specific; it is not a claim that every language in a proposed catalog works. The Code Interpreter adapter currently does not expose a runtime-list endpoint, so additional kernels are not advertised without evidence.
+
 ## External execution providers
 
 The optional Piston and Code Interpreter adapters connect to separately deployed services. They are for explicitly requested Python or other supported-language execution, not for running `.af` programs. Native `assayflux run file.af` always uses the canonical AssayFlux parser, semantic checks, and interpreter; there is no automatic fallback.
