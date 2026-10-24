@@ -15,7 +15,7 @@ from urllib.request import Request as URLRequest
 from urllib.request import urlopen
 
 from assayflux.diagnostics.model import RuntimeErrorAF, SecurityError
-from assayflux.execution.models import ExecutionRequest, ExecutionResult
+from assayflux.execution.models import ExecutionProvider, ExecutionRequest, ExecutionResult
 
 _MAX_CODE_BYTES = 1_000_000
 _MAX_RESPONSE_BYTES = 8_000_000
@@ -285,13 +285,20 @@ class CodeInterpreterProvider:
         )
 
 
-def get_provider(name: str):
+PROVIDER_API_VERSION = "1.0"
+_PROVIDER_FACTORIES = {
+    "piston": PistonProvider,
+    "code-interpreter": CodeInterpreterProvider,
+}
+
+
+def get_provider(name: str) -> ExecutionProvider:
     """Construct a configured provider by its stable CLI identifier."""
-    if name == "piston":
-        return PistonProvider()
-    if name == "code-interpreter":
-        return CodeInterpreterProvider()
-    raise SecurityError(
-        f"Unknown execution provider '{name}'",
-        suggestion="Choose 'piston' or 'code-interpreter'.",
-    )
+    factory = _PROVIDER_FACTORIES.get(name)
+    if factory is None:
+        supported = ", ".join(sorted(_PROVIDER_FACTORIES))
+        raise SecurityError(
+            f"Unknown execution provider '{name}'",
+            suggestion=f"Choose one of: {supported}.",
+        )
+    return factory()
