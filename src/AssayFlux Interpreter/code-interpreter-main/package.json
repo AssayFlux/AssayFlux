@@ -1,5 +1,6 @@
 {
   "name": "e2b-code-interpreter-root",
+  "description": "AssayFlux sandbox infrastructure integration candidate; canonical .af semantics and isolation guarantees remain subject to verification.",
   "private": true,
   "scripts": {
     "version": "pnpm changeset version && pnpm run -r postVersion",
