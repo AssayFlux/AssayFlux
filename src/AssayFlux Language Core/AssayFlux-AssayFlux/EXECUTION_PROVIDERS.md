@@ -1,0 +1,72 @@
+# External Execution Providers
+
+AssayFlux keeps the canonical \`.af\` pipeline separate from optional external runtimes:
+
+- \`assayflux check program.af\` parses and validates AssayFlux source.
+- \`assayflux run program.af\` runs it through the canonical AssayFlux interpreter.
+- \`assayflux execute --provider piston ...\` sends a different language to a separately deployed Piston service.
+- \`assayflux execute --provider code-interpreter ...\` sends Python or another supported notebook-kernel language to the imported Code Interpreter service.
+
+Neither external provider accepts \`.af\` as a substitute for the canonical interpreter. There is no automatic fallback from \`assayflux run\` to an external service.
+
+## Piston
+
+Piston is a separately deployed HTTP service. The adapter calls \`GET /api/v2/runtimes\` and \`POST /api/v2/execute\`. It does not install Piston, install language runtimes, or start Docker for you.
+
+Configure the service URL in the environment:
+
+\`\`\`bash
+export ASSAYFLUX_PISTON_URL=http://127.0.0.1:2000
+# Optional if your Piston deployment requires a bearer token:
+export ASSAYFLUX_PISTON_TOKEN=...
+\`\`\`
+
+Example:
+
+\`\`\`bash
+assayflux execute --provider piston --allow-external-execution \\
+  --language python --version 3.12.0 --code 'print(6 * 7)'
+
+assayflux execute --provider piston --allow-external-execution \\
+  --language c++ --version 10.2.0 --filename main.cpp --code '#include <iostream>\nint main(){std::cout << 42;}'
+\`\`\`
+
+Use a language and version returned by your instance's runtime list. The version above is illustrative, not a promise that a given runtime is installed.
+
+## Code Interpreter service
+
+The imported service is a separate FastAPI/Jupyter service. The adapter calls its \`POST /execute\` endpoint and parses the endpoint's newline-delimited JSON event stream. It does not embed the service inside the language core.
+
+\`\`\`bash
+export ASSAYFLUX_CODE_INTERPRETER_URL=http://127.0.0.1:8000
+# Optional; forwarded only as X-Access-Token:
+export ASSAYFLUX_CODE_INTERPRETER_TOKEN=...
+\`\`\`
+
+Run code in the service's default Python context:
+
+\`\`\`bash
+assayflux execute --provider code-interpreter --allow-external-execution \\
+  --code 'import math; print(math.sqrt(81))'
+\`\`\`
+
+To select a supported language context, pass \`--language\`. To reuse an existing context, pass \`--context-id\`; these options are mutually exclusive. Contexts can retain variables and files between calls, so only reuse a context when that persistence is intended.
+
+## Output and failure behavior
+
+- Add \`--json\` to emit a structured result containing provider, language, version, stdout, stderr, exit status, and provider-specific output events.
+- Source requests are limited to 1 MB; provider responses are bounded.
+- Execution timeouts are limited to 120 seconds by the client.
+- Piston receives source as a named file, stdin, arguments, and the timeout limits.
+- Credentials are read from environment variables and are never included in the structured result.
+- The adapter never silently retries against another provider.
+
+## Security and deployment
+
+The explicit \`--allow-external-execution\` acknowledgement is required for every external execution command. It is a deliberate-use guard, not a sandbox.
+
+Prefer a locally controlled Piston deployment or an HTTPS endpoint you trust. Review the deployment's isolation settings, network policy, resource limits, and runtime packages. Piston's own deployment may require Docker and cgroup support.
+
+The Code Interpreter integration likewise depends on the deployment's sandbox, Jupyter kernels, filesystem policy, access-token validation, and network configuration. The imported server logs code and has a persistent default context; do not expose it to untrusted clients without adding authentication and isolation appropriate to your threat model. A local HTTP endpoint is intended for local development only.
+
+These providers execute source code outside AssayFlux's bounded \`.af\` interpreter. Never pass untrusted code or secrets to a provider unless that provider's deployment is explicitly designed and reviewed for that workload. AssayFlux's client-side timeout and response-size checks are not substitutes for server-side CPU, memory, process, filesystem, and network restrictions.
