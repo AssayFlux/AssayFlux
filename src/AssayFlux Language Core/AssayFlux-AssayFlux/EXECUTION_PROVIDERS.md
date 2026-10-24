@@ -21,6 +21,12 @@ export ASSAYFLUX_PISTON_URL=http://127.0.0.1:2000
 export ASSAYFLUX_PISTON_TOKEN=...
 ```
 
+List the runtimes available on that service before choosing a version:
+
+```bash
+assayflux runtimes --json
+```
+
 Example:
 
 ```bash
