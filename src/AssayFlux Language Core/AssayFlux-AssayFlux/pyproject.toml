@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "AssayFlux"
+version = "0.1.0"
+description = "The AssayFlux language core."
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "AssayFlux Contributors"}]
+dependencies = ["lark>=1.3.1,<2", "cryptography>=41"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6", "build>=1"]
+
+[project.scripts]
+assayflux = "assayflux.cli:main"
+af = "assayflux.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["assayflux", "assayflux.*"]
+
+[tool.setuptools.package-data]
+assayflux = ["language/*.lark"]

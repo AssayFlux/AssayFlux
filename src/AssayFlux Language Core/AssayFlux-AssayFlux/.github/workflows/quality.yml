@@ -1,0 +1,30 @@
+name: Language core quality
+
+on:
+  pull_request:
+  push:
+    branches: [AssayFlux, "restore/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install package and development tools
+        run: python -m pip install -e ".[dev]"
+      - name: Run language-core tests
+        run: python -m pytest
+      - name: Lint active language core and tests
+        run: |
+          python -m ruff check \
+            src/assayflux/cli.py src/assayflux/api.py \
+            src/assayflux/diagnostics src/assayflux/language \
+            src/assayflux/runtime/interpreter.py src/assayflux/runtime/python_bridge.py \
+            src/assayflux/security/checkpoints.py tests
