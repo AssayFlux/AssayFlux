@@ -58,12 +58,12 @@ def _infer(node, env, known_functions, imports):
             return "unknown"
         if node.op=="+" and left_type==right_type and left_type in {"string","collection"}:return left_type
         if node.op=="+" and "unknown" in {left_type,right_type}: return "unknown"
-        if node.op=="*" and ((l in {"string","collection"} and r in _NUM) or (r in {"string","collection"} and l in _NUM)):
-            return l if l in {"string","collection"} else r
-        if l not in _NUM or r not in _NUM:raise TypeCheckError(f"Operator '{node.op}' expects compatible numeric operands",location=node.loc)
-        if node.op in {"//","%","&","|","^","<<",">>"} and "complex" in {l,r}:
+        if node.op=="*" and ((left_type in {"string","collection"} and right_type in _NUM) or (right_type in {"string","collection"} and left_type in _NUM)):
+            return left_type if left_type in {"string","collection"} else right_type
+        if left_type not in _NUM or right_type not in _NUM:raise TypeCheckError(f"Operator '{node.op}' expects compatible numeric operands",location=node.loc)
+        if node.op in {"//","%","&","|","^","<<",">>"} and "complex" in {left_type,right_type}:
             raise TypeCheckError(f"Operator '{node.op}=' does not support complex numbers",location=node.loc)
-        return "complex" if "complex" in {l,r} else "number"
+        return "complex" if "complex" in {left_type,right_type} else "number"
     if isinstance(node,A.Conditional):
         _infer(node.condition,env,known_functions,imports);a=_infer(node.value,env,known_functions,imports);b=_infer(node.otherwise,env,known_functions,imports)
         return a if a==b else "unknown"
