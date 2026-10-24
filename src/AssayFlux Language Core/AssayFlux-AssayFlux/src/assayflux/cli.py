@@ -33,6 +33,7 @@ def _parser() -> argparse.ArgumentParser:
     for name in ("run", "check"):
         command = commands.add_parser(name, help=f"{name} an AssayFlux source file")
         command.add_argument("file", type=Path)
+        command.add_argument("--assist", action="store_true", help="request local diagnostic suggestions if this command fails")
 
     languages = commands.add_parser("languages", help="list runtimes available from configured providers")
     languages.add_argument("--provider", choices=("auto", "piston", "code-interpreter"), default="auto")
@@ -267,6 +268,16 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     except AssayFluxError as exc:
         print(f"AssayFlux: {exc}", file=sys.stderr)
+        if getattr(args, "assist", False):
+            try:
+                from assayflux.assistant import OfflineAssistant
+                diagnostic = OfflineAssistant().diagnose(
+                    f"{exc.message}" + (f"\\nSuggestion: {exc.suggestion}" if exc.suggestion else ""),
+                    context=f"AssayFlux command: {args.command}",
+                )
+                print(json.dumps(diagnostic, ensure_ascii=False, indent=2), file=sys.stderr)
+            except AssayFluxError as assistant_error:
+                print(f"AssayFlux assistant unavailable: {assistant_error}", file=sys.stderr)
         return 1
 
 
