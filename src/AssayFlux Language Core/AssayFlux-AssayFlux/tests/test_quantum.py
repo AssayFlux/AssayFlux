@@ -19,3 +19,18 @@ def test_quantum_circuit_rejects_unknown_gate_before_loading_optional_dependency
 def test_quantum_circuit_rejects_out_of_range_wires():
     with pytest.raises(SecurityError):
         run_circuit({"wires": 1, "gates": [{"gate": "H", "wires": [1]}]})
+
+
+def test_bell_state_probabilities_on_local_simulator():
+    pytest.importorskip("pennylane")
+    result = run_circuit({
+        "wires": 2,
+        "gates": [
+            {"gate": "H", "wires": [0]},
+            {"gate": "CNOT", "wires": [0, 1]},
+        ],
+        "shots": None,
+    })
+    assert result["device"] == "default.qubit"
+    assert result["measurement"] == "probabilities"
+    assert result["probabilities"] == pytest.approx([0.5, 0.0, 0.0, 0.5], abs=1e-6)
