@@ -29,6 +29,10 @@ def _parser() -> argparse.ArgumentParser:
         command = commands.add_parser(name, help=f"{name} an AssayFlux source file")
         command.add_argument("file", type=Path)
 
+    runtimes = commands.add_parser("runtimes", help="list runtimes installed in a Piston service")
+    runtimes.add_argument("--provider", choices=("piston",), default="piston")
+    runtimes.add_argument("--json", action="store_true", dest="json_output")
+
     execute = commands.add_parser("execute", aliases=["exec"], help="execute code through an explicitly configured external provider")
     execute.add_argument("--provider", choices=("piston", "code-interpreter"), required=True)
     source = execute.add_mutually_exclusive_group(required=True)
@@ -145,6 +149,20 @@ def _run_external_execution(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "runtimes":
+        try:
+            runtimes = get_provider(args.provider).list_runtimes()
+            if args.json_output:
+                print(json.dumps(runtimes, ensure_ascii=False, indent=2))
+            else:
+                for runtime in runtimes:
+                    aliases = ", ".join(runtime.get("aliases", []))
+                    suffix = f" (aliases: {aliases})" if aliases else ""
+                    print(f"{runtime.get('language', '?')}\\t{runtime.get('version', '?')}{suffix}")
+            return 0
+        except AssayFluxError as exc:
+            print(f"AssayFlux: {exc}", file=sys.stderr)
+            return 1
     if args.command in {"execute", "exec"}:
         try:
             return _run_external_execution(args)
