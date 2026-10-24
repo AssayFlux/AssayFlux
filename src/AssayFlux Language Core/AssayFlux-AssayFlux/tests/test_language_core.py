@@ -101,3 +101,13 @@ def test_cli_check_and_run(tmp_path: Path, capsys):
 
     assert main(["run", str(source)]) == 0
     assert capsys.readouterr().out.strip() == "hello"
+
+@pytest.mark.parametrize("command", ["check", "run"])
+def test_cli_rejects_non_af_extension(tmp_path: Path, capsys, command: str):
+    from assayflux.cli import main
+
+    source = tmp_path / "hello.txt"
+    source.write_text('show "hello"\\n', encoding="utf-8")
+
+    assert main([command, str(source)]) == 1
+    assert ".af extension" in capsys.readouterr().err
