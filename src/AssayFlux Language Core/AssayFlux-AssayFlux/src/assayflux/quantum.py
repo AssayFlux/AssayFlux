@@ -5,6 +5,7 @@ executing arbitrary Python. PennyLane is imported lazily and is an optional extr
 """
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from assayflux.diagnostics.model import RuntimeErrorAF, SecurityError
@@ -74,7 +75,7 @@ def run_circuit(circuit: dict[str, Any]) -> dict[str, Any]:
             raise SecurityError(f"Invalid wire targets for gate {index}")
         if not isinstance(params, list) or (len(params) != 1 if name in _ROTATIONS else len(params) != 0):
             raise SecurityError(f"Invalid parameters for gate {index}")
-        if any(not isinstance(p, (int, float)) or isinstance(p, bool) for p in params):
+        if any(not isinstance(p, (int, float)) or isinstance(p, bool) or not math.isfinite(p) for p in params):
             raise SecurityError(f"Gate parameters must be numeric at index {index}")
         validated.append((name, target_wires, [float(p) for p in params]))
 
