@@ -16,12 +16,12 @@ from .ast_validator import validate_ast
 
 
 class AssayFluxIndenter(Indenter):
-    NL_type = "_NL"
+    NL_type = "_NL"  # pyright: ignore[reportAssignmentType]
     OPEN_PAREN_types: ClassVar[list[str]] = ["LPAR", "LSQB", "LBRACE"]
     CLOSE_PAREN_types: ClassVar[list[str]] = ["RPAR", "RSQB", "RBRACE"]
-    INDENT_type = "_INDENT"
-    DEDENT_type = "_DEDENT"
-    tab_len = 8
+    INDENT_type = "_INDENT"  # pyright: ignore[reportAssignmentType]
+    DEDENT_type = "_DEDENT"  # pyright: ignore[reportAssignmentType]
+    tab_len = 8  # pyright: ignore[reportAssignmentType]
 
 _GRAMMAR = Path(__file__).with_name("grammar.lark").read_text(encoding="utf-8")
 _PARSER = Lark(_GRAMMAR, parser="lalr", lexer="contextual", postlex=AssayFluxIndenter(),
