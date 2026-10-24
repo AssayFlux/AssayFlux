@@ -6,16 +6,23 @@ This module is the AssayFlux-facing entry point for execution-provider infrastru
 
 The canonical AssayFlux pipeline must parse and validate .af source before execution. External-language runtimes may be supported as separate providers, but they do not replace the canonical interpreter or define AssayFlux semantics.
 
-## Current status
+## Integration status
 
-**Imported execution engine — integration and isolation guarantees not yet verified.** The imported source is located in [piston-master](piston-master/readme.md), with upstream reference material preserved in [UPSTREAM_README.md](piston-master/UPSTREAM_README.md).
+A host-side Piston API v2 adapter is available in the AssayFlux language core at `assayflux.execution.providers.PistonProvider`. It calls a separately deployed service; it does not start Docker, install Piston, or install language runtimes. It is an external-language provider, not an alternate runtime for `.af`.
 
-## Phase 1 requirements
+```bash
+export ASSAYFLUX_PISTON_URL=http://127.0.0.1:2000
+assayflux execute --provider piston --allow-external-execution \
+  --language python --version 3.12.0 --code 'print(6 * 7)'
+```
 
-- Inventory supported runtimes, dependencies, worker lifecycle, and deployment configuration.
-- Define a versioned execution-provider interface and structured diagnostics.
-- Audit CPU, memory, time, process, filesystem, and network controls before running untrusted workloads.
+Use a runtime/version actually returned by the target service. An optional `ASSAYFLUX_PISTON_TOKEN` environment variable is forwarded as a bearer token when your deployment requires it.
+
+## Remaining verification
+
+- Run the adapter against a controlled Piston deployment and representative compiled/interpreted languages.
+- Verify deployed CPU, memory, process, filesystem, and network controls independently of client timeouts.
 - Preserve upstream licenses, notices, compatibility identifiers, and provenance.
-- Add integration and failure-path tests before claiming native support.
+- Add deployment-level tests before claiming support for untrusted workloads.
 
-An AssayFlux-facing README does not imply that the imported engine is connected to the .af runtime or safe for arbitrary untrusted code.
+The adapter is covered by unit tests, but service connectivity and real workload isolation have not been verified in this repository workflow.
