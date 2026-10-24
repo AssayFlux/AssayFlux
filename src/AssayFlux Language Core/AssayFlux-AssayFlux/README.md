@@ -87,6 +87,9 @@ The optional Piston and Code Interpreter adapters connect to separately deployed
 See [EXECUTION_PROVIDERS.md](EXECUTION_PROVIDERS.md) for service setup, environment variables, examples, and security limitations.
 
 ```bash
+# Discover languages and versions installed on your Piston service
+assayflux runtimes --json
+
 # Piston API v2; choose a language/version available on your own instance
 assayflux execute --provider piston --allow-external-execution \
   --language python --version 3.12.0 --code 'print(6 * 7)'
