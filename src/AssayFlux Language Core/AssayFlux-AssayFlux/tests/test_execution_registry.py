@@ -10,7 +10,9 @@ def test_registry_uses_live_piston_inventory_and_marks_default_interpreter():
         {"language": "python", "version": "3.12.0", "aliases": ["py"]},
         {"language": "typescript", "version": "5.0.0", "aliases": ["ts"]},
     ]
-    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", return_value=runtimes):
+    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", return_value=runtimes), patch(
+        "assayflux.execution.registry.CodeInterpreterProvider.health", return_value=True
+    ):
         languages = list_languages("auto")
 
     assert any(
@@ -28,14 +30,28 @@ def test_registry_uses_live_piston_inventory_and_marks_default_interpreter():
 def test_registry_auto_tolerates_piston_unavailable_but_provider_specific_does_not():
     from assayflux.diagnostics.model import RuntimeErrorAF
 
-    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", side_effect=RuntimeErrorAF("offline")):
-        assert list_languages("auto")[0]["provider"] == "code-interpreter"
+    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", side_effect=RuntimeErrorAF("offline")), patch(
+        "assayflux.execution.registry.CodeInterpreterProvider.health", return_value=False
+    ):
+        assert list_languages("auto") == []
         try:
             list_languages("piston")
         except RuntimeErrorAF:
             pass
         else:
             raise AssertionError("provider-specific listing must surface provider failure")
+
+
+def test_code_interpreter_is_only_listed_after_health_check():
+    with patch("assayflux.execution.registry.CodeInterpreterProvider.health", return_value=True):
+        languages = list_languages("code-interpreter")
+    assert languages == [{
+        "language": "python", "provider": "code-interpreter", "status": "available",
+        "versions": [], "aliases": ["py"],
+    }]
+
+    with patch("assayflux.execution.registry.CodeInterpreterProvider.health", return_value=False):
+        assert list_languages("code-interpreter") == []
 
 
 def test_languages_cli_emits_machine_readable_inventory(capsys, monkeypatch):
