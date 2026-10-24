@@ -10,8 +10,8 @@ from assayflux.diagnostics.model import SecurityError
 from assayflux.runtime.python_bridge import is_python_module_hard_denied
 from assayflux.security.checkpoints import SecurityPolicy
 
-_MODULE_NAME = re.compile(r"[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)*\\Z")
-_CALL_NAME = re.compile(r"([A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)*)\\.([A-Za-z_]\\w*)\\Z")
+_MODULE_NAME = re.compile(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*\Z")
+_CALL_NAME = re.compile(r"([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\.([A-Za-z_]\w*)\Z")
 
 
 def _string_list(value: Any, key: str) -> list[str]:
