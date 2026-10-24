@@ -148,7 +148,7 @@ def _collect_returns(nodes):
     return found
 
 def check(program:A.Program)->list[str]:
-    env:dict[str,tuple[str,bool]]={};warnings=[];function_depth=0;loop_depth=0;return_type_stack=[];known_functions={};imports=set()
+    env:dict[str,tuple[str,bool]]={};warnings:list[str]=[];function_depth=0;loop_depth=0;return_type_stack:list[str]=[];known_functions:dict[str,A.FunctionDef]={};imports:set[str]=set()
     def collect_functions(nodes):
         seen_here=set()
         for item in nodes:
