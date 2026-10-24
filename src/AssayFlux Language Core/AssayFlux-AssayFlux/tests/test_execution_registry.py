@@ -72,3 +72,25 @@ def test_auto_execution_routes_versioned_requests_to_piston(monkeypatch, capsys)
                    "--version", "3.12.0", "--code", "print(6*7)"])
     assert status == 0
     assert capsys.readouterr().out == "42\\n"
+
+
+def test_auto_execution_does_not_send_piston_only_stdin_to_code_interpreter(monkeypatch, capsys):
+    from assayflux.cli import main
+
+    selected = []
+
+    def provider_factory(name):
+        selected.append(name)
+        from assayflux.execution.models import ExecutionResult
+        from assayflux.diagnostics.model import SecurityError
+        if name == "piston":
+            raise SecurityError("Piston execution requires both --language and --version")
+        raise AssertionError("Piston-only stdin must not route to Code Interpreter")
+
+    monkeypatch.setattr("assayflux.cli.get_provider", provider_factory)
+    status = main([
+        "execute", "--allow-external-execution", "--code", "print(1)",
+        "--stdin", "input",
+    ])
+    assert status == 1
+    assert selected == ["piston"]
