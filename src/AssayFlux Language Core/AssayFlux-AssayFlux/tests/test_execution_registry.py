@@ -10,7 +10,8 @@ def test_registry_uses_live_piston_inventory_and_marks_default_interpreter():
         {"language": "python", "version": "3.12.0", "aliases": ["py"]},
         {"language": "typescript", "version": "5.0.0", "aliases": ["ts"]},
     ]
-    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", return_value=runtimes):
+    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", return_value=runtimes), \
+         patch("assayflux.execution.registry.CodeInterpreterProvider.health", return_value=True):
         languages = list_languages("auto")
 
     assert any(
@@ -20,7 +21,7 @@ def test_registry_uses_live_piston_inventory_and_marks_default_interpreter():
     )
     assert any(
         item["language"] == "python" and item["provider"] == "code-interpreter"
-        and item["status"] == "configured-default"
+        and item["status"] == "available"
         for item in languages
     )
 
@@ -28,7 +29,8 @@ def test_registry_uses_live_piston_inventory_and_marks_default_interpreter():
 def test_registry_auto_tolerates_piston_unavailable_but_provider_specific_does_not():
     from assayflux.diagnostics.model import RuntimeErrorAF
 
-    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", side_effect=RuntimeErrorAF("offline")):
+    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", side_effect=RuntimeErrorAF("offline")), \
+         patch("assayflux.execution.registry.CodeInterpreterProvider.health", return_value=True):
         assert list_languages("auto")[0]["provider"] == "code-interpreter"
         try:
             list_languages("piston")
@@ -45,7 +47,7 @@ def test_languages_cli_emits_machine_readable_inventory(capsys, monkeypatch):
         "assayflux.execution.registry.list_languages",
         lambda provider: [
             {"language": "python", "provider": "code-interpreter",
-             "status": "configured-default", "versions": [], "aliases": ["py"]}
+             "status": "available", "versions": [], "aliases": ["py"]}
         ],
     )
     assert main(["languages", "--json"]) == 0
@@ -70,3 +72,25 @@ def test_auto_execution_routes_versioned_requests_to_piston(monkeypatch, capsys)
                    "--version", "3.12.0", "--code", "print(6*7)"])
     assert status == 0
     assert capsys.readouterr().out == "42\\n"
+
+
+def test_auto_execution_does_not_send_piston_only_stdin_to_code_interpreter(monkeypatch, capsys):
+    from assayflux.cli import main
+
+    selected = []
+
+    def provider_factory(name):
+        selected.append(name)
+        from assayflux.execution.models import ExecutionResult
+        from assayflux.diagnostics.model import SecurityError
+        if name == "piston":
+            raise SecurityError("Piston execution requires both --language and --version")
+        raise AssertionError("Piston-only stdin must not route to Code Interpreter")
+
+    monkeypatch.setattr("assayflux.cli.get_provider", provider_factory)
+    status = main([
+        "execute", "--allow-external-execution", "--code", "print(1)",
+        "--stdin", "input",
+    ])
+    assert status == 1
+    assert selected == ["piston"]

@@ -33,6 +33,7 @@ def _parser() -> argparse.ArgumentParser:
     for name in ("run", "check"):
         command = commands.add_parser(name, help=f"{name} an AssayFlux source file")
         command.add_argument("file", type=Path)
+        command.add_argument("--assist", action="store_true", help="request local diagnostic suggestions if this command fails")
 
     languages = commands.add_parser("languages", help="list runtimes available from configured providers")
     languages.add_argument("--provider", choices=("auto", "piston", "code-interpreter"), default="auto")
@@ -56,6 +57,21 @@ def _parser() -> argparse.ArgumentParser:
     execute.add_argument("--timeout", type=int, default=10, help="execution timeout in seconds (1-120)")
     execute.add_argument("--json", action="store_true", dest="json_output", help="print the structured execution result as JSON")
     execute.add_argument("--allow-external-execution", action="store_true", help="required acknowledgement: code will run outside the local .af interpreter")
+
+    quantum = commands.add_parser("quantum", help="run validated circuits on the optional local quantum simulator")
+    quantum_commands = quantum.add_subparsers(dest="quantum_command", required=True)
+    quantum_commands.add_parser("devices", help="list supported local quantum devices")
+    quantum_run = quantum_commands.add_parser("run", help="run a JSON quantum circuit")
+    quantum_source = quantum_run.add_mutually_exclusive_group(required=True)
+    quantum_source.add_argument("--circuit", help="circuit JSON supplied directly")
+    quantum_source.add_argument("--file", type=Path, help="read circuit JSON from a file")
+
+    assistant = commands.add_parser("assistant", help="use the configured local diagnostic assistant")
+    assistant_commands = assistant.add_subparsers(dest="assistant_command", required=True)
+    assistant_commands.add_parser("status", help="check the local model service and list models")
+    diagnose = assistant_commands.add_parser("diagnose", help="explain an error without applying changes")
+    diagnose.add_argument("--error", required=True, help="error message to diagnose")
+    diagnose.add_argument("--context", default="", help="optional bounded diagnostic context")
 
     tools = commands.add_parser("tools", help="discover and invoke installed CLI-Anything harnesses")
     tool_commands = tools.add_subparsers(dest="tools_command", required=True)
@@ -140,7 +156,7 @@ def _run_external_execution(args: argparse.Namespace) -> int:
     )
     provider_name = args.provider
     if provider_name == "auto":
-        provider_name = "piston" if request.version else "code-interpreter"
+        provider_name = "piston" if request.version or request.stdin or request.args else "code-interpreter"
     provider = get_provider(provider_name)
     result = provider.execute(request)
     if args.json_output:
@@ -196,6 +212,32 @@ def main(argv: list[str] | None = None) -> int:
         except AssayFluxError as exc:
             print(f"AssayFlux: {exc}", file=sys.stderr)
             return 1
+    if args.command == "quantum":
+        try:
+            from assayflux.quantum import list_devices, run_circuit
+            if args.quantum_command == "devices":
+                result = list_devices()
+            else:
+                raw = args.circuit if args.circuit is not None else args.file.read_text(encoding="utf-8")
+                result = run_circuit(json.loads(raw))
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        except (AssayFluxError, OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            if isinstance(exc, AssayFluxError):
+                print(f"AssayFlux: {exc}", file=sys.stderr)
+            else:
+                print(f"AssayFlux: invalid quantum input ({type(exc).__name__})", file=sys.stderr)
+            return 1
+    if args.command == "assistant":
+        try:
+            from assayflux.assistant import OfflineAssistant
+            assistant_client = OfflineAssistant()
+            result = assistant_client.health() if args.assistant_command == "status" else assistant_client.diagnose(args.error, args.context)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        except AssayFluxError as exc:
+            print(f"AssayFlux: {exc}", file=sys.stderr)
+            return 1
     if args.command == "tools":
         try:
             return _run_tools(args)
@@ -226,6 +268,16 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     except AssayFluxError as exc:
         print(f"AssayFlux: {exc}", file=sys.stderr)
+        if getattr(args, "assist", False):
+            try:
+                from assayflux.assistant import OfflineAssistant
+                diagnostic = OfflineAssistant().diagnose(
+                    f"{exc.message}" + (f"\nSuggestion: {exc.suggestion}" if exc.suggestion else ""),
+                    context=f"AssayFlux command: {args.command}",
+                )
+                print(json.dumps(diagnostic, ensure_ascii=False, indent=2), file=sys.stderr)
+            except AssayFluxError as assistant_error:
+                print(f"AssayFlux assistant unavailable: {assistant_error}", file=sys.stderr)
         return 1
 
 

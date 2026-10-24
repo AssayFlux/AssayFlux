@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Any
 
 from assayflux.diagnostics.model import RuntimeErrorAF, SecurityError
-from assayflux.execution.providers import PistonProvider
+from assayflux.execution.providers import CodeInterpreterProvider, PistonProvider
 
 
 def list_languages(provider: str = "auto") -> list[dict[str, Any]]:
@@ -39,16 +39,22 @@ def list_languages(provider: str = "auto") -> list[dict[str, Any]]:
                 "aliases": [alias for alias in aliases if isinstance(alias, str)],
             })
     if provider in {"auto", "code-interpreter"}:
-        # The imported service's general kernel/language support varies by deployment.
-        # Its default Python path is known from the adapter contract; do not claim
-        # additional kernels until the service reports them through a future API.
-        records.append({
-            "language": "python",
-            "provider": "code-interpreter",
-            "status": "configured-default",
-            "versions": [],
-            "aliases": ["py"],
-        })
+        try:
+            healthy = CodeInterpreterProvider().health()
+        except RuntimeErrorAF:
+            if provider == "code-interpreter":
+                raise
+            healthy = False
+        if healthy:
+            # No runtime-list endpoint exists; advertise only the default Python
+            # path, and only after a live health check succeeds.
+            records.append({
+                "language": "python",
+                "provider": "code-interpreter",
+                "status": "available",
+                "versions": [],
+                "aliases": ["py"],
+            })
     # Keep every provider/version combination; the same language can exist in
     # multiple versions or on multiple providers.
     return sorted(records, key=lambda item: (

@@ -45,4 +45,27 @@ jobs:
             src/assayflux/diagnostics src/assayflux/language \
             src/assayflux/runtime/interpreter.py src/assayflux/runtime/python_bridge.py \
             src/assayflux/execution \
+            src/assayflux/quantum.py src/assayflux/assistant.py \
             src/assayflux/security/checkpoints.py tests
+
+  quantum-simulator:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/AssayFlux Language Core/AssayFlux-AssayFlux
+    steps:
+      - name: Check out AssayFlux
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            src/AssayFlux Language Core/AssayFlux-AssayFlux
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: "src/AssayFlux Language Core/AssayFlux-AssayFlux/pyproject.toml"
+      - name: Install core, development tools, and optional quantum dependency
+        run: python -m pip install -e ".[dev,quantum]"
+      - name: Run quantum adapter validation and live simulator tests
+        run: python -m pytest tests/test_quantum.py -q

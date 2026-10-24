@@ -14,6 +14,8 @@ dependencies = ["lark>=1.3.1,<2", "cryptography>=41"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6", "build>=1"]
+# PennyLane currently requires Python 3.12+. The core remains usable on Python 3.11.
+quantum = ["pennylane>=0.45; python_version >= '3.12'"]
 
 [project.scripts]
 assayflux = "assayflux.cli:main"

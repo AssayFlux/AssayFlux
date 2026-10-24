@@ -11,7 +11,9 @@ This module is the AssayFlux-facing entry point for assistant, knowledge-retriev
 
 ## Current status
 
-**Imported capability — native AssayFlux integration not yet verified.** The underlying source is located in [project-nomad-main](project-nomad-main/README.md). Its original documentation is preserved as [UPSTREAM_README.md](project-nomad-main/UPSTREAM_README.md).
+**Local diagnostic adapter implemented; Project NOMAD application integration remains unverified.** The language core exposes `assayflux.assistant.OfflineAssistant` and `assayflux assistant` commands backed by a local Ollama API. It defaults to loopback, performs no cloud fallback, bounds input/output, and returns deterministic diagnostic advice when the local model is unavailable. Suggestions are advisory and never applied or executed automatically.
+
+The imported application is located in [project-nomad-main](project-nomad-main/README.md); original documentation is preserved in [UPSTREAM_README.md](project-nomad-main/UPSTREAM_README.md). The adapter intentionally uses Ollama's documented API rather than guessing an unverified Project NOMAD route. Full NOMAD UI/service integration and offline-with-network-disabled validation remain outstanding.
 
 ## Phase 1 requirements
 
