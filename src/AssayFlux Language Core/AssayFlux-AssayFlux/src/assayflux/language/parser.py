@@ -262,7 +262,7 @@ def parse(source: str, filename: str="<memory>") -> A.Program:
         raise ParseError("Invalid AssayFlux syntax",location=SourceLocation(filename,exc.line or 1,exc.column or 1),details=f"Unexpected input. Expected: {expected or 'a valid statement or expression'}",suggestion="Check indentation, colons, matching 'end' keywords, quotes, and operators.") from exc
     except VisitError as exc:
         orig=exc.orig_exc
-        if isinstance(orig,(ParseError,AstError)): raise orig
+        if isinstance(orig,(ParseError,AstError)): raise orig from None
         raise AstError("Could not construct a valid syntax tree",location=SourceLocation(filename),details=type(orig).__name__) from orig
     if not isinstance(result,A.Program): raise AstError("Parser did not produce a Program node",location=SourceLocation(filename))
     return validate_ast(result)
