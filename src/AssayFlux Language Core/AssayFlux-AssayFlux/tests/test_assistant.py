@@ -45,3 +45,21 @@ def test_assistant_parses_structured_local_model_response():
     assert result["suggestions"] == ["Add the required import"]
     assert result["confidence"] == "medium"
     assert result["requires_review"] is True
+
+
+def test_nomad_installed_model_list_accepts_json_array():
+    assistant = OfflineAssistant()
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self, limit):
+            return b'[{"name":"llama3.2"}]'
+
+    with patch("assayflux.assistant.urlopen", return_value=FakeResponse()):
+        result = assistant._request("/api/ollama/installed-models")
+    assert result == [{"name": "llama3.2"}]
