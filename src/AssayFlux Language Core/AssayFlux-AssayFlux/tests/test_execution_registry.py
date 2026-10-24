@@ -77,7 +77,7 @@ def test_auto_execution_routes_versioned_requests_to_piston(monkeypatch, capsys)
         def execute(self, request):
             from assayflux.execution.models import ExecutionResult
             return ExecutionResult(provider="piston", language=request.language or "python",
-                                   version=request.version, stdout="42\\n", exit_code=0)
+                                   version=request.version, stdout="42\n", exit_code=0)
 
     monkeypatch.setattr("assayflux.cli.get_provider", lambda name: (
         FakeProvider() if name == "piston" else (_ for _ in ()).throw(AssertionError(name))
@@ -85,4 +85,4 @@ def test_auto_execution_routes_versioned_requests_to_piston(monkeypatch, capsys)
     status = main(["execute", "--allow-external-execution", "--language", "python",
                    "--version", "3.12.0", "--code", "print(6*7)"])
     assert status == 0
-    assert capsys.readouterr().out == "42\\n"
+    assert capsys.readouterr().out == "42\n"
