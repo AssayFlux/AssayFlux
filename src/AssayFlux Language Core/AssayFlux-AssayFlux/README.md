@@ -56,6 +56,7 @@ Read [GRAMMAR.md](GRAMMAR.md) for syntax and [SECURITY.md](SECURITY.md) for runt
 - `src/assayflux/runtime/interpreter.py` — budgeted interpreter.
 - `src/assayflux/runtime/python_bridge.py` — constrained interop with approved Python callables.
 - `src/assayflux/integrations/cli_anything.py` — host-side adapter for installed CLI-Anything harnesses.
+- `src/assayflux/execution/` — provider-neutral request/result models and adapters for Piston and Code Interpreter services.
 - `src/assayflux/diagnostics/` — structured compiler/runtime errors.
 - `src/assayflux/security/` — source validation and runtime policy.
 - `src/assayflux/cli.py` and `src/assayflux/api.py` — command-line and public APIs.
@@ -78,6 +79,31 @@ assayflux tools run --allow-external-tools cli-anything-blender -- --json projec
 ```
 
 The adapter uses argument arrays (never `shell=True`), validates executable names, and applies a configurable timeout capped at 300 seconds. It does not install harnesses automatically. Install the relevant harness in the active Python environment and review its license, dependencies, and side effects before use.
+
+## External execution providers
+
+The optional Piston and Code Interpreter adapters connect to separately deployed services. They are for explicitly requested Python or other supported-language execution, not for running `.af` programs. Native `assayflux run file.af` always uses the canonical AssayFlux parser, semantic checks, and interpreter; there is no automatic fallback.
+
+See [EXECUTION_PROVIDERS.md](EXECUTION_PROVIDERS.md) for service setup, environment variables, examples, and security limitations.
+
+```bash
+# Discover languages and versions installed on your Piston service
+assayflux runtimes --json
+
+# Piston API v2; choose a language/version available on your own instance
+assayflux execute --provider piston --allow-external-execution \
+  --language python --version 3.12.0 --code 'print(6 * 7)'
+
+# Imported Code Interpreter service; defaults to its Python context
+assayflux execute --provider code-interpreter --allow-external-execution \
+  --code 'import math; print(math.sqrt(81))'
+
+# Structured machine-readable result
+assayflux exec --provider code-interpreter --allow-external-execution \
+  --json --code 'print("ready")'
+```
+
+External execution requires an explicit opt-in, a configured provider service, and server-side isolation appropriate for the workload. Client timeouts and response-size limits are not OS sandboxing.
 
 ## Python library interoperability
 
