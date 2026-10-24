@@ -180,3 +180,21 @@ def test_nomad_adapter_http_round_trip_against_loopback_stub():
         server.shutdown()
         server.server_close()
         thread.join(timeout=2)
+
+
+def test_offline_assistant_refuses_nomad_remote_ollama():
+    assistant = OfflineAssistant()
+    calls = []
+
+    def fake_request(path, payload=None):
+        calls.append(path)
+        if path == "/api/health":
+            return {"status": "ok"}
+        if path == "/api/ollama/remote-status":
+            return {"configured": True, "connected": True}
+        raise AssertionError("Must not query models or send chat to a configured remote")
+
+    with patch.object(assistant, "_request", side_effect=fake_request):
+        result = assistant.diagnose("Example failure")
+    assert result["provider"] == "deterministic-fallback"
+    assert calls == ["/api/health", "/api/ollama/remote-status"]
