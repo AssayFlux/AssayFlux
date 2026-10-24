@@ -10,7 +10,8 @@ def test_registry_uses_live_piston_inventory_and_marks_default_interpreter():
         {"language": "python", "version": "3.12.0", "aliases": ["py"]},
         {"language": "typescript", "version": "5.0.0", "aliases": ["ts"]},
     ]
-    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", return_value=runtimes):
+    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", return_value=runtimes), \
+         patch("assayflux.execution.registry.CodeInterpreterProvider.health", return_value=True):
         languages = list_languages("auto")
 
     assert any(
@@ -28,7 +29,8 @@ def test_registry_uses_live_piston_inventory_and_marks_default_interpreter():
 def test_registry_auto_tolerates_piston_unavailable_but_provider_specific_does_not():
     from assayflux.diagnostics.model import RuntimeErrorAF
 
-    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", side_effect=RuntimeErrorAF("offline")):
+    with patch("assayflux.execution.registry.PistonProvider.list_runtimes", side_effect=RuntimeErrorAF("offline")), \
+         patch("assayflux.execution.registry.CodeInterpreterProvider.health", return_value=True):
         assert list_languages("auto")[0]["provider"] == "code-interpreter"
         try:
             list_languages("piston")
@@ -45,7 +47,7 @@ def test_languages_cli_emits_machine_readable_inventory(capsys, monkeypatch):
         "assayflux.execution.registry.list_languages",
         lambda provider: [
             {"language": "python", "provider": "code-interpreter",
-             "status": "configured-default", "versions": [], "aliases": ["py"]}
+             "status": "available", "versions": [], "aliases": ["py"]}
         ],
     )
     assert main(["languages", "--json"]) == 0
