@@ -170,7 +170,8 @@ def test_nomad_adapter_http_round_trip_against_loopback_stub():
         assert result["cause"] == "Missing import"
         assert result["requires_review"] is True
         assert [path for path, _ in seen] == [
-            "/api/health", "/api/ollama/installed-models", "/api/ollama/chat"
+            "/api/health", "/api/ollama/remote-status",
+            "/api/ollama/installed-models", "/api/ollama/chat"
         ]
         payload = seen[-1][1]
         assert payload["stream"] is False
