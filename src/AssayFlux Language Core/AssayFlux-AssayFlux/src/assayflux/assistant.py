@@ -1,4 +1,4 @@
-"""Local-first diagnostic assistant adapter using the Ollama HTTP API.
+"""Local-first diagnostic adapter for Project NOMAD, with direct Ollama as an optional backend.
 
 The assistant explains errors and proposes bounded suggestions; it never executes
 or applies generated code. If the local model is unavailable, a deterministic
@@ -39,11 +39,20 @@ def _endpoint(value: str) -> str:
 
 
 class OfflineAssistant:
-    """Use a local Ollama model for diagnostics; no cloud fallback is performed."""
+    """Use Project NOMAD's local chat/RAG API by default, with no cloud fallback."""
 
-    def __init__(self, base_url: str | None = None, model: str | None = None):
+    def __init__(
+        self,
+        base_url: str | None = None,
+        model: str | None = None,
+        backend: str | None = None,
+    ):
+        self.backend = (backend or os.environ.get("ASSAYFLUX_ASSISTANT_BACKEND", "nomad")).strip().lower()
+        if self.backend not in {"nomad", "ollama"}:
+            raise SecurityError("Assistant backend must be 'nomad' or 'ollama'")
+        default_url = "http://127.0.0.1:8080" if self.backend == "nomad" else "http://127.0.0.1:11434"
         self.base_url = _endpoint(
-            base_url or os.environ.get("ASSAYFLUX_ASSISTANT_URL", "http://127.0.0.1:11434")
+            base_url or os.environ.get("ASSAYFLUX_ASSISTANT_URL", default_url)
         )
         self.model = (model or os.environ.get("ASSAYFLUX_ASSISTANT_MODEL", "llama3.2")).strip()
         if not self.model or len(self.model) > 120:
@@ -80,7 +89,18 @@ class OfflineAssistant:
             raise RuntimeErrorAF("Local assistant returned invalid JSON") from exc
 
     def health(self) -> dict[str, Any]:
-        """Return health and locally installed model names."""
+        """Return local service health and installed model names."""
+        if self.backend == "nomad":
+            health = self._request("/api/health")
+            if health.get("status") != "ok":
+                raise RuntimeErrorAF("Project NOMAD health check did not report status=ok")
+            installed = self._request("/api/ollama/installed-models")
+            models = installed if isinstance(installed, list) else []
+            names = [
+                item.get("name") for item in models
+                if isinstance(item, dict) and isinstance(item.get("name"), str)
+            ]
+            return {"available": True, "provider": "project-nomad-local", "models": names}
         result = self._request("/api/tags")
         models = result.get("models", [])
         if not isinstance(models, list):
@@ -111,8 +131,16 @@ class OfflineAssistant:
             "requires_review": True,
         }
         try:
-            result = self._request("/api/chat", {
-                "model": self.model,
+            model = self.model
+            if self.backend == "nomad":
+                installed = self.health().get("models", [])
+                if not installed:
+                    return fallback
+                if model not in installed:
+                    model = installed[0]
+            endpoint = "/api/ollama/chat" if self.backend == "nomad" else "/api/chat"
+            result = self._request(endpoint, {
+                "model": model,
                 "stream": False,
                 "format": "json",
                 "messages": [
@@ -138,8 +166,8 @@ class OfflineAssistant:
             if not isinstance(uncertainty, str):
                 uncertainty = "Model uncertainty was not supplied."
             return {
-                "provider": "ollama-local",
-                "model": self.model,
+                "provider": "project-nomad-local" if self.backend == "nomad" else "ollama-local",
+                "model": model,
                 "cause": parsed["cause"][:2000],
                 "suggestions": [s[:1000] for s in suggestions if isinstance(s, str)][:8],
                 "confidence": parsed.get("confidence") if parsed.get("confidence") in {"low", "medium", "high"} else "low",
