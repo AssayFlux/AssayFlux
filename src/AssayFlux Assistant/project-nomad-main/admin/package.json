@@ -6,7 +6,6 @@
   "license": "Apache-2.0",
   "author": "Crosstalk Solutions, LLC",
   "description": "AssayFlux Assistant administration interface integration candidate; upstream package identity and attribution are preserved.",
-  "description": "AssayFlux Assistant administration interface integration candidate; upstream package identity and attribution are preserved.",
   "scripts": {
     "start": "node bin/server.js",
     "build": "node ace build",
