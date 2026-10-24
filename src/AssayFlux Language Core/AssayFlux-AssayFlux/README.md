@@ -54,11 +54,36 @@ Read [GRAMMAR.md](GRAMMAR.md) for syntax and [SECURITY.md](SECURITY.md) for runt
 - `src/assayflux/language/ast_validator.py` — structural AST validation.
 - `src/assayflux/language/semantic.py` — name resolution and conservative type checks.
 - `src/assayflux/runtime/interpreter.py` — budgeted interpreter.
+- `src/assayflux/runtime/python_bridge.py` — constrained interop with approved Python callables.
+- `src/assayflux/integrations/cli_anything.py` — host-side adapter for installed CLI-Anything harnesses.
 - `src/assayflux/diagnostics/` — structured compiler/runtime errors.
 - `src/assayflux/security/` — source validation and runtime policy.
 - `src/assayflux/cli.py` and `src/assayflux/api.py` — command-line and public APIs.
 
 The lexer is provided by Lark's contextual lexer from the canonical grammar; token definitions should not be duplicated in a second, divergent lexer.
+
+## CLI-Anything integration
+
+CLI-Anything harnesses remain separately installed Python entry points; AssayFlux discovers them on `PATH` and invokes them through an adapter. This avoids copying application-specific logic into the language runtime.
+
+```bash
+# List discovered harnesses (human-readable or machine-readable)
+assayflux tools list
+assayflux tools list --json
+
+# Invoke a harness. The opt-in is mandatory because tools can edit files
+# or launch external applications. The -- separates AssayFlux flags from
+# the arguments that should be passed to the harness.
+assayflux tools run cli-anything-blender --allow-external-tools -- --json project list
+```
+
+The adapter uses argument arrays (never `shell=True`), validates executable names, and applies a configurable timeout capped at 300 seconds. It does not install harnesses automatically. Install the relevant harness in the active Python environment and review its license, dependencies, and side effects before use.
+
+## Python library interoperability
+
+AssayFlux and its language core run on Python 3.11+. The host environment can install compatible Python packages with `pip`; the language's Python bridge is intentionally more restrictive than ordinary Python. By default it exposes a small set of approved modules and callables. The bridge requires explicit module and callable grants and validates values crossing the language boundary.
+
+This means the integration can grow to support packages such as NumPy, pandas, Pillow, or scientific and machine-learning libraries, but **an installed package is not automatically callable from an `.af` program**. Add explicit trusted-host policy grants for the module and public functions you need, review the package's side effects, and keep filesystem, network, subprocess, and native-code capabilities restricted unless your deployment explicitly trusts the program. Broad unrestricted Python access would defeat the interpreter's security controls; AssayFlux is not an OS-enforced sandbox.
 
 ## Development
 
@@ -68,6 +93,6 @@ python -m pytest
 python -m ruff check src tests
 ```
 
-The repository intentionally focuses on the language core. Separate services can be reconnected later through explicit, tested language APIs. No photo-editing functionality is part of the core.
+Separate services and application adapters should connect through explicit, tested APIs. No photo-editing functionality is part of the language core.
 
 AssayFlux is experimental software, not an OS-enforced sandbox. Do not run untrusted programs with sensitive privileges.
