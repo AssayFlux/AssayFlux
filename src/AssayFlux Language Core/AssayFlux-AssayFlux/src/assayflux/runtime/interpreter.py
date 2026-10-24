@@ -1,12 +1,12 @@
 """Budgeted interpreter for the canonical AssayFlux core (not an OS sandbox)."""
 from __future__ import annotations
 
-import contextlib
 import math
 import operator
 import re
 import sys
 from collections.abc import Callable
+from contextlib import suppress
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -835,7 +835,7 @@ class Interpreter:
                 handler=next((h for h in node.handlers if _matches_exception(exc,h.exception_types)),None)
                 if handler is None: raise
                 error_loc=getattr(exc,"location",node.loc)
-                with contextlib.suppress(OSError):
+                with suppress(OSError):
                     write_report(Diagnostic("AF-RUNTIME-HANDLED","runtime",Severity.WARNING,
                         "A runtime error was caught by an AssayFlux exception handler",error_loc,
                         details=f"{getattr(exc,'code','AF-RUNTIME-001')}: {getattr(exc,'message',str(exc))}",
