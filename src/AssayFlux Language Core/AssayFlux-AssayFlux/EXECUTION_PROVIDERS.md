@@ -9,6 +9,10 @@ AssayFlux keeps the canonical `.af` pipeline separate from optional external run
 
 Neither external provider accepts `.af` as a substitute for the canonical interpreter. There is no automatic fallback from `assayflux run` to an external service.
 
+## Universal runtime inventory
+
+Use `assayflux languages --json` to inspect runtime versions reported by Piston and the Code Interpreter default path. Code Interpreter is listed only when its health endpoint succeeds. A successful health check is not a sandbox/security certification.
+
 ## Piston
 
 Piston is a separately deployed HTTP service. The adapter calls `GET /api/v2/runtimes` and `POST /api/v2/execute`. It does not install Piston, install language runtimes, or start Docker for you.
@@ -76,3 +80,26 @@ Prefer a locally controlled Piston deployment or an HTTPS endpoint you trust. Re
 The Code Interpreter integration likewise depends on the deployment's sandbox, Jupyter kernels, filesystem policy, access-token validation, and network configuration. The imported server logs code and has a persistent default context; do not expose it to untrusted clients without adding authentication and isolation appropriate to your threat model. A local HTTP endpoint is intended for local development only.
 
 These providers execute source code outside AssayFlux's bounded `.af` interpreter. Never pass untrusted code or secrets to a provider unless that provider's deployment is explicitly designed and reviewed for that workload. AssayFlux's client-side timeout and response-size checks are not substitutes for server-side CPU, memory, process, filesystem, and network restrictions.
+
+
+## Optional quantum execution
+
+The core exposes a validated, JSON-based circuit interface backed by PennyLane's local `default.qubit` simulator. Install the optional `quantum` extra on Python 3.12 or later; core installation remains independent of PennyLane. Example:
+
+```bash
+assayflux quantum devices
+assayflux quantum run --circuit '{"wires": 2, "gates": [{"gate": "H", "wires": [0]}, {"gate": "CNOT", "wires": [0, 1]}], "shots": null}'
+```
+
+The adapter permits only a bounded set of gates, up to 16 wires and 1,000 gates, and up to 100,000 shots. It reports computational-basis probabilities. This initial integration is simulator-only; it does not claim hardware access or add quantum syntax to `.af`.
+
+## Local diagnostic assistant
+
+The optional assistant adapter uses a local Ollama HTTP API and never falls back to a cloud model. Configure `ASSAYFLUX_ASSISTANT_URL` (default `http://127.0.0.1:11434`) and `ASSAYFLUX_ASSISTANT_MODEL` (default `llama3.2`). Remote endpoints are rejected unless `ASSAYFLUX_ASSISTANT_ALLOW_REMOTE=1` is explicitly set after review.
+
+```bash
+assayflux assistant status
+assayflux assistant diagnose --error 'SyntaxError: unexpected token' --context 'file.af, line 12'
+```
+
+The diagnostic output is advisory only. The assistant never applies patches or executes generated code. If the local model is unavailable, `diagnose` returns a deterministic fallback. Project NOMAD remains a separate imported application; this adapter uses its documented local-model ecosystem rather than assuming an unverified NOMAD route.
