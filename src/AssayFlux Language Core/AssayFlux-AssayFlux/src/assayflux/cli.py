@@ -272,7 +272,7 @@ def main(argv: list[str] | None = None) -> int:
             try:
                 from assayflux.assistant import OfflineAssistant
                 diagnostic = OfflineAssistant().diagnose(
-                    f"{exc.message}" + (f"\\nSuggestion: {exc.suggestion}" if exc.suggestion else ""),
+                    f"{exc.message}" + (f"\nSuggestion: {exc.suggestion}" if exc.suggestion else ""),
                     context=f"AssayFlux command: {args.command}",
                 )
                 print(json.dumps(diagnostic, ensure_ascii=False, indent=2), file=sys.stderr)
