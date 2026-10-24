@@ -26,9 +26,11 @@ def test_run_requires_explicit_external_tool_opt_in():
 
 
 def test_run_rejects_unknown_harness_even_with_opt_in():
-    with patch("assayflux.integrations.cli_anything.discover_harnesses", return_value=[]):
-        with pytest.raises(RuntimeErrorAF, match="not installed"):
-            run_harness("cli-anything-demo", [], allow_external_tools=True)
+    with (
+        patch("assayflux.integrations.cli_anything.discover_harnesses", return_value=[]),
+        pytest.raises(RuntimeErrorAF, match="not installed"),
+    ):
+        run_harness("cli-anything-demo", [], allow_external_tools=True)
 
 
 def test_run_passes_arguments_without_a_shell(tmp_path: Path):
