@@ -83,7 +83,15 @@ The adapter uses argument arrays (never `shell=True`), validates executable name
 
 AssayFlux and its language core run on Python 3.11+. The host environment can install compatible Python packages with `pip`; the language's Python bridge is intentionally more restrictive than ordinary Python. By default it exposes a small set of approved modules and callables. The bridge requires explicit module and callable grants and validates values crossing the language boundary.
 
-This means the integration can grow to support packages such as NumPy, pandas, Pillow, or scientific and machine-learning libraries, but **an installed package is not automatically callable from an `.af` program**. Add explicit trusted-host policy grants for the module and public functions you need, review the package's side effects, and keep filesystem, network, subprocess, and native-code capabilities restricted unless your deployment explicitly trusts the program. Broad unrestricted Python access would defeat the interpreter's security controls; AssayFlux is not an OS-enforced sandbox.
+This supports packages such as NumPy, pandas, Pillow, and scientific or machine-learning libraries, but **an installed package is not automatically callable from an `.af` program**. Add explicit trusted grants to an `assayflux.toml` file beside the source file:
+
+```toml
+[python]
+modules = ["numpy", "pandas"]
+calls = ["numpy.mean", "numpy.std", "pandas.isna"]
+```
+
+Only list modules installed in the Python environment running AssayFlux, and grant only the public functions your project needs. Configured module and callable grants enable the Python bridge capabilities for that project. Calls still pass through the bridge's input/output value checks and hard-denied module/call rules. Review each package's side effects; broad unrestricted Python access would defeat the interpreter's security controls. AssayFlux is not an OS-enforced sandbox.
 
 ## Development
 
