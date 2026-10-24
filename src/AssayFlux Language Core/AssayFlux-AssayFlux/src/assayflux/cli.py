@@ -13,7 +13,7 @@ from assayflux.api import (
     read_source,
     validate_source,
 )
-from assayflux.diagnostics.model import AssayFluxError
+from assayflux.diagnostics.model import AssayFluxError, SourceError, SourceLocation
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -29,6 +29,12 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     policy = SecurityPolicy()
     try:
+        if args.file.suffix != ".af":
+            raise SourceError(
+                "AssayFlux source files must use the .af extension",
+                location=SourceLocation(str(args.file)),
+                suggestion="Rename the source file with a .af extension.",
+            )
         source = read_source(args.file, policy)
         validate_source(source, str(args.file), policy)
         tree = parse(source, filename=str(args.file))
