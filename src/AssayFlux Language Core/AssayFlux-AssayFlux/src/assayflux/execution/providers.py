@@ -57,8 +57,10 @@ def _validate_request(request: ExecutionRequest) -> None:
         raise SecurityError("Invalid runtime version selector")
     if request.context_id is not None and not _CONTEXT_ID.fullmatch(request.context_id):
         raise SecurityError("Invalid code-interpreter context identifier")
-    if not isinstance(request.stdin, str) or any(not isinstance(arg, str) for arg in request.args):
-        raise SecurityError("stdin and program arguments must be strings")
+    if not isinstance(request.stdin, str) or len(request.stdin.encode("utf-8")) > _MAX_CODE_BYTES:
+        raise SecurityError("stdin must be text no larger than 1 MB")
+    if len(request.args) > 100 or any(not isinstance(arg, str) or len(arg) > 10_000 for arg in request.args):
+        raise SecurityError("Program arguments must be strings with at most 100 arguments of 10,000 characters each")
     filename = request.filename
     if (
         not filename
@@ -223,6 +225,8 @@ class CodeInterpreterProvider:
         _validate_request(request)
         if request.context_id and request.language:
             raise SecurityError("Specify either a code-interpreter context ID or a language, not both")
+        if request.version is not None or request.stdin or request.args:
+            raise SecurityError("The Code Interpreter service does not support runtime versions, stdin, or program arguments")
         payload: dict[str, Any] = {"code": request.code}
         if request.context_id:
             payload["context_id"] = request.context_id
