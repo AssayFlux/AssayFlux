@@ -134,6 +134,8 @@ Phase 1 is **not complete**. The top-level inventory and first branding entry po
 
 ## Follow-up branding pass — October 24, 2026
 
+- Replaced the imported CLI bundle's Chinese and German default README surfaces with AssayFlux-facing integration guides; preserved the complete original translations as `UPSTREAM_README_CN.md` and `UPSTREAM_README_DE.md`.
+
 This pass was applied directly to `main` and kept compatibility-sensitive upstream identities intact.
 
 - Added a branded navigation list in the root README linking all eleven AssayFlux-facing module entry points.
