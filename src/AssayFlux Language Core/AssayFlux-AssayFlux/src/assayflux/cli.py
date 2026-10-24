@@ -34,12 +34,16 @@ def _parser() -> argparse.ArgumentParser:
         command = commands.add_parser(name, help=f"{name} an AssayFlux source file")
         command.add_argument("file", type=Path)
 
+    languages = commands.add_parser("languages", help="list runtimes available from configured providers")
+    languages.add_argument("--provider", choices=("auto", "piston", "code-interpreter"), default="auto")
+    languages.add_argument("--json", action="store_true", dest="json_output")
+
     runtimes = commands.add_parser("runtimes", help="list runtimes installed in a Piston service")
     runtimes.add_argument("--provider", choices=("piston",), default="piston")
     runtimes.add_argument("--json", action="store_true", dest="json_output")
 
     execute = commands.add_parser("execute", aliases=["exec"], help="execute code through an explicitly configured external provider")
-    execute.add_argument("--provider", choices=("piston", "code-interpreter"), required=True)
+    execute.add_argument("--provider", choices=("auto", "piston", "code-interpreter"), default="auto", help="execution backend (auto selects Code Interpreter unless a Piston version is specified)")
     source = execute.add_mutually_exclusive_group(required=True)
     source.add_argument("--code", help="source code supplied directly on the command line")
     source.add_argument("--file", type=Path, help="read source code from a file")
@@ -134,7 +138,10 @@ def _run_external_execution(args: argparse.Namespace) -> int:
         timeout_seconds=args.timeout,
         context_id=args.context_id,
     )
-    provider = get_provider(args.provider)
+    provider_name = args.provider
+    if provider_name == "auto":
+        provider_name = "piston" if request.version else "code-interpreter"
+    provider = get_provider(provider_name)
     result = provider.execute(request)
     if args.json_output:
         print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
@@ -154,6 +161,21 @@ def _run_external_execution(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "languages":
+        try:
+            from assayflux.execution.registry import list_languages
+            languages = list_languages(args.provider)
+            if args.json_output:
+                print(json.dumps(languages, ensure_ascii=False, indent=2))
+            else:
+                for item in languages:
+                    versions = ", ".join(item.get("versions", []))
+                    version_text = f"\\t{versions}" if versions else ""
+                    print(f"{item['language']}\\t{item['provider']}\\t{item['status']}{version_text}")
+            return 0
+        except AssayFluxError as exc:
+            print(f"AssayFlux: {exc}", file=sys.stderr)
+            return 1
     if args.command == "runtimes":
         try:
             runtimes = get_provider(args.provider).list_runtimes()
