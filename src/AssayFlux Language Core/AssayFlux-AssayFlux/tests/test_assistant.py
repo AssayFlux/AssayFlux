@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from assayflux.assistant import OfflineAssistant
-from assayflux.diagnostics.model import SecurityError
+from assayflux.diagnostics.model import RuntimeErrorAF, SecurityError
 
 
 def test_assistant_defaults_to_loopback():
@@ -21,7 +21,7 @@ def test_assistant_rejects_remote_endpoint_by_default():
 
 def test_assistant_deterministic_fallback_when_local_model_is_unavailable():
     assistant = OfflineAssistant()
-    with patch.object(assistant, "_request", side_effect=Exception("offline")):
+    with patch.object(assistant, "_request", side_effect=RuntimeErrorAF("offline")):
         result = assistant.diagnose("SyntaxError: unexpected token")
     assert result["provider"] == "deterministic-fallback"
     assert result["requires_review"] is True
