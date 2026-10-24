@@ -219,6 +219,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "quantum":
         try:
             from assayflux.quantum import list_devices, run_circuit
+            quantum_result: Any
             if args.quantum_command == "devices":
                 quantum_result = list_devices()
             else:
