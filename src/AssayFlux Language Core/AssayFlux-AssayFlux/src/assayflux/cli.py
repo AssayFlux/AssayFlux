@@ -5,7 +5,8 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any
+from collections.abc import Callable
+from typing import Any, cast
 
 from assayflux.api import (
     Interpreter,
@@ -199,7 +200,8 @@ def main(argv: list[str] | None = None) -> int:
             list_runtimes = getattr(provider, "list_runtimes", None)
             if not callable(list_runtimes):
                 raise SecurityError(f"Provider '{args.provider}' does not expose runtime discovery")
-            runtimes = list_runtimes()
+            discover_runtimes = cast(Callable[[], list[dict[str, Any]]], list_runtimes)
+            runtimes = discover_runtimes()
             if args.json_output:
                 print(json.dumps(runtimes, ensure_ascii=False, indent=2))
             else:
