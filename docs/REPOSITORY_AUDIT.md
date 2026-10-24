@@ -130,3 +130,21 @@ These are user-facing branding changes only. They do not claim that the imported
 ## Audit conclusion
 
 Phase 1 is **not complete**. The top-level inventory and first branding entry points are established, but the truncated tree and large imported codebases require deeper inspection before repository-wide branding or file reconciliation can be declared finished.
+
+
+## Follow-up branding pass — October 24, 2026
+
+This pass was applied directly to `main` and kept compatibility-sensitive upstream identities intact.
+
+- Added a branded navigation list in the root README linking all eleven AssayFlux-facing module entry points.
+- Updated the execution API package description to identify it as an AssayFlux integration candidate, explicitly noting that isolation guarantees remain unverified. The package name, dependencies, and license were preserved.
+- Added an AssayFlux-facing description to the assistant admin package metadata while preserving its existing scripts, imports, dependencies, author, and license.
+- Validated both modified package manifests as JSON after the metadata changes.
+- Rechecked the eleven module-root README files: each presents an AssayFlux-facing integration boundary and does not claim completed integration.
+- Kept upstream package names, author/copyright fields, source URLs, executable names, license files, and attribution assets where renaming could break compatibility or misrepresent provenance.
+
+### Branding coverage and limits
+
+The safe branding pass covers the repository overview, all eleven module entry points, previously rebranded upstream-root README files, and selected descriptive package metadata. It is **not** a repository-wide string replacement. The recursive GitHub tree remains truncated, and UI screenshots, builds, nested manifests, workflow labels, container image references, and all source-level branding have not been exhaustively inspected. Remaining surfaces must be handled component-by-component after checking how each is used.
+
+No integration, security, build, or runtime capability is considered verified merely because its display name now uses AssayFlux.
