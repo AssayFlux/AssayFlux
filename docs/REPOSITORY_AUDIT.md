@@ -44,7 +44,7 @@ These counts come from individual recursive Git tree requests. They are **struct
 | Interpreter / sandbox | 158 | 135 | Complete recursive response |
 | Language core | 36 | 27 | Complete recursive response |
 | Linux kernel | 71,523 | 67,391 | **Truncated**; more entries exist |
-| macOS / XNU | Not yet measured | Not yet measured | Tree lookup needs retry |
+| macOS / XNU | 6,066 | 5,693 | Complete recursive response |
 | Quantum provider | 2,193 | 1,946 | Complete recursive response |
 | Reverse engineering | 5,835 | 5,405 | Complete recursive response |
 | Windows-compatible OS | 27,153 | 24,605 | Complete recursive response |
@@ -71,7 +71,7 @@ The counts above cover the nested imported source trees, not the small AssayFlux
 
 The first metadata pass found upstream package identities in build files, including `project-nomad`, `piston-api`, `hackingtool`, `e2b-code-interpreter-root`, `pennylane`, and `rea-agents`. These identifiers are not being globally renamed in this pass: package names, executable names, imports, URLs, and release configuration can be compatibility-sensitive. Their AssayFlux-facing module entry points are branded, while upstream identities remain visible in source metadata until dependency and build checks prove a safe migration.
 
-The default README at the imported PennyLane and REA source roots has been replaced with an AssayFlux-facing integration guide, and each original README was preserved as `UPSTREAM_README.md`. The other imported module roots already had AssayFlux-facing README wrappers and preserved upstream reference documents. Operating-system source trees retain their own root documentation and licensing context; their parent AssayFlux module directories provide the branded integration entry points.
+All eleven `src/` module roots now have an AssayFlux-facing `README.md`. The default README at the imported PennyLane and REA source roots has also been replaced with an AssayFlux-facing integration guide, and each original README was preserved as `UPSTREAM_README.md`. The other imported module roots already had AssayFlux-facing README wrappers and preserved upstream reference documents. Operating-system source trees retain their own root documentation and licensing context; their parent AssayFlux module directories provide the branded integration entry points.
 
 A filename heuristic across the recursive trees did not identify obvious private-key filenames in the complete responses. This is **not** a secret scan or security clearance: Linux's tree response is truncated, and filenames alone cannot detect credentials embedded in source or configuration. The inventory also found intentional-looking data/binary assets (including ZIM/database assets in the assistant project and a DLL fixture in the CLI project) that need classification as runtime assets, test fixtures, generated artifacts, or removable downloads before repository cleanup.
 
