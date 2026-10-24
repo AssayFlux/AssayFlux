@@ -11,7 +11,7 @@ def test_piston_adapter_normalizes_response():
     response = {
         "language": "python",
         "version": "3.12.0",
-        "run": {"stdout": "42\\n", "stderr": "", "code": 0, "signal": None, "output": "42\\n"},
+        "run": {"stdout": "42\n", "stderr": "", "code": 0, "signal": None, "output": "42\n"},
     }
     with patch(
         "assayflux.execution.providers._request_json",
@@ -22,14 +22,14 @@ def test_piston_adapter_normalizes_response():
         )
 
     assert call.call_args.kwargs["payload"]["run_timeout"] == 10000
-    assert result.stdout == "42\\n"
+    assert result.stdout == "42\n"
     assert result.exit_code == 0
 
 
 def test_code_interpreter_adapter_reads_newline_delimited_events():
     stream = (
-        '{"type":"stdout","text":"hello\\n"}\\n'
-        '{"type":"end_of_execution"}\\n'
+        '{"type":"stdout","text":"hello\\n"}\n'
+        '{"type":"end_of_execution"}\n'
     ).encode()
     with patch(
         "assayflux.execution.providers._request_json",
@@ -39,5 +39,5 @@ def test_code_interpreter_adapter_reads_newline_delimited_events():
             ExecutionRequest(code="print('hello')")
         )
 
-    assert result.stdout == "hello\\n"
+    assert result.stdout == "hello\n"
     assert result.exit_code == 0
