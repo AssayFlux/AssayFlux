@@ -67,6 +67,14 @@ The counts above cover the nested imported source trees, not the small AssayFlux
 - **Security boundaries require evidence.** Language validation is not equivalent to operating-system isolation; sandbox and deployment controls require dedicated tests.
 - **Repository size is a material risk.** The OS and other large upstream trees should be assessed for repository suitability, history/provenance, licensing, and build needs before deciding whether to keep full source trees in this repository.
 
+## Branding and artifact scan findings
+
+The first metadata pass found upstream package identities in build files, including `project-nomad`, `piston-api`, `hackingtool`, `e2b-code-interpreter-root`, `pennylane`, and `rea-agents`. These identifiers are not being globally renamed in this pass: package names, executable names, imports, URLs, and release configuration can be compatibility-sensitive. Their AssayFlux-facing module entry points are branded, while upstream identities remain visible in source metadata until dependency and build checks prove a safe migration.
+
+The default README at the imported PennyLane and REA source roots has been replaced with an AssayFlux-facing integration guide, and each original README was preserved as `UPSTREAM_README.md`. The other imported module roots already had AssayFlux-facing README wrappers and preserved upstream reference documents. Operating-system source trees retain their own root documentation and licensing context; their parent AssayFlux module directories provide the branded integration entry points.
+
+A filename heuristic across the recursive trees did not identify obvious private-key filenames in the complete responses. This is **not** a secret scan or security clearance: Linux's tree response is truncated, and filenames alone cannot detect credentials embedded in source or configuration. The inventory also found intentional-looking data/binary assets (including ZIM/database assets in the assistant project and a DLL fixture in the CLI project) that need classification as runtime assets, test fixtures, generated artifacts, or removable downloads before repository cleanup.
+
 ## Remaining Phase 1 work
 
 - [ ] Obtain a complete file inventory using paginated directory traversal or a local checkout; the recursive GitHub tree result is truncated.
