@@ -131,13 +131,13 @@ def _run_external_execution(args: argparse.Namespace) -> int:
         print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
     else:
         if result.stdout:
-            print(result.stdout, end="" if result.stdout.endswith("\\n") else "\\n")
-        if result.provider == "code-interpreter" and not result.stdout:
+            print(result.stdout, end="" if result.stdout.endswith("\n") else "\\n")
+        if result.provider == "code-interpreter":
             for event in result.outputs:
                 if event.get("type") == "result" and event.get("text"):
                     print(event["text"])
         if result.stderr:
-            print(result.stderr, file=sys.stderr, end="" if result.stderr.endswith("\\n") else "\\n")
+            print(result.stderr, file=sys.stderr, end="" if result.stderr.endswith("\n") else "\\n")
         if result.signal:
             print(f"Execution terminated by signal: {result.signal}", file=sys.stderr)
     return result.exit_code if result.exit_code is not None else 1
