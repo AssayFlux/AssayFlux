@@ -550,7 +550,7 @@ class Interpreter:
                 if pieces>100_000:
                     raise RuntimeErrorAF("split result exceeds collection item limit",location=node.loc)
             result=method(*args,**kwargs)
-            if target.name in {"keys","values","items"} and isinstance(result,(type({}.keys()),type({}.values()),type({}.items()))): result=list(result)
+            if target.name in {"keys","values","items"} and isinstance(target.value, dict): result=list(result)
             return self._guard_value(result,node.loc)
         if target not in _BUILTINS.values() and not callable(target): raise RuntimeErrorAF("Value is not callable",location=node.loc)
         if target not in _BUILTINS.values(): raise SecurityError("Calling arbitrary host callables is prohibited",location=node.loc)
