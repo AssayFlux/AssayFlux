@@ -13,7 +13,12 @@ from assayflux.api import (
     read_source,
     validate_source,
 )
-from assayflux.diagnostics.model import AssayFluxError, SecurityError, SourceError, SourceLocation
+from assayflux.diagnostics.model import (
+    AssayFluxError,
+    SecurityError,
+    SourceError,
+    SourceLocation,
+)
 from assayflux.execution import ExecutionRequest, get_provider
 from assayflux.integrations.cli_anything import discover_harnesses, run_harness
 from assayflux.security.project_config import load_security_policy
