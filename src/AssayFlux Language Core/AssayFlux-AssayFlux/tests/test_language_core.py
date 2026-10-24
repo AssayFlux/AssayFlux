@@ -107,7 +107,7 @@ def test_cli_rejects_non_af_extension(tmp_path: Path, capsys, command: str):
     from assayflux.cli import main
 
     source = tmp_path / "hello.txt"
-    source.write_text('show "hello"\\n', encoding="utf-8")
+    source.write_text('show "hello"\n', encoding="utf-8")
 
     assert main([command, str(source)]) == 1
     assert ".af extension" in capsys.readouterr().err
@@ -115,4 +115,4 @@ def test_cli_rejects_non_af_extension(tmp_path: Path, capsys, command: str):
 @pytest.mark.parametrize("count", ["3.0", "0x3", "3e0"])
 def test_counted_repetition_requires_decimal_integer_literal(count: str):
     with pytest.raises(ParseError, match="non-negative integer"):
-        parse(f"{count} times:\\n    show \"again\"\\nend\\n")
+        parse(f"{count} times:\n    show \"again\"\nend\n")
