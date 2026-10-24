@@ -194,7 +194,11 @@ def main(argv: list[str] | None = None) -> int:
             return 1
     if args.command == "runtimes":
         try:
-            runtimes = get_provider(args.provider).list_runtimes()
+            provider = get_provider(args.provider)
+            list_runtimes = getattr(provider, "list_runtimes", None)
+            if not callable(list_runtimes):
+                raise SecurityError(f"Provider '{args.provider}' does not expose runtime discovery")
+            runtimes = list_runtimes()
             if args.json_output:
                 print(json.dumps(runtimes, ensure_ascii=False, indent=2))
             else:
@@ -216,11 +220,11 @@ def main(argv: list[str] | None = None) -> int:
         try:
             from assayflux.quantum import list_devices, run_circuit
             if args.quantum_command == "devices":
-                result = list_devices()
+                quantum_result = list_devices()
             else:
                 raw = args.circuit if args.circuit is not None else args.file.read_text(encoding="utf-8")
-                result = run_circuit(json.loads(raw))
-            print(json.dumps(result, ensure_ascii=False, indent=2))
+                quantum_result = run_circuit(json.loads(raw))
+            print(json.dumps(quantum_result, ensure_ascii=False, indent=2))
             return 0
         except (AssayFluxError, OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
             if isinstance(exc, AssayFluxError):
