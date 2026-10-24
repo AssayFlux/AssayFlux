@@ -100,6 +100,9 @@ The optional assistant adapter uses a local Ollama HTTP API and never falls back
 ```bash
 assayflux assistant status
 assayflux assistant diagnose --error 'SyntaxError: unexpected token' --context 'file.af, line 12'
+
+# Ask the local assistant for suggestions only if native .af validation or execution fails
+assayflux check program.af --assist
 ```
 
 The diagnostic output is advisory only. The assistant never applies patches or executes generated code. If the local model is unavailable, `diagnose` returns a deterministic fallback. Project NOMAD remains a separate imported application; this adapter uses its documented local-model ecosystem rather than assuming an unverified NOMAD route.
