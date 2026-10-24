@@ -108,3 +108,69 @@ def test_assistant_rejects_oversized_inputs():
         assistant.diagnose("x" * 20_001)
     with pytest.raises(SecurityError):
         assistant.diagnose("error", "x" * 20_001)
+
+
+def test_nomad_adapter_http_round_trip_against_loopback_stub():
+    import json
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    from threading import Thread
+
+    seen = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, *_args):
+            pass
+
+        def do_GET(self):
+            seen.append((self.path, None))
+            if self.path == "/api/health":
+                body = {"status": "ok"}
+            elif self.path == "/api/ollama/installed-models":
+                body = [{"name": "llama3.2"}]
+            else:
+                self.send_error(404)
+                return
+            data = json.dumps(body).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
+        def do_POST(self):
+            length = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(length))
+            seen.append((self.path, payload))
+            body = {"message": {"content": json.dumps({
+                "cause": "Missing import",
+                "suggestions": ["Verify the intended module before adding an import"],
+                "confidence": "medium",
+                "uncertainty": "The traceback alone cannot prove the intended module.",
+            })}}
+            data = json.dumps(body).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        assistant = OfflineAssistant(base_url=f"http://127.0.0.1:{server.server_port}")
+        result = assistant.diagnose("NameError: np is not defined", "line 3")
+        assert result["provider"] == "project-nomad-local"
+        assert result["cause"] == "Missing import"
+        assert result["requires_review"] is True
+        assert [path for path, _ in seen] == [
+            "/api/health", "/api/ollama/installed-models", "/api/ollama/chat"
+        ]
+        payload = seen[-1][1]
+        assert payload["stream"] is False
+        assert payload["model"] == "llama3.2"
+        assert "format" not in payload and "options" not in payload
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
