@@ -82,7 +82,7 @@ The adapter uses argument arrays (never `shell=True`), validates executable name
 
 ## Universal external execution interface
 
-Use one `execute` command for external code, and `languages` to inspect what the configured providers report. `--provider auto` is the default: requests with an explicit runtime version route to Piston; requests without a version route to the Code Interpreter service. Specify `--provider` to force a backend. The native `.af` `run` and `check` commands remain separate and never fall back to an external runtime.
+Use one `execute` command for external code, and `languages` to inspect what the configured providers report. `--provider auto` is the default: requests with an explicit runtime version, stdin, or program arguments route to Piston; simple requests without those features route to the Code Interpreter service. Piston requests still require both `--language` and `--version`. Specify `--provider` to force a backend. The native `.af` `run` and `check` commands remain separate and never fall back to an external runtime.
 
 ```bash
 # Inspect the provider-backed runtime inventory
