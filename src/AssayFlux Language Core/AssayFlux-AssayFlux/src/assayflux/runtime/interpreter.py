@@ -236,8 +236,8 @@ class Interpreter:
                 if not isinstance(iterable,(list,tuple,set,dict,str,range)): raise RuntimeErrorAF("Comprehension requires a bounded built-in iterable",location=node.loc)
                 if len(iterable)>100_000: raise RuntimeErrorAF("Comprehension iterable exceeds item limit",location=node.loc)
                 old_present=node.name in self.env; old=self.env.get(node.name); was_constant=node.name in self.constants
-                self.constants.discard(node.name); result: Any = [] if node.kind=="list" else set() if node.kind=="set" else {}
-                estimated=sys.getsizeof(result); seen: set[int] = set()
+                self.constants.discard(node.name); result = [] if node.kind=="list" else set() if node.kind=="set" else {}
+                estimated=sys.getsizeof(result); seen=set()
                 try:
                     for item in iterable:
                         self._step(node.loc); self.env[node.name]=item
@@ -280,7 +280,7 @@ class Interpreter:
                 return self._guard_value(tuple(result),node.loc)
             if isinstance(node,A.SetLiteral):
                 if len(node.values)>100_000: raise RuntimeErrorAF("Collection exceeds configured item limit",location=node.loc)
-                result: set[Any] = set(); estimated=sys.getsizeof(result); seen: set[int] = set()
+                result=set(); estimated=sys.getsizeof(result); seen=set()
                 for child in node.values:
                     value=self._eval(child)
                     estimated += sys.getsizeof(None) + _estimate_value_bytes(value,self.policy.max_value_bytes-estimated,seen)
@@ -289,7 +289,7 @@ class Interpreter:
                 return self._guard_value(result,node.loc)
             if isinstance(node,A.DictLiteral):
                 if len(node.values)>100_000: raise RuntimeErrorAF("Collection exceeds configured item limit",location=node.loc)
-                result: dict[Any, Any] = {}; estimated=sys.getsizeof(result); seen: set[int] = set()
+                result={}; estimated=sys.getsizeof(result); seen=set()
                 for key_node,value_node in node.values:
                     key=self._eval(key_node); value=self._eval(value_node)
                     estimated += 2*sys.getsizeof(None) + _estimate_value_bytes(key,self.policy.max_value_bytes-estimated,seen)
