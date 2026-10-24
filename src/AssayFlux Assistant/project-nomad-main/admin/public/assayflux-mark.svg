@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">AssayFlux</title>
+  <desc id="desc">AssayFlux geometric flux mark</desc>
+  <defs>
+    <linearGradient id="flux" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#37D6A3"/>
+      <stop offset="1" stop-color="#3678F5"/>
+    </linearGradient>
+  </defs>
+  <rect x="20" y="20" width="472" height="472" rx="112" fill="#101827"/>
+  <path d="M256 66 420 161v190L256 446 92 351V161Z" fill="none" stroke="url(#flux)" stroke-width="18" stroke-linejoin="round"/>
+  <path d="M154 323 256 135l102 188M192 253h128" fill="none" stroke="#F5F8FF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="253" r="17" fill="#37D6A3"/>
+</svg>
