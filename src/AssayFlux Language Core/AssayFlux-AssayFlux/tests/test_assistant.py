@@ -36,6 +36,7 @@ def test_assistant_parses_structured_local_model_response():
     }
     with patch.object(assistant, "_request", side_effect=[
         {"status": "ok"},
+        {"configured": False, "connected": False},
         [{"name": "llama3.2"}],
         response,
     ]):
@@ -73,6 +74,8 @@ def test_nomad_chat_payload_matches_supported_api_contract():
         calls.append((path, payload))
         if path == "/api/health":
             return {"status": "ok"}
+        if path == "/api/ollama/remote-status":
+            return {"configured": False, "connected": False}
         if path == "/api/ollama/installed-models":
             return [{"name": "llama3.2"}]
         return {"message": {"content": '{"cause":"Bad syntax","suggestions":["Check brackets"],"confidence":[],"uncertainty":17}'}}
@@ -81,7 +84,8 @@ def test_nomad_chat_payload_matches_supported_api_contract():
         result = assistant.diagnose("SyntaxError: unexpected token")
 
     assert [path for path, _ in calls] == [
-        "/api/health", "/api/ollama/installed-models", "/api/ollama/chat"
+        "/api/health", "/api/ollama/remote-status",
+        "/api/ollama/installed-models", "/api/ollama/chat"
     ]
     payload = calls[-1][1]
     assert payload["model"] == "llama3.2"
@@ -95,7 +99,7 @@ def test_nomad_chat_payload_matches_supported_api_contract():
 def test_assistant_handles_non_object_chat_response_without_crashing():
     assistant = OfflineAssistant()
     with patch.object(assistant, "_request", side_effect=[
-        {"status": "ok"}, [{"name": "llama3.2"}], [{"unexpected": "list"}]
+        {"status": "ok"}, {"configured": False, "connected": False}, [{"name": "llama3.2"}], [{"unexpected": "list"}]
     ]):
         result = assistant.diagnose("Example error")
     assert result["provider"] == "deterministic-fallback"
@@ -125,6 +129,8 @@ def test_nomad_adapter_http_round_trip_against_loopback_stub():
             seen.append((self.path, None))
             if self.path == "/api/health":
                 body = {"status": "ok"}
+            elif self.path == "/api/ollama/remote-status":
+                body = {"configured": False, "connected": False}
             elif self.path == "/api/ollama/installed-models":
                 body = [{"name": "llama3.2"}]
             else:
