@@ -112,7 +112,7 @@ def _run_external_execution(args: argparse.Namespace) -> int:
             if args.file.stat().st_size > 1_000_000:
                 raise SecurityError("Execution source exceeds the 1 MB request limit")
             code = args.file.read_text(encoding="utf-8")
-        except OSError as exc:
+        except (OSError, UnicodeDecodeError) as exc:
             raise SourceError("Unable to read external execution source", location=SourceLocation(str(args.file)), details=type(exc).__name__) from exc
         filename = args.filename or args.file.name
     else:
