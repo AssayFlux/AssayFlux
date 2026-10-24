@@ -28,9 +28,9 @@ def test_piston_adapter_normalizes_response():
 
 def test_code_interpreter_adapter_reads_newline_delimited_events():
     stream = (
-        '{"type":"stdout","text":"hello\\n"}\n'
-        '{"type":"end_of_execution"}\n'
-    ).encode()
+        b'{"type":"stdout","text":"hello\\n"}\n'
+        b'{"type":"end_of_execution"}\n'
+    )
     with patch(
         "assayflux.execution.providers._request_json",
         return_value=(stream, "application/json"),
