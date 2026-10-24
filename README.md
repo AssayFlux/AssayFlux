@@ -2,9 +2,9 @@
 
 **One language. One coherent ecosystem. Many specialized capabilities.**
 
-AssayFlux is being developed as a language-centered programming ecosystem. Its canonical language uses .af source files, a consistent grammar, and a shared execution model. CLI tooling, assistants, security tools, platform integrations, quantum providers, and distributed services are intended to build on that foundation—not introduce competing languages or disconnected runtimes.
+AssayFlux is a language-centered programming ecosystem. Its canonical language uses `.af` source files, a consistent grammar, and a shared execution model. CLI tooling, assistants, security tools, platform integrations, quantum providers, and distributed services are intended to build on that foundation—not introduce competing languages or disconnected runtimes.
 
-> **Repository status:** this repository currently contains imported project codebases at different stages of reconciliation. Their presence does not mean they are already integrated with the AssayFlux language core or production-ready.
+> **Repository status:** this repository contains eleven imported project codebases at different stages of reconciliation. Their presence does not mean they are already integrated with the AssayFlux language core or production-ready.
 
 ## Architecture direction
 
@@ -16,17 +16,24 @@ AssayFlux is being developed as a language-centered programming ecosystem. Its c
 
 ## Language principles
 
-AssayFlux follows the project conventions defined for the language: .af files, plain NAME = expr, project declarations, null, and the specified N-times repetition syntax. These conventions must be implemented and tested by the canonical language pipeline rather than simulated independently by each service.
+AssayFlux follows the project conventions defined for the language: `.af` files, `plain NAME = expr`, `project` declarations, `null`, and the specified N-times repetition syntax. These conventions must be implemented and tested by the canonical language pipeline rather than simulated independently by each service.
 
 ## Repository layout
 
-The current src/ tree contains eleven imported project codebases. The next integration work is to inventory them, preserve their useful functionality and required notices, define service contracts, and connect capabilities to the language core in reviewable stages.
+The `src/` tree contains eleven imported project codebases. Their outer AssayFlux directories provide integration entry points; nested upstream code remains isolated until dependencies, licensing, build requirements, and service contracts are reconciled.
+
+## Phase 1: repository intelligence
+
+The initial audit confirmed all eleven top-level service/platform directories and found that the imported repository is exceptionally large. GitHub reports that the merge of PR #1 introduced 135,902 changed files and 59,950,683 added lines. The recursive tree response is truncated, so this is not yet a complete file-by-file audit.
+
+See [Phase 1 Repository Audit](docs/REPOSITORY_AUDIT.md) for verified findings, limitations, and next audit tasks.
 
 ## Integration status
 
 | Area | Status |
 |---|---|
-| Imported project inventory | In progress |
+| Top-level project inventory | Identified |
+| Complete file-level inventory | In progress; recursive tree is truncated |
 | Canonical language and service contracts | To be verified |
 | CLI-to-runtime workflow | To be verified |
 | Sandboxing and cryptographic controls | To be verified |
@@ -46,7 +53,7 @@ Status labels describe the integration effort, not the maturity of every importe
 
 ## Branding and third-party notices
 
-AssayFlux is the umbrella project identity. Imported components may retain upstream-specific identifiers where required by licensing, dependencies, APIs, build systems, or accurate provenance. See [Branding and Attribution Policy](docs/BRANDING_AND_ATTRIBUTION.md).
+AssayFlux is the umbrella project identity. Maintained entry points and integration documentation should use AssayFlux branding. Imported components may retain upstream-specific identifiers where required by licensing, dependencies, APIs, build systems, compatibility, or truthful provenance. See [Branding and Attribution Policy](docs/BRANDING_AND_ATTRIBUTION.md).
 
 ## License
 
