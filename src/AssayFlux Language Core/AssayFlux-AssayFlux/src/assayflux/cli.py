@@ -64,7 +64,6 @@ def _parser() -> argparse.ArgumentParser:
     quantum_source = quantum_run.add_mutually_exclusive_group(required=True)
     quantum_source.add_argument("--circuit", help="circuit JSON supplied directly")
     quantum_source.add_argument("--file", type=Path, help="read circuit JSON from a file")
-    quantum_run.add_argument("--json", action="store_true", dest="json_output")
 
     assistant = commands.add_parser("assistant", help="use the configured local diagnostic assistant")
     assistant_commands = assistant.add_subparsers(dest="assistant_command", required=True)
@@ -72,7 +71,6 @@ def _parser() -> argparse.ArgumentParser:
     diagnose = assistant_commands.add_parser("diagnose", help="explain an error without applying changes")
     diagnose.add_argument("--error", required=True, help="error message to diagnose")
     diagnose.add_argument("--context", default="", help="optional bounded diagnostic context")
-    diagnose.add_argument("--json", action="store_true", dest="json_output")
 
     tools = commands.add_parser("tools", help="discover and invoke installed CLI-Anything harnesses")
     tool_commands = tools.add_subparsers(dest="tools_command", required=True)
