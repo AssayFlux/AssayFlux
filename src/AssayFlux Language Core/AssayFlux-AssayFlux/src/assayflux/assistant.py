@@ -92,10 +92,12 @@ class OfflineAssistant:
         """Return local service health and installed model names."""
         if self.backend == "nomad":
             health = self._request("/api/health")
-            if health.get("status") != "ok":
+            if not isinstance(health, dict) or health.get("status") != "ok":
                 raise RuntimeErrorAF("Project NOMAD health check did not report status=ok")
             installed = self._request("/api/ollama/installed-models")
-            models = installed if isinstance(installed, list) else []
+            if not isinstance(installed, list):
+                raise RuntimeErrorAF("Project NOMAD installed-model endpoint returned an invalid response")
+            models = installed
             names = [
                 item.get("name") for item in models
                 if isinstance(item, dict) and isinstance(item.get("name"), str)
@@ -142,7 +144,6 @@ class OfflineAssistant:
             result = self._request(endpoint, {
                 "model": model,
                 "stream": False,
-                "format": "json",
                 "messages": [
                     {"role": "system", "content": (
                         "You are a local software diagnostic assistant. Do not claim certainty "
@@ -152,7 +153,6 @@ class OfflineAssistant:
                     )},
                     {"role": "user", "content": f"Error:\n{error}\n\nContext:\n{context}"},
                 ],
-                "options": {"temperature": 0.1},
             })
             message = result.get("message", {})
             content = message.get("content") if isinstance(message, dict) else None
