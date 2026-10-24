@@ -58,7 +58,7 @@ class OfflineAssistant:
         if not self.model or len(self.model) > 120:
             raise SecurityError("Assistant model name must contain 1-120 characters")
 
-    def _request(self, path: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    def _request(self, path: str, payload: dict[str, Any] | None = None) -> Any:
         data = None if payload is None else json.dumps(payload).encode("utf-8")
         request = Request(
             f"{self.base_url}{path}", data=data,
@@ -71,7 +71,7 @@ class OfflineAssistant:
             if len(raw) > _MAX_RESPONSE:
                 raise RuntimeErrorAF("Local assistant response exceeded the 1 MB limit")
             result = json.loads(raw.decode("utf-8"))
-            if not isinstance(result, dict):
+            if not isinstance(result, (dict, list)):
                 raise RuntimeErrorAF("Local assistant returned an invalid response")
             return result
         except HTTPError as exc:
