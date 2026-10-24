@@ -74,7 +74,7 @@ assayflux tools list --json
 # Invoke a harness. The opt-in is mandatory because tools can edit files
 # or launch external applications. The -- separates AssayFlux flags from
 # the arguments that should be passed to the harness.
-assayflux tools run cli-anything-blender --allow-external-tools -- --json project list
+assayflux tools run --allow-external-tools cli-anything-blender -- --json project list
 ```
 
 The adapter uses argument arrays (never `shell=True`), validates executable names, and applies a configurable timeout capped at 300 seconds. It does not install harnesses automatically. Install the relevant harness in the active Python environment and review its license, dependencies, and side effects before use.
