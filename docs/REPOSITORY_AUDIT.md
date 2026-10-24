@@ -31,6 +31,26 @@
 | Reverse engineering | `src/AssayFlux Reverse Engeneering Tool/rea-main` | Preserve source; audit analysis APIs and dependency boundaries |
 | Windows platform | `src/AssayFlux WindowsOS/reactos-master` | Keep upstream OS source isolated; do not imply AssayFlux ships an OS |
 
+## Initial per-project subtree counts
+
+These counts come from individual recursive Git tree requests. They are **structural estimates, not a complete inventory**; a recursive response marked truncated must not be treated as exhaustive.
+
+| Project source tree | Visible entries | Visible files | Completeness |
+|---|---:|---:|---|
+| Assistant / project-nomad | 740 | 651 | Complete recursive response |
+| Execution engine / Piston | 889 | 684 | Complete recursive response |
+| CLI automation | 2,389 | 1,725 | Complete recursive response |
+| Security tools | 199 | 180 | Complete recursive response |
+| Interpreter / sandbox | 158 | 135 | Complete recursive response |
+| Language core | 36 | 27 | Complete recursive response |
+| Linux kernel | 71,523 | 67,391 | **Truncated**; more entries exist |
+| macOS / XNU | Not yet measured | Not yet measured | Tree lookup needs retry |
+| Quantum provider | 2,193 | 1,946 | Complete recursive response |
+| Reverse engineering | 5,835 | 5,405 | Complete recursive response |
+| Windows-compatible OS | 27,153 | 24,605 | Complete recursive response |
+
+The counts above cover the nested imported source trees, not the small AssayFlux-facing README files in their parent directories. They should be refreshed using a local checkout or paginated directory traversal before the inventory is marked complete.
+
 ## Branding actions in this pass
 
 1. Keep the repository root README focused on AssayFlux's language-first architecture and verified integration status.
