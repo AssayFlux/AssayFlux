@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+from assayflux.diagnostics.model import RuntimeErrorAF, SecurityError
+from assayflux.execution.models import ExecutionResult
 from assayflux.execution.registry import list_languages
 
 
@@ -27,8 +29,6 @@ def test_registry_uses_live_piston_inventory_and_marks_default_interpreter():
 
 
 def test_registry_auto_tolerates_piston_unavailable_but_provider_specific_does_not():
-    from assayflux.diagnostics.model import RuntimeErrorAF
-
     with patch("assayflux.execution.registry.PistonProvider.list_runtimes", side_effect=RuntimeErrorAF("offline")), \
          patch("assayflux.execution.registry.CodeInterpreterProvider.health", return_value=True):
         assert list_languages("auto")[0]["provider"] == "code-interpreter"
@@ -61,8 +61,13 @@ def test_auto_execution_routes_versioned_requests_to_piston(monkeypatch, capsys)
 
     class FakeProvider:
         def execute(self, request):
-                return ExecutionResult(provider="piston", language=request.language or "python",
-                                   version=request.version, stdout="42\\n", exit_code=0)
+            return ExecutionResult(
+                provider="piston",
+                language=request.language or "python",
+                version=request.version,
+                stdout="42\\n",
+                exit_code=0,
+            )
 
     monkeypatch.setattr("assayflux.cli.get_provider", lambda name: (
         FakeProvider() if name == "piston" else (_ for _ in ()).throw(AssertionError(name))
@@ -80,8 +85,6 @@ def test_auto_execution_does_not_send_piston_only_stdin_to_code_interpreter(monk
 
     def provider_factory(name):
         selected.append(name)
-        from assayflux.execution.models import ExecutionResult
-        from assayflux.diagnostics.model import SecurityError
         if name == "piston":
             raise SecurityError("Piston execution requires both --language and --version")
         raise AssertionError("Piston-only stdin must not route to Code Interpreter")
