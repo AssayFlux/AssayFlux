@@ -42,7 +42,7 @@ These are branded integration entry points, not a claim that every imported impl
 
 The initial audit confirmed all eleven top-level service/platform directories and found that the imported repository is exceptionally large. GitHub reports that the merge of PR #1 introduced 135,902 changed files and 59,950,683 added lines. The recursive tree response is truncated, so this is not yet a complete file-by-file audit.
 
-See [Phase 1 Repository Audit](docs/REPOSITORY_AUDIT.md) for verified findings, limitations, and next audit tasks.
+See the [Phase 1 Repository Audit](docs/REPOSITORY_AUDIT.md) for findings and limitations, and the [per-module tree inventory](docs/PHASE1_TREE_INVENTORY.md) for the latest structural snapshot.
 
 ## Integration status
 
