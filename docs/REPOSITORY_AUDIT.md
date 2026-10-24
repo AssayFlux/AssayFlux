@@ -95,6 +95,18 @@ All eleven `src/` module roots now have an AssayFlux-facing `README.md`. The def
 
 A filename heuristic across the recursive trees did not identify obvious private-key filenames in the complete responses. This is **not** a secret scan or security clearance: Linux's tree response is truncated, and filenames alone cannot detect credentials embedded in source or configuration. The inventory also found intentional-looking data/binary assets (including ZIM/database assets in the assistant project and a DLL fixture in the CLI project) that need classification as runtime assets, test fixtures, generated artifacts, or removable downloads before repository cleanup.
 
+## Branding metadata pass — completed safe edits
+
+A follow-up branding pass updated descriptive metadata on the default branch for these imported packages:
+
+- Assistant package description now presents the capability as an AssayFlux Assistant integration candidate.
+- Interpreter package metadata now identifies the codebase as sandbox infrastructure awaiting AssayFlux integration and isolation verification.
+- Security toolkit description now identifies it as an AssayFlux Security Services integration candidate for authorized assessment.
+- Quantum framework description now identifies it as an AssayFlux quantum-provider integration candidate.
+- Reverse-engineering package description now identifies it as an AssayFlux reverse-engineering service integration candidate.
+
+Only descriptive metadata was changed. Package names, import paths, executable names, dependency coordinates, author fields, source URLs, licenses, and attribution notices were deliberately preserved because they can be compatibility-sensitive or legally required. These metadata edits do not establish that the services are integrated or verified. The affected packages still require manifest/build tests in a local checkout.
+
 ## Remaining Phase 1 work
 
 - [ ] Obtain a complete file inventory using paginated directory traversal or a local checkout; the recursive GitHub tree result is truncated.
