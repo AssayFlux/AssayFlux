@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Any
 
 from assayflux.diagnostics.model import RuntimeErrorAF, SecurityError
-from assayflux.execution.providers import CodeInterpreterProvider, PistonProvider
+from assayflux.execution.providers import PistonProvider
 
 
 def list_languages(provider: str = "auto") -> list[dict[str, Any]]:
