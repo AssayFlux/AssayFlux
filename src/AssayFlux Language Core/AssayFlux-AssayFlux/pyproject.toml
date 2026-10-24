@@ -13,7 +13,7 @@ authors = [{name = "AssayFlux Contributors"}]
 dependencies = ["lark>=1.3.1,<2", "cryptography>=41"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pytest-socket>=0.7", "ruff>=0.6", "build>=1"]
+dev = ["pytest>=8", "pytest-socket>=0.7", "ruff>=0.6", "build>=1", "mypy>=1.11", "pyright>=1.1.380", "pylint>=3.3", "twine>=5"]
 # PennyLane currently requires Python 3.12+. The core remains usable on Python 3.11.
 quantum = ["pennylane>=0.45; python_version >= '3.12'"]
 
@@ -31,3 +31,51 @@ include = ["assayflux", "assayflux.*"]
 
 [tool.setuptools.package-data]
 assayflux = ["language/*.lark"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+exclude = [
+  "src/AssayFlux Assistant",
+  "src/AssayFlux Command Line Interface",
+  "src/AssayFlux Code Execution Engine",
+  "src/AssayFlux LinuxOS",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/assayflux"]
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true
+check_untyped_defs = true
+ignore_missing_imports = true
+exclude = ["src/assayflux/quantum.py"]
+
+[tool.pyright]
+include = ["src/assayflux"]
+exclude = ["**/__pycache__", "**/tests"]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+reportMissingImports = "none"
+reportMissingTypeStubs = "none"
+
+[tool.pylint.main]
+py-version = "3.11"
+ignore-paths = ["src/AssayFlux Assistant/.*", "src/AssayFlux Command Line Interface/.*"]
+recursive = true
+
+[tool.pylint.messages_control]
+disable = [
+  "missing-module-docstring",
+  "missing-class-docstring",
+  "missing-function-docstring",
+  "too-few-public-methods",
+  "duplicate-code",
+]
