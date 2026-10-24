@@ -97,7 +97,7 @@ assayflux execute --allow-external-execution --language python \\
 assayflux execute --allow-external-execution --code 'print(6 * 7)'
 ```
 
-`languages` reports live Piston runtimes as `available` and the Code Interpreter's documented default Python path as `configured-default`. Inventory is provider/deployment-specific; it is not a claim that every language in a proposed catalog works. The Code Interpreter adapter currently does not expose a runtime-list endpoint, so additional kernels are not advertised without evidence.
+`languages` reports live Piston runtimes as `available`. It reports the Code Interpreter's default Python path only after its health endpoint responds successfully; the adapter does not expose a runtime-list endpoint, so additional kernels are not advertised without evidence. Inventory is provider/deployment-specific and is not a claim that every language in a proposed catalog works.
 
 ## External execution providers
 
