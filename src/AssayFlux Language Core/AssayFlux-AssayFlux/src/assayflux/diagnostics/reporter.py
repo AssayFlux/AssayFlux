@@ -1,6 +1,7 @@
 """Local-first structured diagnostics with bounded, permission-restricted storage."""
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import stat
@@ -21,8 +22,8 @@ def _private_dir(path: Path) -> Path:
     info = path.lstat()
     if not stat.S_ISDIR(info.st_mode):
         raise OSError("Diagnostic path is not a directory")
-    try: path.chmod(0o700)
-    except OSError: pass
+    with contextlib.suppress(OSError):
+        path.chmod(0o700)
     return path
 
 
@@ -52,8 +53,8 @@ def write_report(diagnostic: Diagnostic, report_dir: Path | None = None) -> Path
     rotated = root / "diagnostics.previous.jsonl"
     if _regular_file_size(target) >= MAX_REPORT_BYTES:
         _regular_file_size(rotated)
-        try: rotated.unlink()
-        except FileNotFoundError: pass
+        with contextlib.suppress(FileNotFoundError):
+            rotated.unlink()
         os.replace(target, rotated)
         try:
             fd_rot = os.open(rotated, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
