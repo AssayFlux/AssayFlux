@@ -1,80 +1,26 @@
-<!-- <p align="center">
-  <img width="100" src="https://raw.githubusercontent.com/e2b-dev/E2B/refs/heads/main/readme-assets/logo-circle.png" alt="e2b logo">
-</p> -->
+# AssayFlux Sandbox Runtime Integration
 
-![E2B Code Interpreter Preview](/readme-assets/e2b-code-interpreter-light.png#gh-light-mode-only)
-![E2B Code Interpreter Preview](/readme-assets/e2b-code-interpreter-dark.png#gh-dark-mode-only)
+This directory contains imported sandbox/code-interpreter infrastructure being evaluated for safe execution workflows. It is not, by itself, the canonical AssayFlux language interpreter.
 
-<h4 align="center">
-  <a href="https://pypi.org/project/e2b/">
-    <img alt="Last 1 month downloads for the Python SDK" loading="lazy" width="200" height="20" decoding="async" data-nimg="1"
-    style="color:transparent;width:auto;height:100%" src="https://img.shields.io/pypi/dm/e2b?label=PyPI%20Downloads">
-  </a>
-  <a href="https://www.npmjs.com/package/e2b">
-    <img alt="Last 1 month downloads for the JavaScript SDK" loading="lazy" width="200" height="20" decoding="async" data-nimg="1"
-    style="color:transparent;width:auto;height:100%" src="https://img.shields.io/npm/dm/e2b?label=NPM%20Downloads">
-  </a>
-</h4>
+## Intended role
 
-<!---
-<img width="100%" src="/readme-assets/preview.png" alt="Cover image">
---->
-> [!NOTE]
-> The `@e2b/code-interpreter` and `e2b-code-interpreter` SDK sources now live in the [E2B monorepo](https://github.com/e2b-dev/E2B), under `packages/code-interpreter-js` and `packages/code-interpreter-python`. Open SDK issues and pull requests there. This repository keeps the sandbox template and the chart data extractor.
+AssayFlux source must be parsed and semantically validated by the language core. Sandbox infrastructure may provide an isolation boundary for selected execution workloads, subject to explicit policies and a supported runtime adapter.
 
-## What is E2B?
-[E2B](https://e2b.dev/?utm_source=github&utm_medium=referral&utm_campaign=readme&utm_content=code-interpreter) is an open-source infrastructure that allows you to run AI-generated code in secure isolated sandboxes in the cloud. To start and control sandboxes, use our [JavaScript SDK](https://www.npmjs.com/package/@e2b/code-interpreter) or [Python SDK](https://pypi.org/project/e2b_code_interpreter).
+## Current integration status
 
-## Run your first Sandbox
+**Imported — integration and isolation guarantees not yet verified.** Do not assume this source tree provides a complete sandbox, that its hosted services are available locally, or that its defaults meet AssayFlux's threat model.
 
-### 1. Install SDK
+## Integration requirements
 
-JavaScript / TypeScript
-```
-npm i @e2b/code-interpreter
-```
+- Define a backend-neutral sandbox interface.
+- Validate CPU, memory, time, filesystem, process, and network boundaries.
+- Keep API keys and other secrets outside the repository and execution logs.
+- Test lifecycle cleanup, timeout handling, cancellation, and failed starts.
+- Document which execution paths are local, remote, or provider-dependent.
+- Preserve applicable upstream licenses, notices, and compatibility requirements.
 
-Python
-```
-pip install e2b-code-interpreter
-```
+## Reference documentation
 
-### 2. Get your E2B API key
-1. Sign up to E2B [here](https://e2b.dev/?utm_source=github&utm_medium=referral&utm_campaign=readme&utm_content=code-interpreter).
-2. Get your API key [here](https://e2b.dev/dashboard?tab=keys&utm_source=github&utm_medium=referral&utm_campaign=readme&utm_content=code-interpreter).
-3. Set environment variable with your API key.
-```
-E2B_API_KEY=e2b_***
-```     
+The imported sandbox project's original documentation is preserved in [UPSTREAM_README.md](UPSTREAM_README.md). Review provider-specific setup and SDK details before using them in an AssayFlux deployment.
 
-### 3. Execute code with code interpreter inside Sandbox
-
-JavaScript / TypeScript
-```ts
-import { Sandbox } from '@e2b/code-interpreter'
-
-const sbx = await Sandbox.create()
-await sbx.runCode('x = 1')
-
-const execution = await sbx.runCode('x+=1; x')
-console.log(execution.text)  // outputs 2
-```
-
-Python
-```py
-from e2b_code_interpreter import Sandbox
-
-with Sandbox.create() as sandbox:
-    sandbox.run_code("x = 1")
-    execution = sandbox.run_code("x+=1; x")
-    print(execution.text)  # outputs 2
-```
-
-### 4. Check docs
-Visit [E2B documentation](https://docs.e2b.dev/?utm_source=github&utm_medium=referral&utm_campaign=readme&utm_content=code-interpreter).
-
-### 5. E2B cookbook
-Visit our [Cookbook](https://github.com/e2b-dev/e2b-cookbook/tree/main) to get inspired by examples with different LLMs and AI frameworks.
-
-## Customizing the sandbox template
-Need extra packages or a different runtime? You can build your own Code Interpreter sandbox template. See the [template guide](/template/README.md) for a step-by-step walkthrough of creating, building, and using a custom template (as well as building the production `code-interpreter-v1` template).
+See the repository-level [Branding and Attribution Policy](../../../docs/BRANDING_AND_ATTRIBUTION.md).
