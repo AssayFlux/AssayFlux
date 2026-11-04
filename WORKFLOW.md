@@ -203,14 +203,15 @@ Keep large datasets and model checkpoints in an appropriate artifact store or lo
 - [x] Contribution guidance added.
 - [x] Add and verify the tracked directory scaffold.
 - [x] Add security policy and pull request template.
-- [ ] Review scaffold PR and merge only with authorization.
+- [x] Review scaffold PR; PR #2 was merged into `main` on 2026-11-04.
 - [ ] Design minimal CORE contracts.
 - [ ] Implement Neural tokenizer and model only after contract/design review.
 
-**Active phase:** Phase 0 — Repository scaffold and workflow.
-**Next task:** Design the minimal CORE contracts on a focused feature branch, after confirming whether an existing AssayFlux language implementation lives outside this repository.
+**Active phase:** Phase 2 — CORE contract design (workflow phase numbering).
+**Next task:** Design the minimal CORE contracts on a focused feature branch, after confirming whether an existing AssayFlux language implementation lives outside this repository. Use the expanded roadmap to select only resource-reporting, diagnostics, and artifact metadata contracts with concrete initial consumers; defer generic memory, retrieval, tool, and orchestration frameworks until justified.
 **Known non-claims:** No trained model, tokenizer, training engine, dataset approval, coding benchmark, or device verification is claimed.
 
 ## 11. Change log
 
 - 2026-11-04: Added the documentation-first directory scaffold, ownership READMEs, security policy, PR template, and root workflow on the existing feature branch. Verified on 2026-11-04: all scaffold README files, policy files, workflow, and original LICENSE/.gitignore are present on `main`. No source implementation or tests were added in this scaffold.
+- 2026-11-04: Expanded `DOCUMENTATION/ROADMAP.md` with staged requirements for compute/resource management, diagnostics and monitoring, context and memory management, optional retrieval, reasoning strategies, tool integration and permissions, model lifecycle, offline deployment/update recovery, and measured quantization/optimization. Documentation-only planning change; no implementation or capability completion is claimed.
