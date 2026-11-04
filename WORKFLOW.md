@@ -201,16 +201,16 @@ Keep large datasets and model checkpoints in an appropriate artifact store or lo
 - [x] Initial repository baseline audit documented.
 - [x] AI Pool architecture and staged roadmap documented.
 - [x] Contribution guidance added.
-- [ ] Add and verify the tracked directory scaffold.
-- [ ] Add security policy and pull request template.
+- [x] Add and verify the tracked directory scaffold.
+- [x] Add security policy and pull request template.
 - [ ] Review scaffold PR and merge only with authorization.
 - [ ] Design minimal CORE contracts.
 - [ ] Implement Neural tokenizer and model only after contract/design review.
 
 **Active phase:** Phase 0 — Repository scaffold and workflow.
-**Next task:** Verify the complete scaffold and links, then review the updated pull request.
+**Next task:** Review the updated pull request; then begin CORE contract design only after baseline scaffold review.
 **Known non-claims:** No trained model, tokenizer, training engine, dataset approval, coding benchmark, or device verification is claimed.
 
 ## 11. Change log
 
-- 2026-11-04: Established the master workflow and initial directory ownership map. Scaffold and policy files are being added on the existing feature branch; completion must be verified against the remote tree.
+- 2026-11-04: Added the documentation-first directory scaffold, ownership READMEs, security policy, PR template, and root workflow on the existing feature branch. Remote-tree verification is required before treating the scaffold task as closed.
