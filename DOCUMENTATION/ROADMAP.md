@@ -55,8 +55,10 @@ Suggested order:
 4. Training and inference contracts.
 5. Checkpoint metadata and save/restore interface.
 6. Evaluation result schema.
-7. Logging, reproducibility, and resource-reporting interfaces.
-8. Model registry metadata specification.
+7. Logging, diagnostics, reproducibility, and resource-reporting interfaces.
+8. Compute/resource capability reporting (device, memory, accelerator availability, and safe limits) without assuming a specific device.
+9. Model registry metadata specification, including lifecycle state and artifact provenance.
+10. Optional retrieval/index interfaces only after a concrete consumer and privacy boundary are defined.
 
 Implement only the pieces that have concrete consumers and tests. Avoid a premature plugin framework or orchestrator.
 
@@ -75,9 +77,12 @@ Tasks:
 6. Implement checkpoint saving and recovery, including optimizer and random-state metadata as appropriate.
 7. Add diagnostics and evaluation.
 8. Keep inference separate from training.
-9. Document resource requirements and limitations.
+9. Document resource requirements and limitations, including peak memory, throughput/latency measurement methods, and graceful behavior when resources are insufficient.
+10. Add diagnostic hooks for training/inference health, loss curves, timing, memory use, and actionable failures without logging secrets.
+11. Evaluate optimization options (for example mixed precision, compilation, and quantization) only against a correct baseline; keep them optional and record quality/resource trade-offs.
+12. Define model artifact version metadata and compatibility rules for model, tokenizer, configuration, and checkpoint versions.
 
-**Exit criteria:** Unit and integration tests pass; a small reproducible training run completes; checkpoint recovery is demonstrated; evaluation output is recorded. This does not imply useful coding ability.
+**Exit criteria:** Unit and integration tests pass; a small reproducible training run completes; checkpoint recovery is demonstrated; evaluation output is recorded; resource use and diagnostics are measured on a declared environment. Optimizations remain optional and are accepted only with correctness and quality comparisons. This does not imply useful coding ability or target-device support.
 
 ## Phase 5 — Dataset pipeline and coding evaluation
 
@@ -93,8 +98,10 @@ Tasks:
 7. Document every preprocessing transformation.
 8. Create held-out coding benchmarks and evaluation harnesses.
 9. Start with one programming language and a narrow task family.
+10. Define context-window construction, truncation, long-input handling, and context provenance for evaluation.
+11. If retrieval is needed, specify indexed sources, chunking, ranking, freshness, deletion, and access-control behavior; keep retrieval optional and separate from model weights.
 
-**Exit criteria:** Dataset lineage and license status are recorded; split integrity is tested; evaluation is reproducible and held out from training.
+**Exit criteria:** Dataset lineage and license status are recorded; split integrity is tested; evaluation is reproducible and held out from training; context and any retrieval path have leakage, privacy, and access-control tests.
 
 ## Phase 6 — Coding intelligence development
 
@@ -111,10 +118,13 @@ Progressive capabilities:
 8. Algorithmic reasoning.
 9. Multi-file context handling.
 10. Repository analysis and project generation.
+11. Explicit reasoning strategies appropriate to the task (for example decomposition, planning, verification, and retry limits), measured for correctness, latency, and token/resource cost.
+12. Context and memory management: bounded conversation/session state, explicit retention and deletion semantics, summarization provenance, and protection against cross-user or cross-project leakage.
+13. Optional retrieval-augmented generation with source attribution, relevance evaluation, and defenses against untrusted retrieved instructions.
 
-Add languages only when data, tokenizer behavior, tests, and benchmark coverage support them. Report per-language and per-task performance separately.
+Add languages only when data, tokenizer behavior, tests, and benchmark coverage support them. Report per-language and per-task performance separately. Memory and retrieval must be explicit, bounded, permission-aware, and optional; they must not silently retain sensitive content.
 
-**Exit criteria:** Each claimed capability has a documented benchmark, held-out results, failure analysis, and reproducible evaluation.
+**Exit criteria:** Each claimed capability has a documented benchmark, held-out results, failure analysis, and reproducible evaluation. Reasoning, context, and retrieval features have ablation tests and measured quality/resource trade-offs.
 
 ## Phase 7 — Additional independent AI systems
 
@@ -145,9 +155,15 @@ Tasks:
 5. Permission and security boundaries for tools/actions.
 6. Android, desktop, and web clients.
 7. Offline model packaging and update strategy.
-8. End-to-end reliability, privacy, and performance evaluation.
+8. Tool integration through explicit capability manifests, typed input/output contracts, allowlists, user approval for consequential actions, timeouts, and auditable execution.
+9. Permission model for files, network, subprocesses, secrets, and cross-system calls; deny by default and isolate untrusted model/tool outputs.
+10. Model lifecycle management: import, validation, versioning, activation, rollback, retirement, and artifact integrity checks.
+11. Deployment packaging, local/offline installation, updates, compatibility checks, and recovery from interrupted updates.
+12. Operational monitoring and diagnostics for latency, resource use, failures, model/version identity, and privacy-preserving telemetry controls.
+13. Quantization and other deployment optimizations validated against task quality, numerical correctness, memory, and latency baselines.
+14. End-to-end reliability, privacy, and performance evaluation.
 
-**Exit criteria:** Integrated workflows pass end-to-end tests; model selection and failures are observable; security boundaries and offline behavior are documented.
+**Exit criteria:** Integrated workflows pass end-to-end tests; model selection and failures are observable; tool permissions and sandbox boundaries are tested; lifecycle and rollback work; offline installation/update recovery is documented; monitoring does not expose private data; performance and quality trade-offs are measured.
 
 ## Phase gates and status
 
@@ -155,12 +171,12 @@ Tasks:
 | --- | --- | --- |
 | 1. Audit and baseline | Documentation baseline prepared | Review audit scope and confirm any external/local language project |
 | 2. AI Pool foundation | Planned / documentation started | Architecture and contribution conventions accepted |
-| 3. CORE contracts | Not started | Executable contracts with tests and consumer |
-| 4. Neural experiment | Not started | Reproducible training and checkpoint recovery |
-| 5. Dataset pipeline | Not started | Validated, licensed, versioned data pipeline |
-| 6. Coding intelligence | Not started | Held-out benchmark evidence |
+| 3. CORE contracts | Not started | Executable contracts with tests and consumer; resource, diagnostics, and artifact metadata contracts specified only where needed |
+| 4. Neural experiment | Not started | Reproducible training and checkpoint recovery; measured resource profile, diagnostics, and baseline-vs-optimization comparisons |
+| 5. Dataset pipeline | Not started | Validated, licensed, versioned data pipeline; context/retrieval privacy and leakage checks where applicable |
+| 6. Coding intelligence | Not started | Held-out benchmark evidence; measured reasoning/context/retrieval gains and bounded memory behavior |
 | 7. Independent systems | Not started | Independently tested additional AI system |
-| 8. Orchestration/apps | Not started | End-to-end integrated workflows |
+| 8. Orchestration/apps | Not started | End-to-end integrated workflows; permissioned tools, lifecycle/rollback, offline deployment, and privacy-preserving monitoring |
 
 ## Immediate next work
 
@@ -169,6 +185,8 @@ Tasks:
 3. Create the first focused implementation PR for repository conventions and minimal CORE contracts.
 4. Add executable code only alongside tests and documented acceptance criteria.
 5. Begin the Neural tokenizer only after its interface, vocabulary format, and test cases are agreed.
+6. During CORE design, include only minimal resource-reporting, diagnostics, and artifact metadata contracts with concrete Neural consumers; defer general orchestration, memory, retrieval, and tool frameworks until justified by a real use case.
+7. Keep reasoning, memory, retrieval, optimization, tool use, monitoring, and deployment as staged capabilities with explicit safety, privacy, quality, and resource acceptance tests.
 
 ## What this roadmap does not claim
 
