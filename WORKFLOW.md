@@ -3,7 +3,7 @@
 **This file is the controlling project workflow.** Read it before every task, implementation session, pull request, or architectural change. If another plan conflicts with this file, stop and reconcile the conflict here before coding.
 
 Last reviewed: 2026-11-04
-Current baseline: `feature/ai-pool-baseline` (see the active pull request for the current head SHA)
+Current repository head at scaffold verification: `main` (`7a48020b30eaf4c05392ea5172a2ea8f2cfd4cdd`). Use a feature branch for all subsequent changes.
 Project status: foundation and documentation scaffold; no model or training implementation is claimed.
 
 ## 1. Mandatory start-of-task procedure
@@ -208,9 +208,9 @@ Keep large datasets and model checkpoints in an appropriate artifact store or lo
 - [ ] Implement Neural tokenizer and model only after contract/design review.
 
 **Active phase:** Phase 0 — Repository scaffold and workflow.
-**Next task:** Review the updated pull request; then begin CORE contract design only after baseline scaffold review.
+**Next task:** Design the minimal CORE contracts on a focused feature branch, after confirming whether an existing AssayFlux language implementation lives outside this repository.
 **Known non-claims:** No trained model, tokenizer, training engine, dataset approval, coding benchmark, or device verification is claimed.
 
 ## 11. Change log
 
-- 2026-11-04: Added the documentation-first directory scaffold, ownership READMEs, security policy, PR template, and root workflow on the existing feature branch. Remote-tree verification is required before treating the scaffold task as closed.
+- 2026-11-04: Added the documentation-first directory scaffold, ownership READMEs, security policy, PR template, and root workflow on the existing feature branch. Verified on 2026-11-04: all scaffold README files, policy files, workflow, and original LICENSE/.gitignore are present on `main`. No source implementation or tests were added in this scaffold.
