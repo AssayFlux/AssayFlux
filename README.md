@@ -12,6 +12,7 @@ The repository is at its baseline/foundation stage.
 
 - The initial repository audit is documented in [DOCUMENTATION/BASELINE_AUDIT.md](DOCUMENTATION/BASELINE_AUDIT.md).
 - The staged implementation plan is documented in [DOCUMENTATION/ROADMAP.md](DOCUMENTATION/ROADMAP.md).
+- The mandatory task-by-task operating rules are in [WORKFLOW.md](WORKFLOW.md). Read this file before every change.
 - The intended component boundaries are documented in [DOCUMENTATION/ARCHITECTURE.md](DOCUMENTATION/ARCHITECTURE.md).
 - No AI model, tokenizer, training engine, inference engine, or device benchmark is currently claimed as implemented.
 - AssayFlux Neural is the planned first independent AI system.
@@ -24,7 +25,7 @@ Each AI system should own the components specific to its domain, including model
 
 ## Planned architecture
 
-The following is a logical target, not a statement that these directories or components already exist:
+The repository now contains a documentation-first directory scaffold. The presence of a directory does not mean its software component is implemented:
 
 | Area | Responsibility |
 | --- | --- |
@@ -37,7 +38,7 @@ The following is a logical target, not a statement that these directories or com
 | `DOCUMENTATION/` | Architecture, audit, roadmap, design decisions, and operational guidance |
 | `SCRIPTS/` | Reproducible development and maintenance utilities |
 
-The existing repository contents are preserved. New directories will be introduced when there is a concrete documented or tested purpose for them.
+Each scaffolded directory has an ownership README. Executable components will be added only when there is a concrete design, acceptance criteria, and tests.
 
 ## First system: AssayFlux Neural
 
